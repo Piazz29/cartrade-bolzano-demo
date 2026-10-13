@@ -1,0 +1,64 @@
+{
+  "demo": true,
+  "make": "Fiat",
+  "model": "500",
+  "version": "1.2 Hybrid 65 CV Icon",
+  "condition": "km0",
+  "year": 2026,
+  "registration": "2026-06",
+  "km": 15,
+  "price": 15400,
+  "fuel": "hybrid",
+  "gearbox": "manual",
+  "drive": "fwd",
+  "powerKw": 48,
+  "powerCv": 65,
+  "body": "city",
+  "color": {
+    "it": "Bianco Gelato",
+    "de": "Gelato-Weiß"
+  },
+  "doors": 3,
+  "seats": 4,
+  "euro": "Euro 6e",
+  "owners": 1,
+  "warrantyMonths": 24,
+  "consumption": "5,3",
+  "featured": true,
+  "images": [
+    {
+      "id": "1536667842290-7602f6a43a2b",
+      "alt": {
+        "it": "Fiat 500 bianca, vista anteriore di tre quarti",
+        "de": "Weißer Fiat 500, Dreiviertelansicht von vorn"
+      }
+    },
+    {
+      "id": "1604410869154-3c16714cd476",
+      "alt": {
+        "it": "Fiat 500 bianca parcheggiata in città",
+        "de": "Weißer Fiat 500 in der Stadt geparkt"
+      }
+    }
+  ],
+  "features": {
+    "it": [
+      "Tetto panoramico in vetro",
+      "Display touch 7\" con Apple CarPlay e Android Auto",
+      "Cerchi in lega 15\"",
+      "Climatizzatore",
+      "Sensori di parcheggio posteriori"
+    ],
+    "de": [
+      "Panorama-Glasdach",
+      "7\"-Touchscreen mit Apple CarPlay und Android Auto",
+      "15-Zoll-Leichtmetallfelgen",
+      "Klimaanlage",
+      "Einparkhilfe hinten"
+    ]
+  },
+  "description": {
+    "it": "Km 0: immatricolata da noi, mai usata. Garanzia ufficiale del costruttore e prezzo più basso del listino.",
+    "de": "Tageszulassung: bei uns zugelassen, nie gefahren. Volle Herstellergarantie und deutlich unter Listenpreis."
+  }
+}

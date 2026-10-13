@@ -1,0 +1,462 @@
+---
+// Calcolatore scadenza revisione (art. 80 Codice della Strada, autovetture uso privato):
+// prima revisione entro 4 anni dalla prima immatricolazione, poi ogni 2 anni,
+// sempre entro la fine del mese di riferimento.
+// "Avvisami" è solo interfaccia in questa demo: TODO collegare a un servizio di invio (email/WhatsApp Business API).
+import { site, type Lang } from '../data/site';
+import { ui } from '../i18n/ui';
+import Icon from './Icon.astro';
+
+interface Props { lang: Lang; id?: string }
+const { lang, id = 'calc' } = Astro.props;
+const t = ui[lang];
+
+const copy = {
+  it: {
+    mode: 'Parto da',
+    modes: { reg: 'Immatricolazione', rev: 'Ultima revisione' },
+    month: 'Mese',
+    year: 'Anno',
+    choose: 'Scegli',
+    deadline: 'Scadenza entro il',
+    estimate: 'Stima: la prima revisione era entro il {first}. Se da allora le hai sempre fatte puntuali, la prossima è questa. Per il dato esatto inserisci l\'ultima revisione.',
+    switchToRev: 'Inserisci l\'ultima revisione',
+    in: 'tra {n} giorni',
+    inOne: 'domani',
+    today: 'scade oggi',
+    ago: 'scaduta da {n} giorni',
+    ok: 'In regola',
+    soon: 'È il momento di prenotare',
+    expired: 'Scaduta',
+    expiredText: 'Prenota subito: circolare con la revisione scaduta comporta una sanzione. Il giorno della prenotazione puoi venire da noi con l\'auto.',
+    soonText: 'Mancano meno di due mesi. Prenota ora e scegli tu il giorno.',
+    okText: 'Nessuna fretta. Ti avvisiamo noi quando sarà ora.',
+    cycleStart: 'Inizio ciclo',
+    cycleEnd: 'Scadenza',
+    todayMark: 'Oggi',
+    ics: 'Aggiungi al calendario',
+    notify: 'Avvisami prima della scadenza',
+    notifyIntro: 'Un promemoria 30 giorni prima. Niente pubblicità.',
+    channel: 'Come preferisci essere avvisato?',
+    email: 'Email',
+    whatsapp: 'WhatsApp',
+    emailLabel: 'Il tuo indirizzo email',
+    phoneLabel: 'Il tuo numero WhatsApp',
+    consent: 'Acconsento a ricevere il promemoria. Posso annullarlo in qualsiasi momento.',
+    submit: 'Attiva il promemoria',
+    done: 'Fatto. Ti scriveremo il {date}, 30 giorni prima della scadenza.',
+    demo: 'Demo: il promemoria non viene ancora inviato.',
+    errEmail: 'Inserisci un indirizzo email valido, ad esempio nome@esempio.it',
+    errPhone: 'Inserisci un numero di cellulare, ad esempio 333 123 4567',
+    errConsent: 'Serve il consenso per inviarti il promemoria.',
+    note: 'Vale per autovetture ad uso privato. Taxi, NCC e veicoli con più di 8 posti hanno la revisione annuale.',
+    icsTitle: 'Scadenza revisione auto',
+    icsDesc: 'Prenota la revisione da Car Trade Bolzano',
+    noscript: 'Regola: prima revisione entro 4 anni dall\'immatricolazione, poi ogni 2 anni, entro la fine del mese.',
+  },
+  de: {
+    mode: 'Ausgehend von',
+    modes: { reg: 'Erstzulassung', rev: 'Letzte Revision' },
+    month: 'Monat',
+    year: 'Jahr',
+    choose: 'Wählen',
+    deadline: 'Fällig bis',
+    estimate: 'Schätzung: Die erste Revision war bis {first} fällig. Wenn sie seither immer pünktlich war, ist dies der nächste Termin. Für das genaue Datum geben Sie die letzte Revision ein.',
+    switchToRev: 'Letzte Revision eingeben',
+    in: 'in {n} Tagen',
+    inOne: 'morgen',
+    today: 'heute fällig',
+    ago: 'seit {n} Tagen abgelaufen',
+    ok: 'Alles in Ordnung',
+    soon: 'Zeit für einen Termin',
+    expired: 'Abgelaufen',
+    expiredText: 'Bitte sofort buchen: Mit abgelaufener Revision zu fahren wird bestraft. Am Tag des Termins dürfen Sie mit dem Auto zu uns kommen.',
+    soonText: 'Weniger als zwei Monate. Jetzt buchen und den Tag selbst wählen.',
+    okText: 'Kein Grund zur Eile. Wir erinnern Sie rechtzeitig.',
+    cycleStart: 'Beginn',
+    cycleEnd: 'Fällig',
+    todayMark: 'Heute',
+    ics: 'In den Kalender eintragen',
+    notify: 'Vor Ablauf erinnern',
+    notifyIntro: 'Eine Erinnerung 30 Tage vorher. Keine Werbung.',
+    channel: 'Wie möchten Sie erinnert werden?',
+    email: 'E-Mail',
+    whatsapp: 'WhatsApp',
+    emailLabel: 'Ihre E-Mail-Adresse',
+    phoneLabel: 'Ihre WhatsApp-Nummer',
+    consent: 'Ich möchte die Erinnerung erhalten und kann sie jederzeit abbestellen.',
+    submit: 'Erinnerung aktivieren',
+    done: 'Erledigt. Wir melden uns am {date}, 30 Tage vor Ablauf.',
+    demo: 'Demo: Die Erinnerung wird noch nicht verschickt.',
+    errEmail: 'Bitte eine gültige E-Mail-Adresse eingeben, z. B. name@beispiel.it',
+    errPhone: 'Bitte eine Handynummer eingeben, z. B. 333 123 4567',
+    errConsent: 'Für die Erinnerung brauchen wir Ihre Zustimmung.',
+    note: 'Gilt für Pkw im Privatgebrauch. Taxis, Mietwagen mit Fahrer und Fahrzeuge mit mehr als 8 Sitzplätzen müssen jährlich zur Revision.',
+    icsTitle: 'Revision Auto fällig',
+    icsDesc: 'Revision bei Car Trade Bozen buchen',
+    noscript: 'Regel: erste Revision innerhalb von 4 Jahren ab Erstzulassung, danach alle 2 Jahre, jeweils bis Monatsende.',
+  },
+}[lang];
+
+const locale = lang === 'it' ? 'it-IT' : 'de-DE';
+const months = Array.from({ length: 12 }, (_, i) =>
+  new Intl.DateTimeFormat(locale, { month: 'long' }).format(new Date(2026, i, 1)),
+);
+const now = new Date();
+const thisYear = now.getFullYear();
+const years = Array.from({ length: 31 }, (_, i) => thisYear - i);
+// Esempio precompilato: ultima revisione 18 mesi fa, così la demo mostra subito un risultato
+const example = new Date(now.getFullYear(), now.getMonth() - 18, 1);
+---
+<div class="calc" data-calc data-lang={lang} data-copy={JSON.stringify(copy)} data-booking={site.dekra.bookingUrl}>
+  <form class="calc-form" data-calc-form novalidate onsubmit="return false">
+    <fieldset class="field">
+      <legend class="t-label mb-3 text-steel-2">{copy.mode}</legend>
+      <div class="seg w-full">
+        <input type="radio" name={`${id}-mode`} id={`${id}-mode-reg`} value="reg" />
+        <label for={`${id}-mode-reg`}>{copy.modes.reg}</label>
+        <input type="radio" name={`${id}-mode`} id={`${id}-mode-rev`} value="rev" checked />
+        <label for={`${id}-mode-rev`}>{copy.modes.rev}</label>
+      </div>
+    </fieldset>
+    <div class="mt-5 grid grid-cols-[1.4fr_1fr] gap-3">
+      <div class="field">
+        <label for={`${id}-month`} class="text-steel">{copy.month}</label>
+        <select id={`${id}-month`} class="input" data-month>
+          {months.map((m, i) => (
+            <option value={i + 1} selected={i === example.getMonth()}>
+              {m.charAt(0).toUpperCase() + m.slice(1)}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div class="field">
+        <label for={`${id}-year`} class="text-steel">{copy.year}</label>
+        <select id={`${id}-year`} class="input t-num" data-year>
+          {years.map((y) => <option value={y} selected={y === example.getFullYear()}>{y}</option>)}
+        </select>
+      </div>
+    </div>
+    <p class="mt-6 text-sm text-steel-2">{copy.note}</p>
+  </form>
+
+  <div class="calc-result" aria-live="polite" data-result>
+    <div class="flex items-start justify-between gap-4">
+      <p class="t-label text-steel-2" data-deadline-label>{copy.deadline}</p>
+      <p class="status t-label" data-status></p>
+    </div>
+    <p class="big-date t-num mt-3" data-date>— — —</p>
+    <p class="mt-2 text-lg text-steel t-num" data-countdown></p>
+
+    <div class="meter mt-7" aria-hidden="true" data-meter>
+      <div class="ticks" data-ticks></div>
+      <div class="fill" data-fill></div>
+      <div class="today" data-today><span class="t-label">{copy.todayMark}</span></div>
+    </div>
+    <div class="mt-2 flex justify-between t-label text-steel-2 t-num">
+      <span data-start></span>
+      <span data-end></span>
+    </div>
+
+    <p class="mt-6 max-w-[52ch] text-steel" data-advice></p>
+    <p class="estimate mt-4 max-w-[56ch] text-sm text-steel" data-estimate hidden>
+      <span data-estimate-text></span>
+      <button type="button" class="link-u ml-1 font-semibold text-paper" data-switch-rev>{copy.switchToRev}</button>
+    </p>
+
+    <div class="mt-7 flex flex-wrap gap-3">
+      <a href={site.dekra.bookingUrl} class="btn btn-primary" target="_blank" rel="noopener">
+        {t.cta.book}<span class="sr-only"> ({t.externalBooking})</span>
+        <Icon name="arrow-up-right" size={18} class="btn-arrow" />
+      </a>
+      <button type="button" class="btn btn-ghost" data-ics>
+        <Icon name="download" size={18} /> {copy.ics}
+      </button>
+    </div>
+
+    <!-- Promemoria: divulgazione progressiva, niente modale -->
+    <div class="notify mt-8 border-t border-[var(--line-dark)] pt-6">
+      <button type="button" class="notify-toggle" aria-expanded="false" data-notify-toggle aria-controls={`${id}-notify`}>
+        <Icon name="bell" size={20} />
+        <span>{copy.notify}</span>
+        <Icon name="chevron" size={18} class="chev" />
+      </button>
+      <div class="acc" id={`${id}-notify`} data-notify-panel data-open="false">
+        <div>
+          <form class="grid gap-5 pt-5" data-notify-form novalidate>
+            <p class="text-sm text-steel">{copy.notifyIntro}</p>
+            <fieldset>
+              <legend class="mb-2 text-sm font-semibold">{copy.channel}</legend>
+              <div class="seg">
+                <input type="radio" name={`${id}-ch`} id={`${id}-ch-mail`} value="email" checked />
+                <label for={`${id}-ch-mail`}>{copy.email}</label>
+                <input type="radio" name={`${id}-ch`} id={`${id}-ch-wa`} value="whatsapp" />
+                <label for={`${id}-ch-wa`}>{copy.whatsapp}</label>
+              </div>
+            </fieldset>
+            <div class="field" data-field-email>
+              <label for={`${id}-email`}>{copy.emailLabel}</label>
+              <input id={`${id}-email`} type="email" class="input" autocomplete="email" inputmode="email" aria-describedby={`${id}-email-err`} />
+              <p id={`${id}-email-err`} class="field-error" hidden></p>
+            </div>
+            <div class="field" data-field-phone hidden>
+              <label for={`${id}-phone`}>{copy.phoneLabel}</label>
+              <input id={`${id}-phone`} type="tel" class="input t-num" autocomplete="tel" inputmode="tel" placeholder="+39" aria-describedby={`${id}-phone-err`} />
+              <p id={`${id}-phone-err`} class="field-error" hidden></p>
+            </div>
+            <div>
+              <label class="flex items-start gap-3 text-sm text-steel">
+                <input type="checkbox" class="mt-0.5 size-5 shrink-0 accent-[var(--color-orange)]" data-consent aria-describedby={`${id}-consent-err`} />
+                <span>{copy.consent}</span>
+              </label>
+              <p id={`${id}-consent-err`} class="field-error mt-2" hidden></p>
+            </div>
+            <div>
+              <button type="submit" class="btn btn-ghost">{copy.submit}</button>
+            </div>
+          </form>
+          <div class="done mt-5" data-notify-done hidden tabindex="-1">
+            <p class="flex items-start gap-3 font-semibold"><Icon name="check" size={22} class="shrink-0 text-orange" /><span data-done-text></span></p>
+            <p class="mt-2 text-sm text-steel-2">{copy.demo}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <noscript><p class="mt-4 text-steel">{copy.noscript}</p></noscript>
+</div>
+
+<style>
+@layer components {
+  .calc { display: grid; gap: 2rem; }
+  @media (min-width: 48rem) {
+    .calc { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); column-gap: 3rem; align-items: start; }
+    .calc > p, .calc > noscript { grid-column: 1 / -1; }
+  }
+  .calc-result {
+    padding: 1.5rem;
+    border: 1px solid var(--line-dark);
+    background: color-mix(in oklab, var(--color-night) 70%, black);
+  }
+  @media (min-width: 64rem) { .calc-result { padding: 2.25rem; } }
+
+  .big-date {
+    font-stretch: 125%;
+    font-weight: 650;
+    font-size: clamp(2.6rem, 8vw, 4.6rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    color: var(--color-paper);
+    text-transform: uppercase;
+  }
+  .status { padding: 0.35rem 0.5rem; border-radius: 2px; white-space: nowrap; }
+  .status:empty { display: none; }
+  [data-state='ok'] .status { background: color-mix(in oklab, #2fb36d 22%, transparent); color: #9fe3bd; }
+  [data-state='soon'] .status { background: var(--color-orange); color: var(--color-ink); }
+  [data-state='expired'] .status { background: #ff8a7a; color: var(--color-ink); }
+
+  .meter { position: relative; height: 2.25rem; }
+  .ticks { position: absolute; inset: 0; display: flex; justify-content: space-between; align-items: flex-end; }
+  .ticks :global(i) { width: 1px; height: 40%; background: color-mix(in oklab, var(--color-steel) 35%, transparent); }
+  .ticks :global(i.y) { height: 100%; background: color-mix(in oklab, var(--color-steel) 70%, transparent); }
+  .fill {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: 100%;
+    background: var(--color-steel);
+    transform-origin: left;
+    transform: scaleX(0);
+    transition: transform 1s var(--ease-out-expo);
+  }
+  [data-state='soon'] .fill, [data-state='expired'] .fill { background: var(--color-orange); }
+  .today {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 160%;
+    width: 2px;
+    background: var(--color-orange);
+    transition: left 1s var(--ease-out-expo);
+  }
+  .today span {
+    position: absolute;
+    top: -1.1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--color-orange);
+    white-space: nowrap;
+  }
+
+  .notify-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 2.75rem;
+    font-weight: 600;
+    text-align: left;
+    color: var(--color-paper);
+  }
+  .notify-toggle .chev { margin-left: auto; transition: transform 0.4s var(--ease-out-expo); }
+  .notify-toggle[aria-expanded='true'] .chev { transform: rotate(180deg); }
+  .estimate button { color: var(--color-paper); }
+}
+</style>
+
+<script>
+  type Copy = Record<string, any>;
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const lastDayOfMonth = (y: number, m1: number) => new Date(y, m1, 0); // m1 = mese 1-12
+  const DAY = 86_400_000;
+
+  function setup(root: HTMLElement) {
+    const copy: Copy = JSON.parse(root.dataset.copy!);
+    const lang = root.dataset.lang!;
+    const locale = lang === 'de' ? 'de-DE' : 'it-IT';
+    const fmtLong = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' });
+    const fmtShort = new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric' });
+    const fmtNum = new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+    const $ = <T extends Element>(s: string) => root.querySelector<T>(s)!;
+    const month = $<HTMLSelectElement>('[data-month]');
+    const year = $<HTMLSelectElement>('[data-year]');
+    const modes = root.querySelectorAll<HTMLInputElement>('input[name$="-mode"]');
+    const ticks = $<HTMLElement>('[data-ticks]');
+    let deadline: Date | null = null;
+
+    const mode = () => [...modes].find((m) => m.checked)?.value ?? 'rev';
+
+    function render() {
+      const today = startOfDay(new Date());
+      const y = Number(year.value);
+      const m = Number(month.value);
+      const isReg = mode() === 'reg';
+      const years = isReg ? 4 : 2;
+      let d = lastDayOfMonth(y + years, m);
+      let estimated = false;
+      const first = d;
+
+      // Dall'immatricolazione con prima scadenza già passata: stima la prossima ogni 2 anni
+      if (isReg && d < today) {
+        while (d < today) d = lastDayOfMonth(d.getFullYear() + 2, d.getMonth() + 1);
+        estimated = true;
+      }
+      deadline = d;
+      const cycleStart = new Date(d.getFullYear() - (isReg && !estimated ? 4 : 2), d.getMonth(), 1);
+      const days = Math.round((d.getTime() - today.getTime()) / DAY);
+      const state = days < 0 ? 'expired' : days <= 60 ? 'soon' : 'ok';
+      root.dataset.state = state;
+
+      $('[data-date]').textContent = fmtLong.format(d).replace(/\./g, '');
+      $('[data-countdown]').textContent =
+        days < 0 ? copy.ago.replace('{n}', String(-days)) : days === 0 ? copy.today : days === 1 ? copy.inOne : copy.in.replace('{n}', days.toLocaleString(locale));
+      $('[data-status]').textContent = copy[state];
+      $('[data-advice]').textContent = copy[`${state}Text`];
+      $('[data-start]').textContent = fmtShort.format(cycleStart);
+      $('[data-end]').textContent = fmtShort.format(d);
+
+      const est = $<HTMLElement>('[data-estimate]');
+      est.hidden = !estimated;
+      if (estimated) $('[data-estimate-text]').textContent = copy.estimate.replace('{first}', fmtNum.format(first));
+
+      // Misuratore: una tacca per mese, tacca lunga a ogni anno
+      const monthsInCycle = (d.getFullYear() - cycleStart.getFullYear()) * 12 + d.getMonth() - cycleStart.getMonth() + 1;
+      ticks.innerHTML = Array.from({ length: monthsInCycle + 1 }, (_, i) => `<i class="${i % 12 === 0 ? 'y' : ''}"></i>`).join('');
+      const total = d.getTime() - cycleStart.getTime();
+      const p = Math.max(0, Math.min(1, (today.getTime() - cycleStart.getTime()) / total));
+      $<HTMLElement>('[data-fill]').style.transform = `scaleX(${p})`;
+      $<HTMLElement>('[data-today]').style.left = `calc(${p * 100}% - 1px)`;
+    }
+
+    [month, year, ...modes].forEach((el) => el.addEventListener('change', render));
+    $('[data-switch-rev]').addEventListener('click', () => {
+      const rev = [...modes].find((m) => m.value === 'rev')!;
+      rev.checked = true;
+      render();
+      rev.focus();
+    });
+
+    // File .ics con promemoria 30 giorni prima
+    $('[data-ics]').addEventListener('click', () => {
+      if (!deadline) return;
+      const d = deadline;
+      const next = new Date(d.getTime() + DAY);
+      const ymd = (x: Date) => `${x.getFullYear()}${pad(x.getMonth() + 1)}${pad(x.getDate())}`;
+      const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+      const ics = [
+        'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Car Trade Bolzano//Revisione//IT', 'CALSCALE:GREGORIAN',
+        'BEGIN:VEVENT',
+        `UID:revisione-${ymd(d)}@cartradebolzano.it`,
+        `DTSTAMP:${stamp}`,
+        `DTSTART;VALUE=DATE:${ymd(d)}`,
+        `DTEND;VALUE=DATE:${ymd(next)}`,
+        `SUMMARY:${copy.icsTitle}`,
+        `DESCRIPTION:${copy.icsDesc}: ${root.dataset.booking}`,
+        'BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${copy.icsTitle}`, 'TRIGGER:-P30D', 'END:VALARM',
+        'END:VEVENT', 'END:VCALENDAR',
+      ].join('\r\n');
+      const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
+      const a = Object.assign(document.createElement('a'), { href: url, download: `revisione-${ymd(d)}.ics` });
+      document.body.append(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+
+    // Promemoria (solo UI)
+    const toggle = $<HTMLButtonElement>('[data-notify-toggle]');
+    const panel = $<HTMLElement>('[data-notify-panel]');
+    toggle.addEventListener('click', () => {
+      const open = toggle.getAttribute('aria-expanded') !== 'true';
+      toggle.setAttribute('aria-expanded', String(open));
+      panel.dataset.open = String(open);
+    });
+    const form = $<HTMLFormElement>('[data-notify-form]');
+    const fEmail = $<HTMLElement>('[data-field-email]');
+    const fPhone = $<HTMLElement>('[data-field-phone]');
+    const channel = () => (form.querySelector<HTMLInputElement>('input[name$="-ch"]:checked')?.value ?? 'email');
+    form.querySelectorAll('input[name$="-ch"]').forEach((r) =>
+      r.addEventListener('change', () => {
+        const wa = channel() === 'whatsapp';
+        fEmail.hidden = wa;
+        fPhone.hidden = !wa;
+      }),
+    );
+    const setErr = (input: HTMLInputElement, msg: string) => {
+      const err = root.querySelector<HTMLElement>(`#${input.getAttribute('aria-describedby')}`)!;
+      err.textContent = msg;
+      err.hidden = !msg;
+      input.setAttribute('aria-invalid', msg ? 'true' : 'false');
+      return !msg;
+    };
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const wa = channel() === 'whatsapp';
+      const email = fEmail.querySelector('input')!;
+      const phone = fPhone.querySelector('input')!;
+      const consent = form.querySelector<HTMLInputElement>('[data-consent]')!;
+      let ok = true;
+      if (wa) ok = setErr(phone, /^\+?[\d\s]{9,15}$/.test(phone.value.trim()) ? '' : copy.errPhone) && ok;
+      else ok = setErr(email, /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.value.trim()) ? '' : copy.errEmail) && ok;
+      ok = setErr(consent, consent.checked ? '' : copy.errConsent) && ok;
+      if (!ok) {
+        form.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+        return;
+      }
+      const remind = new Date((deadline ?? new Date()).getTime() - 30 * DAY);
+      const done = $<HTMLElement>('[data-notify-done]');
+      $('[data-done-text]').textContent = copy.done.replace('{date}', fmtNum.format(remind));
+      form.hidden = true;
+      done.hidden = false;
+      done.focus();
+    });
+
+    render();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-calc]').forEach(setup);
+</script>

@@ -1,0 +1,283 @@
+---
+import Base from '../layouts/Base.astro';
+import { Picture } from 'astro:assets';
+import PhotoHero from '../components/PhotoHero.astro';
+// Foto reali fornite dal cliente
+import sedeImg from '../assets/sede/sede-revisioni-dekra.webp';
+import showroom1 from '../assets/sede/showroom-1.webp';
+import showroom2 from '../assets/sede/showroom-2.webp';
+import showroom3 from '../assets/sede/showroom-3.webp';
+import Icon from '../components/Icon.astro';
+import SectionHead from '../components/SectionHead.astro';
+import HoursTable from '../components/HoursTable.astro';
+import RoofLine from '../components/RoofLine.astro';
+import GoogleReviews from '../components/GoogleReviews.astro';
+import { site, type Lang } from '../data/site';
+import { alternatesFor, routes } from '../i18n/routes';
+import { ui } from '../i18n/ui';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = ui[lang];
+
+// TODO: storia, anno di fondazione, nomi e foto del team sono da fornire dal cliente.
+// I testi qui sotto sono plausibili ma non contengono fatti verificati.
+const copy = {
+  it: {
+    title: 'Chi siamo · Car Trade Bolzano',
+    description: 'CAR TRADE SRL: revisione, officina, carrozzeria e vendita auto in un’unica sede a Bolzano Sud. Chi siamo, come lavoriamo, dove trovarci.',
+    label: 'Azienda',
+    h1: ['Quattro mestieri.', 'Una sola squadra.'],
+    lead: 'Revisione, officina, carrozzeria e vendita sotto lo stesso tetto in Via Werner von Siemens. Così l’auto non deve girare la città, e tu nemmeno.',
+    photoAlt: 'La sede Car Trade: linea di revisione con l’insegna “Revisioni DEKRA Italia Überprüfung” e un’auto sul banco prova',
+    caption: 'La sede · Via Werner von Siemens 4/F',
+    storyLabel: 'La storia',
+    storyTitle: 'Nata da un problema molto concreto.',
+    story: [
+      'Chi porta l’auto in revisione e scopre un difetto, di solito deve trovare un’officina, aspettare un appuntamento, tornare per la nuova verifica. Giorni persi per un fanale o un disco dei freni.',
+      'Noi abbiamo scelto di fare tutto nello stesso posto: il centro revisioni affiliato DEKRA, l’officina meccanica, la carrozzeria. Accanto all’officina ci sono le auto in vendita, scelte con lo stesso criterio con cui le ripariamo.',
+    ],
+    milestones: [
+      { k: 'Officina', d: 'Meccanica e carrozzeria interne, per auto di tutte le marche.' },
+      { k: 'Revisioni', d: 'Centro revisioni affiliato DEKRA, abilitato per autovetture.' },
+      { k: 'Auto', d: 'Usato selezionato e km 0, controllati in officina prima della vendita.' },
+    ],
+    yearTodo: 'Anno',
+    valuesLabel: 'Come lavoriamo',
+    values: [
+      { t: 'Il prezzo si dice prima.', d: 'Prima di mettere mano all’auto sai cosa facciamo e quanto costa. Se durante il lavoro emerge altro, ti chiamiamo.' },
+      { t: 'Un solo interlocutore.', d: 'Dalla revisione alla riparazione parli con le stesse persone, che conoscono la tua auto.' },
+      { t: 'Lavoro che si può controllare.', d: 'Ti spieghiamo cosa abbiamo fatto e, se vuoi, ti mostriamo i pezzi sostituiti.' },
+    ],
+    teamLabel: 'Le persone',
+    teamTitle: 'Le persone che vedrai in officina.',
+    teamText: 'Volti e nomi arriveranno con il servizio fotografico in sede.',
+    team: [
+      { r: 'Titolare', a: 'Direzione e vendita auto' },
+      { r: 'Responsabile tecnico', a: 'Centro revisioni' },
+      { r: 'Capo officina', a: 'Meccanica e diagnosi' },
+      { r: 'Carrozziere', a: 'Riparazione e verniciatura' },
+    ],
+    photoSoon: 'Foto in arrivo',
+    nameTodo: 'Nome e cognome',
+    placeLabel: 'La sede',
+    placeTitle: 'Via Werner von Siemens 4/F, zona produttiva Bolzano Sud.',
+    showroom: 'Lo showroom',
+    showroomText: 'Le auto in vendita sono esposte al coperto, nella stessa sede dell’officina.',
+    showAlt: [
+      'Showroom: Mercedes Classe C Coupé bianca in primo piano, altre auto sullo sfondo',
+      'Showroom: Jeep Wrangler bianca con assetto fuoristrada',
+      'Showroom: Abarth 595 blu e Jeep Renegade rossa',
+    ],
+    facts: [
+      ['Ragione sociale', site.name],
+      ['P. IVA', site.vat],
+      ['Indirizzo', `${site.address.street.it}, ${site.address.postalCode} Bolzano`],
+      ['Revisioni', 'Centro affiliato DEKRA, autovetture'],
+    ],
+    // TODO: verificare le indicazioni stradali con il cliente
+    arrive: 'Dall’autostrada A22 uscita Bolzano Sud, poi seguire per la zona produttiva.',
+    contact: 'Vieni a trovarci',
+  },
+  de: {
+    title: 'Über uns · Car Trade Bozen',
+    description: 'CAR TRADE SRL: Revision, Werkstatt, Karosserie und Fahrzeugverkauf an einem Standort in Bozen Süd. Wer wir sind, wie wir arbeiten, wo Sie uns finden.',
+    label: 'Unternehmen',
+    h1: ['Vier Bereiche.', 'Ein Team.'],
+    lead: 'Revision, Werkstatt, Karosserie und Verkauf unter einem Dach in der Werner-von-Siemens-Straße. Damit das Auto nicht quer durch die Stadt muss und Sie auch nicht.',
+    photoAlt: 'Der Standort von Car Trade: Prüfstraße mit dem Schild „Revisioni DEKRA Italia Überprüfung“ und einem Auto auf dem Prüfstand',
+    caption: 'Standort · Werner-von-Siemens-Straße 4/F',
+    storyLabel: 'Geschichte',
+    storyTitle: 'Entstanden aus einem ganz konkreten Problem.',
+    story: [
+      'Wer bei der Revision einen Mangel entdeckt, muss meist eine Werkstatt suchen, auf einen Termin warten und dann zur Nachprüfung zurück. Tage verloren wegen eines Scheinwerfers oder einer Bremsscheibe.',
+      'Wir haben uns entschieden, alles an einem Ort zu machen: die Prüfstelle als DEKRA-Partner, die Kfz-Werkstatt, die Karosserie. Neben der Werkstatt stehen die Fahrzeuge zum Verkauf, ausgewählt nach denselben Maßstäben, nach denen wir sie reparieren.',
+    ],
+    milestones: [
+      { k: 'Werkstatt', d: 'Mechanik und Karosserie im Haus, für Autos aller Marken.' },
+      { k: 'Revision', d: 'DEKRA-Partner für die Revision, zugelassen für Pkw.' },
+      { k: 'Fahrzeuge', d: 'Ausgewählte Gebrauchtwagen und Tageszulassungen, vor dem Verkauf geprüft.' },
+    ],
+    yearTodo: 'Jahr',
+    valuesLabel: 'Wie wir arbeiten',
+    values: [
+      { t: 'Der Preis steht vorher fest.', d: 'Bevor wir am Auto arbeiten, wissen Sie, was wir machen und was es kostet. Kommt etwas dazu, rufen wir an.' },
+      { t: 'Ein Ansprechpartner.', d: 'Von der Revision bis zur Reparatur sprechen Sie mit denselben Leuten, die Ihr Auto kennen.' },
+      { t: 'Arbeit, die man prüfen kann.', d: 'Wir erklären, was wir gemacht haben, und zeigen Ihnen auf Wunsch die ausgebauten Teile.' },
+    ],
+    teamLabel: 'Menschen',
+    teamTitle: 'Die Menschen, die Sie in der Werkstatt treffen.',
+    teamText: 'Gesichter und Namen folgen mit dem Fotoshooting vor Ort.',
+    team: [
+      { r: 'Inhaber', a: 'Leitung und Fahrzeugverkauf' },
+      { r: 'Technischer Leiter', a: 'Prüfstelle Revision' },
+      { r: 'Werkstattleiter', a: 'Mechanik und Diagnose' },
+      { r: 'Karosseriebauer', a: 'Reparatur und Lackierung' },
+    ],
+    photoSoon: 'Foto folgt',
+    nameTodo: 'Vor- und Nachname',
+    placeLabel: 'Standort',
+    placeTitle: 'Werner-von-Siemens-Straße 4/F, Gewerbegebiet Bozen Süd.',
+    showroom: 'Der Ausstellungsraum',
+    showroomText: 'Die Fahrzeuge stehen überdacht im selben Gebäude wie die Werkstatt.',
+    showAlt: [
+      'Ausstellungsraum: weißes Mercedes C-Klasse Coupé im Vordergrund, weitere Autos dahinter',
+      'Ausstellungsraum: weißer Jeep Wrangler mit Geländefahrwerk',
+      'Ausstellungsraum: blauer Abarth 595 und roter Jeep Renegade',
+    ],
+    facts: [
+      ['Firmenname', site.name],
+      ['MwSt.-Nr.', site.vat],
+      ['Adresse', `${site.address.street.de}, ${site.address.postalCode} Bozen`],
+      ['Revision', 'DEKRA-Partner, Pkw'],
+    ],
+    arrive: 'Von der Autobahn A22 Ausfahrt Bozen Süd, dann Richtung Gewerbegebiet.',
+    contact: 'Besuchen Sie uns',
+  },
+}[lang];
+---
+<Base lang={lang} title={copy.title} description={copy.description} alternates={alternatesFor('azienda')} current="azienda" overlayHeader>
+  <PhotoHero lang={lang} label={copy.label} title={copy.h1} lead={copy.lead} image={sedeImg} alt={copy.photoAlt} position="42% 40%" caption={copy.caption}>
+    <Fragment slot="actions">
+      <a href={routes.contatti[lang]} class="btn btn-primary">{copy.contact} <Icon name="arrow" size={18} class="btn-arrow" /></a>
+      <a href={site.mapsUrl} class="btn btn-ghost" target="_blank" rel="noopener">{t.cta.directions} <Icon name="arrow-up-right" size={16} /></a>
+    </Fragment>
+  </PhotoHero>
+
+  <!-- 01 Storia -->
+  <section class="section-y" aria-labelledby="story-title">
+    <div class="wrap">
+      <SectionHead num="01" label={copy.storyLabel} />
+      <div class="grid-12 mt-8 gap-y-8 lg:mt-12">
+        <h2 id="story-title" class="t-h2 col-span-4 max-w-[16ch] lg:col-span-5" data-reveal>{copy.storyTitle}</h2>
+        <div class="col-span-4 grid gap-5 lg:col-span-6 lg:col-start-7">
+          {copy.story.map((p) => <p class="t-lead text-ink/85" data-reveal>{p}</p>)}
+        </div>
+      </div>
+      <ol class="miles mt-16 lg:mt-24" data-stagger="100">
+        {copy.milestones.map((m, i) => (
+          <li data-reveal>
+            {/* TODO: inserire l'anno reale di ogni tappa */}
+            <span class="t-label t-num text-muted">{copy.yearTodo} · {String(i + 1).padStart(2, '0')}</span>
+            <span class="mile-k">{m.k}</span>
+            <span class="text-muted">{m.d}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- 02 Valori -->
+  <section class="on-dark section-y bg-night text-paper" aria-labelledby="values-label">
+    <div class="wrap">
+      <SectionHead num="02" label={copy.valuesLabel} dark />
+      <h2 id="values-label" class="sr-only">{copy.valuesLabel}</h2>
+      <ol class="values mt-6">
+        {copy.values.map((v, i) => (
+          <li data-reveal>
+            <span class="t-label t-num text-orange">{String(i + 1).padStart(2, '0')}</span>
+            <h3 class="value-t">{v.t}</h3>
+            <p class="text-steel">{v.d}</p>
+          </li>
+        ))}
+      </ol>
+      <div class="mt-16 lg:mt-24">
+        <GoogleReviews lang={lang} />
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 Team -->
+  <section class="section-y" aria-labelledby="team-title">
+    <div class="wrap">
+      <SectionHead num="03" label={copy.teamLabel} />
+      <div class="grid-12 mt-8 gap-y-4 lg:mt-12">
+        <h2 id="team-title" class="t-h2 col-span-4 max-w-[18ch] lg:col-span-7" data-reveal>{copy.teamTitle}</h2>
+        <p class="col-span-4 text-muted lg:col-span-4 lg:col-start-9 lg:self-end">{copy.teamText}</p>
+      </div>
+      <ul class="team mt-10 lg:mt-14" data-stagger="80">
+        {copy.team.map((m) => (
+          <li data-reveal>
+            {/* TODO: foto ritratto reale + nome e cognome */}
+            <div class="portrait on-dark">
+              <RoofLine tone="paper" class="w-[70%] opacity-80" draw={false} weight={1.25} />
+              <span class="t-label text-steel-2">{copy.photoSoon}</span>
+            </div>
+            <p class="t-h3 mt-4">{m.r}</p>
+            <p class="mt-1 text-muted">{m.a}</p>
+            <p class="mt-1 text-sm text-muted">{copy.nameTodo}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- 04 Sede -->
+  <section class="section-y bg-paper-2" aria-labelledby="place-title">
+    <div class="wrap">
+      <SectionHead num="04" label={copy.placeLabel} />
+      <h2 id="place-title" class="t-h2 mt-8 max-w-[22ch] lg:mt-12" data-reveal>{copy.placeTitle}</h2>
+      <div class="grid-12 mt-10 gap-y-10 lg:mt-14">
+        <figure class="col-span-4 lg:col-span-7">
+          {/* Foto dello showroom reale (dalle recensioni Google).
+              TODO: verificare chi ne detiene i diritti: se sono state caricate da clienti, chiedere il permesso o sostituirle con foto proprie.
+              TODO: confermare che lo showroom sia nella stessa sede (didascalia). */}
+          <div class="mosaic" data-stagger="90">
+            <div class="tile tile-wide" data-reveal>
+              <Picture src={showroom2} alt={copy.showAlt[1]} formats={['avif', 'webp']} fallbackFormat="webp" widths={[480, showroom2.width]} sizes="(min-width: 64rem) 55vw, 100vw" class="tile-img" />
+            </div>
+            <div class="tile" data-reveal>
+              <Picture src={showroom1} alt={copy.showAlt[0]} formats={['avif', 'webp']} fallbackFormat="webp" widths={[showroom1.width]} sizes="(min-width: 64rem) 27vw, 50vw" class="tile-img" />
+            </div>
+            <div class="tile" data-reveal>
+              <Picture src={showroom3} alt={copy.showAlt[2]} formats={['avif', 'webp']} fallbackFormat="webp" widths={[showroom3.width]} sizes="(min-width: 64rem) 27vw, 50vw" class="tile-img" />
+            </div>
+          </div>
+          <figcaption class="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span class="t-label">{copy.showroom}</span>
+            <span class="text-sm text-muted">{copy.showroomText}</span>
+          </figcaption>
+        </figure>
+        <div class="col-span-4 lg:col-span-5">
+          <dl class="spec border-t border-[var(--line-strong)]">
+            {copy.facts.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
+          </dl>
+          <p class="mt-6 text-muted">{copy.arrive}</p>
+          <h3 class="t-label mt-8">{t.hours.title}</h3>
+          <HoursTable lang={lang} class="mt-2" />
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a href={routes.contatti[lang]} class="btn btn-ink">{copy.contact} <Icon name="arrow" size={18} class="btn-arrow" /></a>
+            <a href={site.mapsUrl} class="btn btn-ghost" target="_blank" rel="noopener">{t.cta.directions} <Icon name="arrow-up-right" size={16} /></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+@layer components {
+  .miles { display: grid; border-top: 1px solid var(--line-strong); }
+  .miles li { display: grid; gap: 0.5rem; padding-block: 1.5rem; border-bottom: 1px solid var(--line); }
+  @media (min-width: 48rem) {
+    .miles { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--gutter); border-top: 0; }
+    .miles li { border-top: 1px solid var(--line-strong); border-bottom: 0; padding-top: 1.75rem; }
+  }
+  .mile-k { font-stretch: 125%; font-weight: 640; font-size: clamp(1.75rem, 3.2vw, 2.6rem); letter-spacing: -0.03em; line-height: 1; margin-top: 0.5rem; }
+
+  .values li { display: grid; gap: 0.75rem; padding-block: 2rem; border-bottom: 1px solid var(--line-dark); }
+  @media (min-width: 64rem) {
+    .values li { grid-template-columns: 4rem minmax(0, 1.3fr) minmax(0, 1fr); column-gap: 2rem; align-items: baseline; padding-block: 2.75rem; }
+  }
+  .value-t { font-stretch: 125%; font-weight: 640; font-size: clamp(1.75rem, 4vw, 3.2rem); line-height: 1.02; letter-spacing: -0.03em; }
+
+  .team { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.5rem var(--gutter); }
+  @media (min-width: 64rem) { .team { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .mosaic { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gutter); }
+  .tile { position: relative; overflow: hidden; aspect-ratio: 3 / 4; background: var(--color-paper-3); }
+  .tile-wide { grid-column: 1 / -1; aspect-ratio: 3 / 2; }
+  .tile :global(.tile-img) { width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s var(--ease-out-expo); }
+  .tile:hover :global(.tile-img) { transform: scale(1.04); }
+  .portrait { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; aspect-ratio: 4 / 5; background: var(--color-night); }
+}
+</style>

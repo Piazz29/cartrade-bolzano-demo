@@ -1,0 +1,150 @@
+---
+import '../styles/global.css';
+import { site, type Lang } from '../data/site';
+import { routes, type Alternates, type RouteKey } from '../i18n/routes';
+import { ui } from '../i18n/ui';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import MobileCtaBar from '../components/MobileCtaBar.astro';
+import Preloader from '../components/Preloader.astro';
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description: string;
+  alternates: Alternates;
+  current?: RouteKey;
+  ogImage?: string;
+  jsonLd?: Record<string, unknown>[];
+  whatsappText?: string;
+  overlayHeader?: boolean;
+}
+const { lang, title, description, alternates, current, ogImage, jsonLd = [], whatsappText, overlayHeader = false } = Astro.props;
+const t = ui[lang];
+const siteUrl = Astro.site!.toString().replace(/\/$/, '');
+const canonical = `${siteUrl}${alternates[lang]}`;
+const og = ogImage ?? `${siteUrl}/og/og-${lang}.jpg`;
+const fullTitle = title.includes('Car Trade') ? title : `${title} · Car Trade Bolzano`;
+
+// schema.org: officina + concessionario nella stessa sede
+const business = {
+  '@context': 'https://schema.org',
+  '@type': ['AutoRepair', 'AutoDealer'],
+  '@id': `${siteUrl}/#business`,
+  name: site.name,
+  alternateName: site.brand,
+  url: `${siteUrl}${routes.home[lang]}`,
+  image: `${siteUrl}/og/og-${lang}.jpg`,
+  logo: `${siteUrl}/brand/logo.svg`,
+  telephone: site.phone.e164,
+  ...(site.email ? { email: site.email } : {}),
+  vatID: `IT${site.vat}`,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: site.address.street[lang],
+    postalCode: site.address.postalCode,
+    addressLocality: site.address.city[lang],
+    addressRegion: site.address.region,
+    addressCountry: site.address.country,
+  },
+  geo: { '@type': 'GeoCoordinates', latitude: site.geo.lat, longitude: site.geo.lng },
+  hasMap: site.mapsUrl,
+  areaServed: { '@type': 'City', name: lang === 'it' ? 'Bolzano' : 'Bozen' },
+  // TODO: aggiungere il sabato se confermato
+  openingHoursSpecification: site.hours.map((h) => ({
+    '@type': 'OpeningHoursSpecification',
+    dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+    opens: h.open,
+    closes: h.close,
+  })),
+  knowsLanguage: ['it', 'de'],
+  // Nota: niente aggregateRating dalle recensioni Google (non ammesso per i rich result "self-serving").
+};
+const ld = [business, ...jsonLd];
+---
+<!doctype html>
+<html lang={lang} class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="it" href={`${siteUrl}${alternates.it}`} />
+    <link rel="alternate" hreflang="de" href={`${siteUrl}${alternates.de}`} />
+    <link rel="alternate" hreflang="x-default" href={`${siteUrl}${alternates.it}`} />
+    <link rel="sitemap" href="/sitemap.xml" />
+
+    <meta name="theme-color" content="#F7F6F3" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Car Trade Bolzano" />
+    <meta property="og:locale" content={lang === 'it' ? 'it_IT' : 'de_DE'} />
+    <meta property="og:locale:alternate" content={lang === 'it' ? 'de_DE' : 'it_IT'} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={og} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <meta name="geo.region" content="IT-BZ" />
+    <meta name="geo.placename" content={lang === 'it' ? 'Bolzano' : 'Bozen'} />
+    <meta name="geo.position" content={`${site.geo.lat};${site.geo.lng}`} />
+
+    <!-- Font non precaricato: su mobile ruberebbe banda alla foto LCP. font-display: swap + fallback metrico = niente CLS -->
+    <link rel="preconnect" href="https://images.unsplash.com" />
+
+    <script is:inline>
+      // JS attivo + schermata di caricamento solo al primo ingresso nella sessione (mai con "riduci movimento")
+      (function () {
+        var d = document.documentElement;
+        d.classList.replace('no-js', 'js');
+        try {
+          if (sessionStorage.getItem('ct-intro') || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+          d.classList.add('is-loading');
+          setTimeout(function () { d.classList.remove('is-loading'); }, 4500); // rete di sicurezza
+        } catch (e) {}
+      })();
+    </script>
+
+    {ld.map((item) => <script type="application/ld+json" set:html={JSON.stringify(item)} />)}
+    <slot name="head" />
+  </head>
+  <body>
+    <Preloader lang={lang} />
+    <a href="#main" class="skip-link">{t.skip}</a>
+    <Header lang={lang} alternates={alternates} current={current} overlay={overlayHeader} />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+    <MobileCtaBar lang={lang} whatsappText={whatsappText} />
+
+    <script>
+      import '../scripts/reveal';
+      import '../scripts/motion';
+    </script>
+
+    <style>
+@layer components {
+      .skip-link {
+        position: fixed;
+        left: 1rem;
+        top: 0.75rem;
+        z-index: 100;
+        padding: 0.75rem 1rem;
+        background: var(--color-ink);
+        color: var(--color-paper);
+        font-weight: 600;
+        transform: translateY(-200%);
+      }
+      .skip-link:focus { transform: none; }
+      main:focus { outline: none; }
+    }
+</style>
+  </body>
+</html>

@@ -1,0 +1,59 @@
+---
+import type { Lang } from '../data/site';
+import type { Alternates } from '../i18n/routes';
+import { ui } from '../i18n/ui';
+
+interface Props { lang: Lang; alternates: Alternates; tone?: 'light' | 'dark'; class?: string }
+const { lang, alternates, tone = 'light', class: cls } = Astro.props;
+const t = ui[lang];
+const items: Lang[] = ['it', 'de'];
+---
+<nav aria-label={t.langLabel} class:list={['lang-switch', `lang-${tone}`, cls]}>
+  <ul class="flex">
+    {items.map((l) => (
+      <li>
+        <a
+          href={alternates[l]}
+          hreflang={l}
+          lang={l}
+          aria-current={l === lang ? 'true' : undefined}
+          data-lang-link={l}
+        >
+          <span aria-hidden="true">{l.toUpperCase()}</span>
+          <span class="sr-only">{ui[l].langNames[l]}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+@layer components {
+  .lang-switch ul {
+    border: 1px solid var(--line-strong);
+    border-radius: 2px;
+    padding: 2px;
+    gap: 2px;
+  }
+  .lang-switch a {
+    display: grid;
+    place-items: center;
+    min-width: 2.75rem;
+    min-height: 2.5rem;
+    padding-inline: 0.5rem;
+    font-stretch: 118%;
+    font-size: 0.8125rem;
+    font-weight: 650;
+    letter-spacing: 0.06em;
+    border-radius: 1px;
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .lang-switch a:hover { background: color-mix(in oklab, var(--color-ink) 7%, transparent); }
+  .lang-switch a[aria-current='true'] { background: var(--color-ink); color: var(--color-paper); }
+  .lang-dark ul { border-color: color-mix(in oklab, var(--color-steel) 35%, transparent); }
+  .lang-dark a { color: var(--color-paper); }
+  .lang-dark a:hover { background: color-mix(in oklab, var(--color-paper) 10%, transparent); }
+  .lang-dark a[aria-current='true'] { background: var(--color-paper); color: var(--color-ink); }
+}
+</style>

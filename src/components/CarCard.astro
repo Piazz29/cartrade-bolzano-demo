@@ -1,0 +1,64 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatPrice, type Lang } from '../data/site';
+import { carUrl } from '../i18n/routes';
+import { carLabels, formatKm, localizeVersion } from '../i18n/cars';
+import Photo from './Photo.astro';
+
+interface Props { car: CollectionEntry<'cars'>; lang: Lang; sizes?: string; headingLevel?: 'h2' | 'h3' }
+const { car, lang, sizes = '(min-width: 64rem) 25vw, (min-width: 40rem) 45vw, 82vw', headingLevel = 'h3' } = Astro.props;
+const d = car.data;
+const L = carLabels[lang];
+const H = headingLevel;
+const cover = d.images[0];
+const version = localizeVersion(d.version, lang);
+---
+<article class="car-card group relative" data-car>
+  <a href={carUrl(car.id, lang)} class="block">
+    <div class="relative overflow-hidden">
+      {/* TODO: sostituire con foto della sede (foto reali dell'auto) */}
+      <Photo id={cover.id} alt={cover.alt[lang]} sizes={sizes} ratio={[4, 3]} widths={[400, 640, 900]} imgClass="car-img" />
+      {d.condition === 'km0' && <span class="badge t-label">{L.condition.km0}</span>}
+    </div>
+    <div class="pt-4">
+      <p class="t-label text-muted">{d.make}</p>
+      <H class="t-h3 mt-1.5">
+        {d.model} <span class="sr-only">{version}</span>
+      </H>
+      <p class="mt-1 truncate text-[0.9375rem] text-muted" aria-hidden="true">{version}</p>
+      <ul class="specs mt-4 t-num" aria-label={L.details}>
+        <li>{d.year}</li>
+        <li>{formatKm(d.km, lang)}</li>
+        <li>{L.fuel[d.fuel]}</li>
+        <li>{L.gearbox[d.gearbox]}</li>
+      </ul>
+      <p class="price mt-4 flex items-baseline justify-between gap-3">
+        <span class="t-num text-[1.375rem] font-semibold" style="font-stretch:115%">{formatPrice(d.price, lang)}</span>
+        <span class="arrow" aria-hidden="true">→</span>
+      </p>
+    </div>
+  </a>
+</article>
+
+<style>
+@layer components {
+  .car-card a { text-decoration: none; }
+  .car-card :global(.car-img) { transition: transform 0.9s var(--ease-out-expo); }
+  .car-card:hover :global(.car-img) { transform: scale(1.04); }
+  .badge {
+    position: absolute;
+    left: 0.75rem;
+    top: 0.75rem;
+    padding: 0.4rem 0.55rem;
+    background: var(--color-orange);
+    color: var(--color-ink);
+    border-radius: 2px;
+  }
+  .specs { display: grid; grid-template-columns: 1fr 1fr; font-size: 0.875rem; border-top: 1px solid var(--line); }
+  .specs li { padding: 0.45rem 0; border-bottom: 1px solid var(--line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .specs li:nth-child(odd) { padding-right: 0.75rem; border-right: 1px solid var(--line); }
+  .specs li:nth-child(even) { padding-left: 0.75rem; }
+  .arrow { transition: transform 0.4s var(--ease-out-expo); font-size: 1.25rem; }
+  .car-card:hover .arrow { transform: translateX(4px); color: var(--color-orange-ink); }
+}
+</style>

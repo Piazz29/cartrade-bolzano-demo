@@ -1,0 +1,351 @@
+---
+// Recensioni Google reali, lette dal vivo dalla scheda "Centro Revisioni Dekra - Car Trade Srl".
+// Come funziona:
+// - Le policy di Google Places vietano di salvare o mettere in cache i contenuti delle recensioni,
+//   quindi NON le scriviamo nell'HTML in build: le carica il browser con la Places API (Maps JavaScript API),
+//   solo quando la sezione sta per entrare in vista (nessun peso sul caricamento della pagina).
+// - Google restituisce al massimo 5 recensioni ("più pertinenti"), nella lingua della pagina.
+// - Senza PUBLIC_GOOGLE_MAPS_API_KEY, o se la chiamata fallisce: voto, numero e link alle recensioni reali.
+// Nessuna recensione è mai inventata o scritta a mano.
+import { site, formatNumber, type Lang } from '../data/site';
+import Icon from './Icon.astro';
+
+interface Props { lang: Lang; dark?: boolean }
+const { lang, dark = true } = Astro.props;
+const live = Boolean(site.google.apiKey);
+
+const copy = {
+  it: {
+    title: 'Cosa dicono su Google',
+    readAll: 'Leggi tutte le recensioni',
+    write: 'Lascia una recensione',
+    loading: 'Caricamento delle recensioni da Google…',
+    readOnGoogle: 'Leggi su Google',
+    translated: 'Tradotta da Google',
+    source: 'Recensioni da Google Maps',
+    policy: 'Le recensioni non sono verificate da Google, ma Google cerca e rimuove i contenuti falsi.',
+    policyLink: 'Come funziona',
+    prev: 'Recensioni precedenti',
+    next: 'Recensioni successive',
+    stars: 'stelle su 5',
+    reviews: 'recensioni',
+    of: 'su',
+  },
+  de: {
+    title: 'Was Kunden auf Google sagen',
+    readAll: 'Alle Bewertungen lesen',
+    write: 'Bewertung schreiben',
+    loading: 'Bewertungen werden von Google geladen…',
+    readOnGoogle: 'Auf Google lesen',
+    translated: 'Von Google übersetzt',
+    source: 'Bewertungen von Google Maps',
+    policy: 'Bewertungen werden von Google nicht geprüft, Google sucht und entfernt jedoch gefälschte Inhalte.',
+    policyLink: 'So funktioniert es',
+    prev: 'Vorherige Bewertungen',
+    next: 'Nächste Bewertungen',
+    stars: 'von 5 Sternen',
+    reviews: 'Bewertungen',
+    of: 'von',
+  },
+}[lang];
+---
+<section
+  class:list={['greviews', dark && 'on-dark']}
+  aria-labelledby="greviews-title"
+  data-greviews
+  data-key={site.google.apiKey}
+  data-place={site.google.placeId}
+  data-lang={lang}
+  data-copy={JSON.stringify(copy)}
+  data-state={live ? 'loading' : 'static'}
+>
+  <div class="head">
+    <h3 id="greviews-title" class="t-h3">{copy.title}</h3>
+    <div class="flex items-center gap-2" data-nav hidden>
+      <button type="button" class="nav-btn" data-prev aria-label={copy.prev}><Icon name="arrow" size={18} class="rotate-180" /></button>
+      <button type="button" class="nav-btn" data-next aria-label={copy.next}><Icon name="arrow" size={18} /></button>
+    </div>
+  </div>
+
+  {live && (
+    <div class="rail-wrap">
+      <ul class="rail" data-rail aria-busy="true" aria-live="polite" tabindex="0" aria-label={copy.title}>
+        {[0, 1, 2].map(() => (
+          <li class="card skeleton" aria-hidden="true">
+            <span class="sk sk-stars"></span>
+            <span class="sk"></span><span class="sk"></span><span class="sk sk-short"></span>
+            <span class="sk sk-author"></span>
+          </li>
+        ))}
+      </ul>
+      <p class="sr-only" data-loading-text>{copy.loading}</p>
+    </div>
+  )}
+
+  <div class="foot">
+    <p class="summary t-num">
+      <span class="g-mark" aria-hidden="true">G</span>
+      <span>
+        <strong data-g-rating>{formatNumber(site.google.rating, lang, 1)}</strong> {copy.of} 5{' · '}<span data-g-count>{site.google.reviewCount}</span> {copy.reviews}
+      </span>
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href={site.google.reviewsUrl} class="btn btn-ghost" target="_blank" rel="noopener" data-g-link>
+        {copy.readAll} <Icon name="arrow-up-right" size={16} />
+      </a>
+      <a href={site.google.writeReviewUrl} class="btn btn-ghost" target="_blank" rel="noopener">
+        {copy.write} <Icon name="arrow-up-right" size={16} />
+      </a>
+    </div>
+  </div>
+  <p class="attrib">
+    {copy.source}. {copy.policy}{' '}
+    <a href="https://support.google.com/contributionpolicy/answer/7400114" class="link-u" target="_blank" rel="noopener">{copy.policyLink}</a>
+  </p>
+</section>
+
+<style>
+@layer components {
+  .greviews { display: grid; gap: 1.5rem; }
+  .head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .nav-btn {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid color-mix(in oklab, var(--color-steel) 35%, transparent);
+    border-radius: 999px;
+    transition: background-color 0.2s, border-color 0.2s, opacity 0.2s;
+  }
+  .nav-btn:hover { background: var(--color-paper); color: var(--color-ink); border-color: var(--color-paper); }
+  .nav-btn:disabled { opacity: 0.35; pointer-events: none; }
+
+  .rail-wrap { margin-inline: calc(var(--gutter) * -1); }
+  .rail {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: min(86%, 24rem);
+    gap: 1px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    padding-inline: var(--gutter);
+    scrollbar-width: none;
+    outline-offset: -2px;
+  }
+  .rail::-webkit-scrollbar { display: none; }
+  @media (min-width: 64rem) {
+    .rail-wrap { margin-inline: 0; }
+    .rail { grid-auto-columns: calc((100% - 2px) / 3); padding-inline: 0; scroll-padding-inline: 0; }
+  }
+
+  /* Le card sono create dallo script: :global perché non hanno l'attributo di scope */
+  .rail :global(.card) {
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 15rem;
+    padding: 1.5rem;
+    background: color-mix(in oklab, var(--color-night) 70%, black);
+    border: 1px solid var(--line-dark);
+  }
+  .rail :global(.stars) { display: flex; gap: 0.2rem; color: var(--color-orange); }
+  .rail :global(.stars .off) { color: color-mix(in oklab, var(--color-steel) 25%, transparent); }
+  .rail :global(.meta) { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; font-size: 0.8125rem; color: var(--color-steel-2); }
+  .rail :global(.text) {
+    display: -webkit-box;
+    -webkit-line-clamp: 7;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    color: var(--color-paper);
+    line-height: 1.55;
+  }
+  .rail :global(.tr) { font-size: 0.75rem; color: var(--color-steel-2); }
+  .rail :global(.author) { margin-top: auto; display: flex; align-items: center; gap: 0.75rem; padding-top: 1rem; border-top: 1px solid var(--line-dark); }
+  .rail :global(.author img), .rail :global(.avatar) { width: 2.25rem; height: 2.25rem; border-radius: 999px; object-fit: cover; flex: none; background: var(--color-night-2); }
+  .rail :global(.avatar) { display: grid; place-items: center; font-weight: 650; color: var(--color-paper); }
+  .rail :global(.author .name) { font-weight: 600; color: var(--color-paper); }
+  .rail :global(.read) { font-size: 0.8125rem; color: var(--color-steel); }
+
+  .skeleton .sk { display: block; height: 0.6rem; border-radius: 1px; background: color-mix(in oklab, var(--color-steel) 12%, transparent); animation: pulse 1.6s ease-in-out infinite; }
+  .skeleton .sk-stars { width: 6rem; height: 0.9rem; }
+  .skeleton .sk-short { width: 55%; }
+  .skeleton .sk-author { margin-top: auto; width: 45%; height: 2.25rem; }
+  @keyframes pulse { 50% { opacity: 0.45; } }
+
+  .foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem 2rem; }
+  .summary { display: flex; align-items: center; gap: 0.75rem; font-size: 1.0625rem; }
+  .g-mark {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-weight: 700;
+    font-size: 1rem;
+  }
+  .attrib { font-size: 0.8125rem; color: var(--color-steel-2); max-width: 70ch; }
+  .greviews:not(.on-dark) .attrib, .greviews:not(.on-dark) .rail :global(.meta) { color: var(--color-muted); }
+}
+</style>
+
+<script>
+  type Copy = Record<string, string>;
+  declare global {
+    interface Window { google?: any; __ctMapsReady?: () => void }
+  }
+
+  // Caricamento della Maps JavaScript API (una sola volta per pagina)
+  let mapsPromise: Promise<void> | null = null;
+  function loadMaps(key: string, lang: string) {
+    if (window.google?.maps?.importLibrary) return Promise.resolve();
+    if (mapsPromise) return mapsPromise;
+    mapsPromise = new Promise<void>((resolve, reject) => {
+      window.__ctMapsReady = () => resolve();
+      const s = document.createElement('script');
+      const p = new URLSearchParams({ key, v: 'weekly', language: lang, region: 'IT', loading: 'async', callback: '__ctMapsReady' });
+      s.src = `https://maps.googleapis.com/maps/api/js?${p}`;
+      s.async = true;
+      s.onerror = () => reject(new Error('Maps JavaScript API non caricata'));
+      document.head.append(s);
+    });
+    return mapsPromise;
+  }
+
+  const el = <K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  };
+  const starSvg = (on: boolean) =>
+    `<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" class="${on ? '' : 'off'}"><path fill="currentColor" d="m12 3.8 2.5 5.2 5.6.7-4.1 3.9 1 5.6L12 16.5l-5 2.7 1-5.6-4.1-3.9 5.6-.7L12 3.8Z"/></svg>`;
+
+  function renderReview(r: any, copy: Copy, lang: string, fallbackUrl: string) {
+    const li = el('li', 'card');
+    const rating = Math.round(Number(r.rating) || 0);
+    const meta = el('div', 'meta');
+    const stars = el('span', 'stars');
+    stars.setAttribute('role', 'img');
+    stars.setAttribute('aria-label', `${rating} ${copy.stars}`);
+    stars.innerHTML = [1, 2, 3, 4, 5].map((i) => starSvg(i <= rating)).join('');
+    meta.append(stars, el('span', '', r.relativePublishTimeDescription || ''));
+    li.append(meta);
+
+    const text = (r.text ?? '').toString().trim();
+    if (text) {
+      li.append(el('p', 'text', text));
+      const orig = r.originalTextLanguageCode || r.originalText?.languageCode;
+      const shown = r.textLanguageCode || r.text?.languageCode;
+      if (orig && shown && orig.slice(0, 2) !== shown.slice(0, 2)) li.append(el('span', 'tr', copy.translated));
+    }
+
+    const author = el('div', 'author');
+    const a = r.authorAttribution ?? {};
+    if (a.photoURI) {
+      const img = el('img');
+      img.src = a.photoURI;
+      img.alt = '';
+      img.width = 36;
+      img.height = 36;
+      img.loading = 'lazy';
+      img.referrerPolicy = 'no-referrer';
+      author.append(img);
+    } else {
+      author.append(el('span', 'avatar', (a.displayName || '?').charAt(0).toUpperCase()));
+    }
+    const who = el('div');
+    if (a.uri) {
+      const link = el('a', 'name', a.displayName || '');
+      link.href = a.uri;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      who.append(link);
+    } else who.append(el('span', 'name', a.displayName || ''));
+    const read = el('a', 'read link-u', copy.readOnGoogle);
+    read.href = r.googleMapsURI || fallbackUrl;
+    read.target = '_blank';
+    read.rel = 'noopener';
+    who.append(el('br'), read);
+    author.append(who);
+    li.append(author);
+    li.lang = (r.textLanguageCode || lang).slice(0, 2);
+    return li;
+  }
+
+  async function load(root: HTMLElement) {
+    const copy: Copy = JSON.parse(root.dataset.copy!);
+    const lang = root.dataset.lang!;
+    const rail = root.querySelector<HTMLUListElement>('[data-rail]')!;
+    const fallbackUrl = root.querySelector<HTMLAnchorElement>('[data-g-link]')!.href;
+    try {
+      await loadMaps(root.dataset.key!, lang);
+      const { Place } = await window.google.maps.importLibrary('places');
+      const place = new Place({ id: root.dataset.place, requestedLanguage: lang });
+      await place.fetchFields({ fields: ['rating', 'userRatingCount', 'reviews', 'googleMapsURI'] });
+
+      // Voto e numero aggiornati ovunque nella pagina
+      const locale = lang === 'de' ? 'de-DE' : 'it-IT';
+      if (place.rating) {
+        const r = Number(place.rating).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        document.querySelectorAll<HTMLElement>('[data-g-rating]').forEach((n) => {
+          if (n.dataset.count) n.dataset.count = String(place.rating);
+          n.textContent = r;
+        });
+      }
+      if (place.userRatingCount) {
+        document.querySelectorAll<HTMLElement>('[data-g-count]').forEach((n) => (n.textContent = String(place.userRatingCount)));
+      }
+      if (place.googleMapsURI) root.querySelector<HTMLAnchorElement>('[data-g-link]')!.href = place.googleMapsURI;
+
+      const reviews: any[] = place.reviews ?? [];
+      if (!reviews.length) throw new Error('nessuna recensione');
+      rail.replaceChildren(...reviews.map((r) => renderReview(r, copy, lang, place.googleMapsURI || fallbackUrl)));
+      rail.setAttribute('aria-busy', 'false');
+      root.dataset.state = 'live';
+      setupNav(root, rail);
+    } catch (err) {
+      // Fallback onesto: niente card, restano voto, numero e link alle recensioni reali
+      console.warn('[recensioni Google]', err);
+      rail.closest('.rail-wrap')?.remove();
+      root.dataset.state = 'static';
+    }
+  }
+
+  function setupNav(root: HTMLElement, rail: HTMLElement) {
+    const nav = root.querySelector<HTMLElement>('[data-nav]')!;
+    const prev = nav.querySelector<HTMLButtonElement>('[data-prev]')!;
+    const next = nav.querySelector<HTMLButtonElement>('[data-next]')!;
+    const step = () => (rail.firstElementChild as HTMLElement | null)?.getBoundingClientRect().width ?? rail.clientWidth;
+    const sync = () => {
+      const overflow = rail.scrollWidth > rail.clientWidth + 2;
+      nav.hidden = !overflow;
+      prev.disabled = rail.scrollLeft < 4;
+      next.disabled = rail.scrollLeft + rail.clientWidth > rail.scrollWidth - 4;
+    };
+    const smooth = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    prev.addEventListener('click', () => rail.scrollBy({ left: -step(), behavior: smooth }));
+    next.addEventListener('click', () => rail.scrollBy({ left: step(), behavior: smooth }));
+    rail.addEventListener('scroll', () => requestAnimationFrame(sync), { passive: true });
+    window.addEventListener('resize', sync);
+    sync();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-greviews]').forEach((root) => {
+    if (root.dataset.state !== 'loading' || !root.dataset.key) return;
+    // Carica quando la sezione è a meno di ~600px dal viewport
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          io.disconnect();
+          load(root);
+        }
+      },
+      { rootMargin: '600px 0px' },
+    );
+    io.observe(root);
+  });
+</script>

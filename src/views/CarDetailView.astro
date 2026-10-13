@@ -1,0 +1,340 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import CarCard from '../components/CarCard.astro';
+import SectionHead from '../components/SectionHead.astro';
+import RequestForm from '../components/RequestForm.astro';
+import { site, formatPrice, type Lang } from '../data/site';
+import { routes, carUrl } from '../i18n/routes';
+import { carLabels, formatKm, formatReg, localizeVersion } from '../i18n/cars';
+import { unsplash, unsplashSrcset } from '../lib/img';
+
+interface Props { lang: Lang; car: CollectionEntry<'cars'> }
+const { lang, car } = Astro.props;
+const d = car.data;
+const L = carLabels[lang];
+const siteUrl = Astro.site!.toString().replace(/\/$/, '');
+const name = `${d.make} ${d.model}`;
+const version = localizeVersion(d.version, lang);
+const fullName = `${name} ${version}`;
+const url = `${siteUrl}${carUrl(car.id, lang)}`;
+
+const copy = {
+  it: {
+    back: 'Tutte le auto',
+    title: `${fullName}, ${d.year}, ${formatKm(d.km, 'it')}`,
+    description: `${fullName} ${L.condition[d.condition].toLowerCase()} in vendita a Bolzano: ${d.year}, ${formatKm(d.km, 'it')}, ${L.fuel[d.fuel].toLowerCase()}, cambio ${L.gearbox[d.gearbox].toLowerCase()}. ${formatPrice(d.price, 'it')}.`,
+    wa: `Buongiorno, mi interessa la ${fullName} a ${formatPrice(d.price, 'it')}. È ancora disponibile? ${url}`,
+    waCta: 'Scrivici su WhatsApp',
+    callCta: 'Chiama',
+    visit: 'Prenota una visita o una prova',
+    specs: 'Scheda tecnica',
+    equipment: 'Dotazioni principali',
+    descr: 'In breve',
+    why: 'Perché comprarla qui',
+    // TODO: confermare con il cliente cosa include davvero la consegna (controlli, tagliando, garanzia)
+    whyList: ['Controllata nella nostra officina prima della vendita', 'Garanzia di {m} mesi', 'Passaggio di proprietà gestito da noi', 'Officina e revisione nella stessa sede, anche dopo l’acquisto'],
+    gallery: 'Galleria foto',
+    photo: 'Foto',
+    of: 'di',
+    prev: 'Foto precedente',
+    next: 'Foto successiva',
+    related: 'Altre auto',
+    infoLabel: 'Richiesta informazioni',
+    infoTitle: 'Vuoi vederla dal vivo?',
+    infoText: 'Lasciaci un recapito: ti richiamiamo per fissare una visita o un giro di prova.',
+  },
+  de: {
+    back: 'Alle Fahrzeuge',
+    title: `${fullName}, ${d.year}, ${formatKm(d.km, 'de')}`,
+    description: `${fullName} (${L.condition[d.condition]}) in Bozen zu verkaufen: Baujahr ${d.year}, ${formatKm(d.km, 'de')}, ${L.fuel[d.fuel]}, ${L.gearbox[d.gearbox]}. ${formatPrice(d.price, 'de')}.`,
+    wa: `Guten Tag, ich interessiere mich für den ${fullName} zu ${formatPrice(d.price, 'de')}. Ist er noch verfügbar? ${url}`,
+    waCta: 'Per WhatsApp schreiben',
+    callCta: 'Anrufen',
+    visit: 'Besichtigung oder Probefahrt vereinbaren',
+    specs: 'Technische Daten',
+    equipment: 'Wichtigste Ausstattung',
+    descr: 'Kurz gesagt',
+    why: 'Warum bei uns kaufen',
+    whyList: ['Vor dem Verkauf in unserer Werkstatt geprüft', '{m} Monate Garantie', 'Umschreibung erledigen wir', 'Werkstatt und Revision am selben Ort, auch nach dem Kauf'],
+    gallery: 'Fotogalerie',
+    photo: 'Foto',
+    of: 'von',
+    prev: 'Vorheriges Foto',
+    next: 'Nächstes Foto',
+    related: 'Weitere Fahrzeuge',
+    infoLabel: 'Anfrage',
+    infoTitle: 'Möchten Sie es live sehen?',
+    infoText: 'Hinterlassen Sie uns Ihre Nummer: Wir rufen zurück und vereinbaren eine Besichtigung oder Probefahrt.',
+  },
+}[lang];
+
+const specs: [string, string][] = [
+  [L.registration, formatReg(d.registration, lang)],
+  [L.mileage, formatKm(d.km, lang)],
+  [L.fuelLabel, L.fuel[d.fuel]],
+  [L.gearboxLabel, L.gearbox[d.gearbox]],
+  [L.driveLabel, L.drive[d.drive]],
+  [L.power, `${d.powerKw} kW (${d.powerCv} ${lang === 'it' ? 'CV' : 'PS'})`],
+  [L.color, d.color[lang]],
+  [`${L.doors} / ${L.seats}`, `${d.doors} / ${d.seats}`],
+  [L.euro, d.euro],
+  [L.owners, String(d.owners)],
+  [L.warranty, `${d.warrantyMonths} ${L.months}`],
+  ...(d.consumption ? ([[L.consumption, `${d.consumption} l/100 km`]] as [string, string][]) : []),
+];
+
+const others = (await getCollection('cars')).filter((c) => c.id !== car.id).slice(0, 3);
+const galleryWidths = [480, 640, 800, 1080, 1440];
+const img = (id: string, w: number, h: number) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&h=${h}&q=72`;
+
+const carLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Car',
+  name: fullName,
+  brand: { '@type': 'Brand', name: d.make },
+  model: d.model,
+  vehicleConfiguration: version,
+  productionDate: String(d.year),
+  dateVehicleFirstRegistered: d.registration,
+  mileageFromOdometer: { '@type': 'QuantitativeValue', value: d.km, unitCode: 'KMT' },
+  fuelType: L.fuel[d.fuel],
+  vehicleTransmission: L.gearbox[d.gearbox],
+  color: d.color[lang],
+  numberOfDoors: d.doors,
+  seatingCapacity: d.seats,
+  itemCondition: d.condition === 'km0' ? 'https://schema.org/NewCondition' : 'https://schema.org/UsedCondition',
+  image: d.images.map((i) => img(i.id, 1200, 900)),
+  url,
+  offers: {
+    '@type': 'Offer',
+    price: d.price,
+    priceCurrency: 'EUR',
+    availability: 'https://schema.org/InStock',
+    seller: { '@id': `${siteUrl}/#business` },
+  },
+};
+---
+<Base
+  lang={lang}
+  title={copy.title}
+  description={copy.description}
+  alternates={{ it: carUrl(car.id, 'it'), de: carUrl(car.id, 'de') }}
+  current="showroom"
+  jsonLd={[carLd]}
+  ogImage={img(d.images[0].id, 1200, 630)}
+  whatsappText={copy.wa}
+>
+  <link slot="head" rel="preload" as="image" imagesrcset={unsplashSrcset(d.images[0].id, galleryWidths)} imagesizes="(min-width: 64rem) 60vw, 100vw" fetchpriority="high" href={unsplash(d.images[0].id, 800)} />
+  <article class="wrap pt-6 lg:pt-10">
+    <a href={routes.showroom[lang]} class="t-label link-u inline-flex items-center gap-2 text-muted">
+      <Icon name="arrow" size={16} class="rotate-180" /> {copy.back}
+    </a>
+
+    <div class="detail mt-6 lg:mt-8">
+      <!-- Galleria: swipe su mobile, foto grande + miniature su desktop -->
+      <div class="gallery" data-gallery aria-roledescription="carousel" aria-label={`${copy.gallery}: ${name}`}>
+        <div class="stage" data-stage tabindex="0">
+          {d.images.map((im, i) => (
+            <figure class="slide" data-slide aria-roledescription="slide" aria-label={`${copy.photo} ${i + 1} ${copy.of} ${d.images.length}`}>
+              {/* TODO: sostituire con foto della sede (foto reali dell'auto) */}
+              <img
+                src={unsplash(im.id, 800)}
+                srcset={unsplashSrcset(im.id, galleryWidths)}
+                sizes="(min-width: 64rem) 60vw, 100vw"
+                alt={im.alt[lang]}
+                width="1200"
+                height="900"
+                loading={i === 0 ? 'eager' : 'lazy'}
+                fetchpriority={i === 0 ? 'high' : 'auto'}
+                decoding="async"
+              />
+            </figure>
+          ))}
+        </div>
+        {d.images.length > 1 && (
+          <>
+            <div class="g-bar">
+              <p class="t-label t-num" aria-live="polite"><span data-current>1</span> / {d.images.length}</p>
+              <div class="flex gap-2">
+                <button type="button" class="g-btn" data-prev aria-label={copy.prev}><Icon name="arrow" size={18} class="rotate-180" /></button>
+                <button type="button" class="g-btn" data-next aria-label={copy.next}><Icon name="arrow" size={18} /></button>
+              </div>
+            </div>
+            <ul class="thumbs" aria-label={copy.gallery}>
+              {d.images.map((im, i) => (
+                <li>
+                  <button type="button" data-thumb={i} aria-label={`${copy.photo} ${i + 1}`} aria-current={i === 0 ? 'true' : undefined}>
+                    <img src={img(im.id, 240, 180)} alt="" width="120" height="90" loading="lazy" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
+
+      <!-- Informazioni e azioni -->
+      <div class="info">
+        <div class="lg:sticky lg:top-28">
+          <p class="t-label flex items-center gap-3 text-muted">
+            {d.make}
+            {d.condition === 'km0' && <span class="rounded-[2px] bg-orange px-1.5 py-1 text-ink">{L.condition.km0}</span>}
+          </p>
+          <h1 class="t-h1 mt-2 !text-[clamp(2.2rem,4.6vw,3.6rem)]">{d.model}</h1>
+          <p class="mt-2 text-lg text-muted">{version}</p>
+
+          <ul class="quad mt-6 t-num">
+            <li><span class="t-label text-muted">{L.year}</span><span>{d.year}</span></li>
+            <li><span class="t-label text-muted">{L.mileage}</span><span>{formatKm(d.km, lang)}</span></li>
+            <li><span class="t-label text-muted">{L.fuelLabel}</span><span>{L.fuel[d.fuel]}</span></li>
+            <li><span class="t-label text-muted">{L.gearboxLabel}</span><span>{L.gearbox[d.gearbox]}</span></li>
+          </ul>
+
+          <p class="price t-num mt-7">{formatPrice(d.price, lang)}</p>
+          <p class="mt-1 text-sm text-muted">{L.vatNote}</p>
+
+          <div class="mt-7 grid gap-3">
+            <a href={site.whatsapp.href(copy.wa)} class="btn btn-primary" target="_blank" rel="noopener">
+              <Icon name="whatsapp" size={20} /> {copy.waCta}
+            </a>
+            <a href={site.phone.href} class="btn btn-ink t-num"><Icon name="phone" size={18} /> {copy.callCta} {site.phone.display}</a>
+            <a href="#info" class="btn btn-ghost">{copy.visit}</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dettagli -->
+    <div class="grid-12 mt-16 gap-y-14 lg:mt-24">
+      <section class="col-span-4 lg:col-span-6" aria-labelledby="specs-title">
+        <h2 id="specs-title" class="t-label">{copy.specs}</h2>
+        <dl class="spec mt-3 border-t border-[var(--line-strong)]">
+          {specs.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
+        </dl>
+      </section>
+      <div class="col-span-4 grid content-start gap-12 lg:col-span-5 lg:col-start-8">
+        <section aria-labelledby="descr-title">
+          <h2 id="descr-title" class="t-label">{copy.descr}</h2>
+          <p class="mt-4 t-lead">{d.description[lang]}</p>
+        </section>
+        <section aria-labelledby="eq-title">
+          <h2 id="eq-title" class="t-label">{copy.equipment}</h2>
+          <ul class="eq mt-3">
+            {d.features[lang].map((f) => <li>{f}</li>)}
+          </ul>
+        </section>
+        <section aria-labelledby="why-title" class="why">
+          <h2 id="why-title" class="t-label">{copy.why}</h2>
+          <ul class="mt-4 grid gap-3">
+            {copy.whyList.map((w) => <li class="flex gap-3"><Icon name="check" size={20} class="shrink-0 text-orange-ink" /> {w.replace('{m}', String(d.warrantyMonths))}</li>)}
+          </ul>
+        </section>
+      </div>
+    </div>
+  </article>
+
+  <!-- Richiesta info -->
+  <section class="on-dark section-y mt-[var(--section)] bg-night text-paper" id="info" aria-labelledby="info-title">
+    <div class="wrap">
+      <SectionHead label={copy.infoLabel} dark />
+      <div class="grid-12 mt-8 gap-y-10 lg:mt-12">
+        <div class="col-span-4 lg:col-span-5">
+          <h2 id="info-title" class="t-h2">{copy.infoTitle}</h2>
+          <p class="mt-5 max-w-[40ch] text-steel">{copy.infoText}</p>
+        </div>
+        <div class="col-span-4 lg:col-span-6 lg:col-start-7">
+          <RequestForm lang={lang} variant="contact" id="car-info" carName={`${fullName} (${formatPrice(d.price, lang)})`} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Altre auto -->
+  <section class="section-y" aria-labelledby="rel-title">
+    <div class="wrap">
+      <SectionHead label={copy.related} href={routes.showroom[lang]} linkText={copy.back} />
+      <h2 id="rel-title" class="sr-only">{copy.related}</h2>
+      <div class="rel mt-10">
+        {others.map((c) => <CarCard car={c} lang={lang} sizes="(min-width: 64rem) 30vw, (min-width: 40rem) 45vw, 92vw" />)}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+@layer components {
+  .detail { display: grid; gap: 2rem; }
+  @media (min-width: 64rem) { .detail { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 3.5rem; align-items: start; } }
+
+  .gallery { min-width: 0; }
+  .stage {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    margin-inline: calc(var(--gutter) * -1);
+    background: var(--color-paper-3);
+  }
+  .stage::-webkit-scrollbar { display: none; }
+  @media (min-width: 40rem) { .stage { margin-inline: 0; } }
+  .slide { scroll-snap-align: start; aspect-ratio: 4 / 3; margin: 0; }
+  .slide img { width: 100%; height: 100%; object-fit: cover; }
+  .g-bar { display: flex; align-items: center; justify-content: space-between; padding-top: 0.9rem; }
+  .g-btn { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border: 1px solid var(--line-strong); border-radius: 999px; transition: background-color 0.2s, border-color 0.2s; }
+  .g-btn:hover { background: var(--color-ink); color: var(--color-paper); border-color: var(--color-ink); }
+  .thumbs { display: none; }
+  @media (min-width: 64rem) {
+    .thumbs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.5rem; margin-top: 0.75rem; }
+    .thumbs button { display: block; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; opacity: 0.55; transition: opacity 0.25s; outline-offset: 2px; }
+    .thumbs button:hover, .thumbs button[aria-current='true'] { opacity: 1; }
+    .thumbs button[aria-current='true'] { box-shadow: inset 0 -3px 0 var(--color-orange); }
+    .thumbs img { width: 100%; height: 100%; object-fit: cover; }
+  }
+
+  .quad { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line-strong); }
+  .quad li { display: grid; gap: 0.3rem; padding: 0.85rem 0; border-bottom: 1px solid var(--line); font-weight: 600; }
+  .quad li:nth-child(odd) { padding-right: 1rem; border-right: 1px solid var(--line); }
+  .quad li:nth-child(even) { padding-left: 1rem; }
+  .price { font-stretch: 125%; font-weight: 650; font-size: clamp(2.4rem, 5vw, 3.4rem); line-height: 1; letter-spacing: -0.03em; }
+
+  .eq { border-top: 1px solid var(--line-strong); }
+  .eq li { padding-block: 0.7rem; border-bottom: 1px solid var(--line); }
+  .why { padding: 1.5rem; background: var(--color-paper-2); }
+
+  .rel { display: grid; gap: 2.5rem var(--gutter); }
+  @media (min-width: 40rem) { .rel { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 64rem) { .rel { grid-template-columns: repeat(3, 1fr); } }
+}
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-gallery]').forEach((g) => {
+    const stage = g.querySelector<HTMLElement>('[data-stage]')!;
+    const slides = [...g.querySelectorAll<HTMLElement>('[data-slide]')];
+    const thumbs = [...g.querySelectorAll<HTMLButtonElement>('[data-thumb]')];
+    const current = g.querySelector('[data-current]');
+    let index = 0;
+    const go = (i: number) => {
+      index = (i + slides.length) % slides.length;
+      stage.scrollTo({ left: index * stage.clientWidth, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    };
+    const sync = () => {
+      const i = Math.round(stage.scrollLeft / stage.clientWidth);
+      index = i;
+      if (current) current.textContent = String(i + 1);
+      thumbs.forEach((t, k) => t.setAttribute('aria-current', String(k === i)));
+    };
+    stage.addEventListener('scroll', () => requestAnimationFrame(sync), { passive: true });
+    g.querySelector('[data-prev]')?.addEventListener('click', () => go(index - 1));
+    g.querySelector('[data-next]')?.addEventListener('click', () => go(index + 1));
+    thumbs.forEach((t, k) => t.addEventListener('click', () => go(k)));
+    stage.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { e.preventDefault(); go(index + 1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(index - 1); }
+    });
+  });
+</script>

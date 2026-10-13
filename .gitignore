@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.astro/
+.firecrawl/
+.DS_Store
+screenshots/
+.env
+.vercel

@@ -1,0 +1,362 @@
+---
+// Modulo richiesta (preventivo officina/carrozzeria o contatto generico).
+// SOLO FRONTEND per la demo: nessun dato viene inviato.
+// TODO: collegare a un endpoint (es. Formspree, Netlify Forms o funzione serverless con invio email)
+// e caricare le foto su uno storage (S3/R2) prima dell'invio.
+import { type Lang } from '../data/site';
+import Icon from './Icon.astro';
+
+interface Props { lang: Lang; variant?: 'quote' | 'contact'; id?: string; dark?: boolean; carName?: string }
+const { lang, variant = 'quote', id = 'req', dark = true, carName } = Astro.props;
+const isQuote = variant === 'quote';
+
+const copy = {
+  it: {
+    type: 'Di cosa hai bisogno?',
+    types: isQuote
+      ? [['officina', 'Officina'], ['carrozzeria', 'Carrozzeria'], ['nonso', 'Non so']]
+      : [['revisione', 'Revisione'], ['officina', 'Officina'], ['auto', 'Auto in vendita'], ['altro', 'Altro']],
+    name: 'Nome e cognome',
+    phone: 'Telefono',
+    email: 'Email',
+    optional: 'facoltativo',
+    car: 'Auto (marca e modello)',
+    carPh: 'es. Volkswagen Golf 2018',
+    plate: 'Targa',
+    msg: isQuote ? 'Descrivi il problema o il danno' : 'Messaggio',
+    msgPh: isQuote ? 'es. rumore dai freni anteriori in frenata, oppure: graffio sulla portiera posteriore destra' : 'Scrivi qui la tua richiesta',
+    photos: 'Foto del danno',
+    photosHint: 'Fino a 6 foto, max 10 MB l’una. Da vicino e da lontano, con buona luce.',
+    drop: 'Scatta o carica le foto',
+    dropDesk: 'oppure trascinale qui',
+    remove: 'Rimuovi foto',
+    contactPref: 'Come preferisci essere ricontattato?',
+    prefs: [['phone', 'Telefono'], ['whatsapp', 'WhatsApp'], ['email', 'Email']],
+    privacy: 'Ho letto l’informativa privacy e acconsento al trattamento dei dati per ricevere una risposta.',
+    submit: isQuote ? 'Invia la richiesta di preventivo' : 'Invia il messaggio',
+    sending: 'Invio in corso…',
+    // TODO: confermare con il cliente i tempi di risposta reali
+    doneTitle: 'Richiesta pronta.',
+    doneText: 'Ti rispondiamo entro un giorno lavorativo, nel modo che hai scelto.',
+    demo: 'Demo: in questa versione il modulo non invia dati.',
+    again: 'Nuova richiesta',
+    errRequired: 'Campo obbligatorio.',
+    errPhone: 'Inserisci un numero di telefono valido, ad esempio 333 123 4567.',
+    errEmail: 'Inserisci un indirizzo email valido.',
+    errPrivacy: 'Serve il consenso per poterti rispondere.',
+    errFile: 'Formato non supportato o file oltre 10 MB:',
+    errMax: 'Puoi caricare al massimo 6 foto.',
+    summaryPhoto: 'foto allegata',
+    summaryPhotos: 'foto allegate',
+    required: 'obbligatorio',
+  },
+  de: {
+    type: 'Worum geht es?',
+    types: isQuote
+      ? [['officina', 'Werkstatt'], ['carrozzeria', 'Karosserie'], ['nonso', 'Weiß nicht']]
+      : [['revisione', 'Revision'], ['officina', 'Werkstatt'], ['auto', 'Fahrzeuge'], ['altro', 'Sonstiges']],
+    name: 'Vor- und Nachname',
+    phone: 'Telefon',
+    email: 'E-Mail',
+    optional: 'optional',
+    car: 'Fahrzeug (Marke und Modell)',
+    carPh: 'z. B. Volkswagen Golf 2018',
+    plate: 'Kennzeichen',
+    msg: isQuote ? 'Beschreiben Sie das Problem oder den Schaden' : 'Nachricht',
+    msgPh: isQuote ? 'z. B. Quietschen der Vorderbremsen, oder: Kratzer an der hinteren rechten Tür' : 'Ihre Anfrage',
+    photos: 'Fotos vom Schaden',
+    photosHint: 'Bis zu 6 Fotos, max. 10 MB pro Foto. Von nah und fern, bei gutem Licht.',
+    drop: 'Fotos aufnehmen oder hochladen',
+    dropDesk: 'oder hierher ziehen',
+    remove: 'Foto entfernen',
+    contactPref: 'Wie sollen wir Sie kontaktieren?',
+    prefs: [['phone', 'Telefon'], ['whatsapp', 'WhatsApp'], ['email', 'E-Mail']],
+    privacy: 'Ich habe die Datenschutzerklärung gelesen und stimme der Verarbeitung meiner Daten zur Beantwortung zu.',
+    submit: isQuote ? 'Angebot anfordern' : 'Nachricht senden',
+    sending: 'Wird gesendet…',
+    doneTitle: 'Anfrage bereit.',
+    doneText: 'Wir antworten innerhalb eines Werktags, auf dem gewünschten Weg.',
+    demo: 'Demo: In dieser Version werden keine Daten gesendet.',
+    again: 'Neue Anfrage',
+    errRequired: 'Pflichtfeld.',
+    errPhone: 'Bitte eine gültige Telefonnummer eingeben, z. B. 333 123 4567.',
+    errEmail: 'Bitte eine gültige E-Mail-Adresse eingeben.',
+    errPrivacy: 'Wir brauchen Ihre Zustimmung, um antworten zu können.',
+    errFile: 'Format nicht unterstützt oder Datei über 10 MB:',
+    errMax: 'Maximal 6 Fotos möglich.',
+    summaryPhoto: 'Foto angehängt',
+    summaryPhotos: 'Fotos angehängt',
+    required: 'Pflichtfeld',
+  },
+}[lang];
+const defaultMsg = carName ? (lang === 'it' ? `Vorrei informazioni su: ${carName}.` : `Ich interessiere mich für: ${carName}.`) : '';
+---
+<div class:list={['req', dark && 'on-dark']} data-req data-copy={JSON.stringify(copy)}>
+  <form class="grid gap-7" novalidate data-req-form aria-describedby={`${id}-req-note`}>
+    <p id={`${id}-req-note`} class="text-sm text-steel-2"><span aria-hidden="true">*</span> = {copy.required}</p>
+    <fieldset>
+      <legend class="mb-3 text-[0.9375rem] font-semibold">{copy.type}</legend>
+      <div class="flex flex-wrap gap-2">
+        {copy.types.map(([v, l], i) => (
+          <span class="chip">
+            <input type="radio" name="type" id={`${id}-type-${v}`} value={v} checked={i === 0} />
+            <label for={`${id}-type-${v}`}>{l}</label>
+          </span>
+        ))}
+      </div>
+    </fieldset>
+
+    <div class="grid gap-5 sm:grid-cols-2">
+      <div class="field sm:col-span-2">
+        <label for={`${id}-name`}>{copy.name} <span aria-hidden="true">*</span></label>
+        <input id={`${id}-name`} name="name" class="input" autocomplete="name" required aria-describedby={`${id}-name-err`} />
+        <p id={`${id}-name-err`} class="field-error" hidden></p>
+      </div>
+      <div class="field">
+        <label for={`${id}-phone`}>{copy.phone} <span aria-hidden="true">*</span></label>
+        <input id={`${id}-phone`} name="phone" type="tel" class="input t-num" autocomplete="tel" inputmode="tel" required aria-describedby={`${id}-phone-err`} />
+        <p id={`${id}-phone-err`} class="field-error" hidden></p>
+      </div>
+      <div class="field">
+        <label for={`${id}-email`}>{copy.email} <span class="font-normal text-steel-2">({copy.optional})</span></label>
+        <input id={`${id}-email`} name="email" type="email" class="input" autocomplete="email" inputmode="email" aria-describedby={`${id}-email-err`} />
+        <p id={`${id}-email-err`} class="field-error" hidden></p>
+      </div>
+      {isQuote && (
+        <>
+          <div class="field">
+            <label for={`${id}-car`}>{copy.car} <span class="font-normal text-steel-2">({copy.optional})</span></label>
+            <input id={`${id}-car`} name="car" class="input" placeholder={copy.carPh} />
+          </div>
+          <div class="field">
+            <label for={`${id}-plate`}>{copy.plate} <span class="font-normal text-steel-2">({copy.optional})</span></label>
+            <input id={`${id}-plate`} name="plate" class="input plate t-num" autocapitalize="characters" maxlength="10" placeholder="AB 123 CD" />
+          </div>
+        </>
+      )}
+      <div class="field sm:col-span-2">
+        <label for={`${id}-msg`}>{copy.msg} <span aria-hidden="true">*</span></label>
+        <textarea id={`${id}-msg`} name="message" class="input" rows="5" placeholder={copy.msgPh} required aria-describedby={`${id}-msg-err`}>{defaultMsg}</textarea>
+        <p id={`${id}-msg-err`} class="field-error" hidden></p>
+      </div>
+    </div>
+
+    {isQuote && (
+      <div class="field">
+        <span class="label" id={`${id}-photos-label`}>{copy.photos} <span class="font-normal text-steel-2">({copy.optional})</span></span>
+        <p class="text-sm text-steel-2" id={`${id}-photos-hint`}>{copy.photosHint}</p>
+        <label class="drop mt-2" data-drop>
+          <input type="file" accept="image/*" multiple class="sr-only" data-files aria-labelledby={`${id}-photos-label`} aria-describedby={`${id}-photos-hint ${id}-photos-err`} />
+          <Icon name="upload" size={26} />
+          <span class="font-semibold">{copy.drop}</span>
+          <span class="hidden text-sm text-steel-2 lg:inline">{copy.dropDesk}</span>
+        </label>
+        <p id={`${id}-photos-err`} class="field-error" hidden></p>
+        <ul class="thumbs mt-3" data-thumbs aria-live="polite"></ul>
+      </div>
+    )}
+
+    <fieldset>
+      <legend class="mb-3 text-[0.9375rem] font-semibold">{copy.contactPref}</legend>
+      <div class="seg">
+        {copy.prefs.map(([v, l], i) => (
+          <>
+            <input type="radio" name="pref" id={`${id}-pref-${v}`} value={v} checked={i === 0} />
+            <label for={`${id}-pref-${v}`}>{l}</label>
+          </>
+        ))}
+      </div>
+    </fieldset>
+
+    <div>
+      <label class="flex items-start gap-3 text-sm">
+        <input type="checkbox" name="privacy" class="mt-0.5 size-5 shrink-0 accent-[var(--color-orange)]" aria-describedby={`${id}-privacy-err`} />
+        {/* TODO: collegare il link all'informativa privacy reale */}
+        <span class="text-steel">{copy.privacy}</span>
+      </label>
+      <p id={`${id}-privacy-err`} class="field-error mt-2" hidden></p>
+    </div>
+
+    <div>
+      <button type="submit" class="btn btn-primary w-full sm:w-auto" data-submit>
+        <span data-submit-label>{copy.submit}</span>
+        <Icon name="arrow" size={18} class="btn-arrow" />
+      </button>
+    </div>
+  </form>
+
+  <div class="done" data-req-done hidden tabindex="-1">
+    <span class="done-icon" aria-hidden="true"><Icon name="check" size={28} /></span>
+    <p class="t-h3 mt-5">{copy.doneTitle}</p>
+    <p class="mt-2 text-steel" data-done-text>{copy.doneText}</p>
+    <p class="mt-1 text-sm text-steel-2" data-done-summary></p>
+    <p class="mt-4 text-sm text-steel-2">{copy.demo}</p>
+    <button type="button" class="btn btn-ghost mt-6" data-again>{copy.again}</button>
+  </div>
+</div>
+
+<style>
+@layer components {
+  .req:not(.on-dark) .text-steel, .req:not(.on-dark) .text-steel-2 { color: var(--color-muted); }
+  .plate { text-transform: uppercase; letter-spacing: 0.08em; font-stretch: 112%; }
+  .drop {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 9rem;
+    padding: 1.5rem;
+    border: 1.5px dashed color-mix(in oklab, var(--color-steel) 45%, transparent);
+    border-radius: 2px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+  }
+  .req:not(.on-dark) .drop { border-color: var(--line-strong); }
+  .drop:hover, .drop.is-over { border-color: var(--color-orange); background: color-mix(in oklab, var(--color-orange) 8%, transparent); }
+  .drop:focus-within { outline: 2px solid var(--color-orange); outline-offset: 3px; }
+  .thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr)); gap: 0.5rem; }
+  .thumbs:empty { display: none; }
+  .thumbs :global(li) { position: relative; aspect-ratio: 1; overflow: hidden; background: var(--color-night-2); animation: thumb-in 0.4s var(--ease-out-expo); }
+  @keyframes thumb-in { from { opacity: 0; transform: scale(0.94); } }
+  .thumbs :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .thumbs :global(button) {
+    position: absolute;
+    top: 0.3rem;
+    right: 0.3rem;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .done { padding-block: 1rem; }
+  .done-icon { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 999px; background: var(--color-orange); color: var(--color-ink); }
+}
+</style>
+
+<script>
+  const MAX = 6;
+  const MAX_SIZE = 10 * 1024 * 1024;
+
+  document.querySelectorAll<HTMLElement>('[data-req]').forEach((root) => {
+    const copy = JSON.parse(root.dataset.copy!);
+    const form = root.querySelector<HTMLFormElement>('[data-req-form]')!;
+    const done = root.querySelector<HTMLElement>('[data-req-done]')!;
+    const fileInput = root.querySelector<HTMLInputElement>('[data-files]');
+    const drop = root.querySelector<HTMLElement>('[data-drop]');
+    const thumbs = root.querySelector<HTMLUListElement>('[data-thumbs]');
+    const photosErr = fileInput ? root.querySelector<HTMLElement>(`#${fileInput.getAttribute('aria-describedby')!.split(' ')[1]}`) : null;
+    let files: File[] = [];
+
+    const renderThumbs = () => {
+      if (!thumbs) return;
+      thumbs.innerHTML = '';
+      files.forEach((f, i) => {
+        const li = document.createElement('li');
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(f);
+        img.alt = f.name;
+        img.onload = () => URL.revokeObjectURL(img.src);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('aria-label', `${copy.remove}: ${f.name}`);
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+        btn.addEventListener('click', () => {
+          files.splice(i, 1);
+          renderThumbs();
+          fileInput?.focus();
+        });
+        li.append(img, btn);
+        thumbs.append(li);
+      });
+    };
+
+    const addFiles = (list: FileList | File[]) => {
+      const rejected: string[] = [];
+      let overMax = false;
+      [...list].forEach((f) => {
+        if (!f.type.startsWith('image/') || f.size > MAX_SIZE) return rejected.push(f.name);
+        if (files.length >= MAX) return (overMax = true);
+        files.push(f);
+      });
+      const msg = [rejected.length ? `${copy.errFile} ${rejected.join(', ')}` : '', overMax ? copy.errMax : ''].filter(Boolean).join(' ');
+      if (photosErr) {
+        photosErr.textContent = msg;
+        photosErr.hidden = !msg;
+      }
+      renderThumbs();
+    };
+
+    fileInput?.addEventListener('change', () => {
+      if (fileInput.files) addFiles(fileInput.files);
+      fileInput.value = '';
+    });
+    if (drop) {
+      ['dragenter', 'dragover'].forEach((ev) =>
+        drop.addEventListener(ev, (e) => {
+          e.preventDefault();
+          drop.classList.add('is-over');
+        }),
+      );
+      ['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, () => drop.classList.remove('is-over')));
+      drop.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (e.dataTransfer?.files) addFiles(e.dataTransfer.files);
+      });
+    }
+
+    const setErr = (input: HTMLInputElement | HTMLTextAreaElement, msg: string) => {
+      const err = root.querySelector<HTMLElement>(`#${input.getAttribute('aria-describedby')}`);
+      if (err) {
+        err.textContent = msg;
+        err.hidden = !msg;
+      }
+      input.setAttribute('aria-invalid', msg ? 'true' : 'false');
+      return !msg;
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const get = (n: string) => form.elements.namedItem(n) as HTMLInputElement;
+      const f = { name: get('name'), phone: get('phone'), email: get('email'), message: get('message') as unknown as HTMLTextAreaElement, privacy: get('privacy') };
+      let ok = true;
+      ok = setErr(f.name, f.name.value.trim() ? '' : copy.errRequired) && ok;
+      const phone = f.phone.value.trim();
+      ok = setErr(f.phone, !phone ? copy.errRequired : /^\+?[\d\s/.-]{8,16}$/.test(phone) ? '' : copy.errPhone) && ok;
+      const email = f.email.value.trim();
+      const pref = (form.querySelector('input[name="pref"]:checked') as HTMLInputElement).value;
+      ok = setErr(f.email, email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) ? copy.errEmail : pref === 'email' && !email ? copy.errRequired : '') && ok;
+      ok = setErr(f.message, f.message.value.trim() ? '' : copy.errRequired) && ok;
+      ok = setErr(f.privacy, f.privacy.checked ? '' : copy.errPrivacy) && ok;
+      if (!ok) {
+        form.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+        return;
+      }
+      const btn = form.querySelector<HTMLButtonElement>('[data-submit]')!;
+      const label = btn.querySelector('[data-submit-label]')!;
+      const original = label.textContent;
+      btn.disabled = true;
+      label.textContent = copy.sending;
+      await new Promise((r) => setTimeout(r, 700)); // simulazione invio (demo)
+      btn.disabled = false;
+      label.textContent = original;
+      root.querySelector('[data-done-summary]')!.textContent = files.length ? `${files.length} ${files.length === 1 ? copy.summaryPhoto : copy.summaryPhotos}` : '';
+      form.hidden = true;
+      done.hidden = false;
+      done.focus();
+    });
+
+    root.querySelector('[data-again]')?.addEventListener('click', () => {
+      form.reset();
+      files = [];
+      renderThumbs();
+      done.hidden = true;
+      form.hidden = false;
+      form.querySelector<HTMLElement>('input')?.focus();
+    });
+  });
+</script>

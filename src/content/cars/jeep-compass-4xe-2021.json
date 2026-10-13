@@ -1,0 +1,71 @@
+{
+  "demo": true,
+  "make": "Jeep",
+  "model": "Compass",
+  "version": "1.3 T4 PHEV 190 CV 4xe Limited",
+  "condition": "used",
+  "year": 2021,
+  "registration": "2021-02",
+  "km": 54300,
+  "price": 22900,
+  "fuel": "phev",
+  "gearbox": "automatic",
+  "drive": "awd",
+  "powerKw": 140,
+  "powerCv": 190,
+  "body": "suv",
+  "color": {
+    "it": "Bianco Alpine",
+    "de": "Alpine White"
+  },
+  "doors": 5,
+  "seats": 5,
+  "euro": "Euro 6d",
+  "owners": 1,
+  "warrantyMonths": 12,
+  "consumption": "2,1",
+  "featured": true,
+  "images": [
+    {
+      "id": "1642047826426-a9d091ddca6e",
+      "alt": {
+        "it": "Jeep Compass bianca al tramonto, vista di tre quarti",
+        "de": "Weißer Jeep Compass bei Sonnenuntergang, Dreiviertelansicht"
+      }
+    },
+    {
+      "id": "1639280791656-5f8506ff21d2",
+      "alt": {
+        "it": "Jeep Compass bianca su strada",
+        "de": "Weißer Jeep Compass auf der Straße"
+      }
+    },
+    {
+      "id": "1642047826343-9c00cf6af778",
+      "alt": {
+        "it": "Dettaglio della calandra a sette feritoie",
+        "de": "Detail des Sieben-Schlitz-Kühlergrills"
+      }
+    }
+  ],
+  "features": {
+    "it": [
+      "Ibrida plug-in, 4xe elettrica sul posteriore",
+      "Autonomia elettrica circa 45 km",
+      "Uconnect 8,4\" con Apple CarPlay",
+      "Sedili riscaldabili e volante riscaldato",
+      "Cavo di ricarica Tipo 2"
+    ],
+    "de": [
+      "Plug-in-Hybrid, 4xe-Elektroantrieb hinten",
+      "Elektrische Reichweite rund 45 km",
+      "Uconnect 8,4\" mit Apple CarPlay",
+      "Sitz- und Lenkradheizung",
+      "Ladekabel Typ 2"
+    ]
+  },
+  "description": {
+    "it": "Tragitti quotidiani in elettrico, trazione integrale quando nevica. Batteria verificata con diagnosi in officina.",
+    "de": "Im Alltag elektrisch unterwegs, Allrad, wenn es schneit. Batterie in unserer Werkstatt per Diagnose geprüft."
+  }
+}

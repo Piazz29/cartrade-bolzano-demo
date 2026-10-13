@@ -1,0 +1,73 @@
+{
+  "demo": true,
+  "make": "Škoda",
+  "model": "Octavia Wagon",
+  "version": "RS 2.0 TDI 184 CV DSG",
+  "condition": "used",
+  "year": 2019,
+  "registration": "2019-03",
+  "km": 112000,
+  "price": 18900,
+  "fuel": "diesel",
+  "gearbox": "automatic",
+  "drive": "fwd",
+  "powerKw": 135,
+  "powerCv": 184,
+  "body": "wagon",
+  "color": {
+    "it": "Grigio Quarzo metallizzato",
+    "de": "Quarz-Grau Metallic"
+  },
+  "doors": 5,
+  "seats": 5,
+  "euro": "Euro 6",
+  "owners": 2,
+  "warrantyMonths": 12,
+  "consumption": "5,2",
+  "featured": false,
+  "images": [
+    {
+      "id": "1673822317390-d1a8c15ad656",
+      "alt": {
+        "it": "Škoda Octavia Wagon RS grigia, vista frontale",
+        "de": "Graue Škoda Octavia Combi RS, Frontansicht"
+      }
+    },
+    {
+      "id": "1673822317394-6fd502a324e6",
+      "alt": {
+        "it": "Octavia Wagon RS, vista di tre quarti",
+        "de": "Octavia Combi RS, Dreiviertelansicht"
+      }
+    },
+    {
+      "id": "1727790621990-3a7a2623d564",
+      "alt": {
+        "it": "Octavia Wagon grigia in parcheggio",
+        "de": "Graue Octavia Combi auf einem Parkplatz"
+      }
+    }
+  ],
+  "features": {
+    "it": [
+      "Assetto sportivo RS",
+      "Sedili sportivi RS",
+      "Columbus navi",
+      "Fari Full LED",
+      "Climatizzatore bizona",
+      "Cerchi 18\""
+    ],
+    "de": [
+      "RS-Sportfahrwerk",
+      "RS-Sportsitze",
+      "Navigationssystem Columbus",
+      "Voll-LED-Scheinwerfer",
+      "Zweizonen-Klimaautomatik",
+      "18-Zoll-Felgen"
+    ]
+  },
+  "description": {
+    "it": "La famigliare sportiva per chi macina chilometri. Distribuzione e frizione DSG già controllate nella nostra officina.",
+    "de": "Der sportliche Kombi für Vielfahrer. Steuerriemen und DSG-Kupplung bereits in unserer Werkstatt geprüft."
+  }
+}

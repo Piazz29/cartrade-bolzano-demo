@@ -1,0 +1,229 @@
+---
+import { site, type Lang } from '../data/site';
+import { routes, navOrder, type Alternates, type RouteKey } from '../i18n/routes';
+import { ui } from '../i18n/ui';
+import Logo from './Logo.astro';
+import LangSwitch from './LangSwitch.astro';
+import Icon from './Icon.astro';
+import OpenStatus from './OpenStatus.astro';
+
+interface Props { lang: Lang; alternates: Alternates; current?: RouteKey; overlay?: boolean }
+// overlay: header trasparente sopra una hero fotografica (Home); diventa carta appena si scorre
+const { lang, alternates, current, overlay = false } = Astro.props;
+const t = ui[lang];
+---
+<header class="site-header" data-header data-overlay={overlay ? '' : undefined}>
+  <div class="wrap flex h-[var(--header-h)] items-center justify-between gap-4">
+    <a href={routes.home[lang]} class="logo-link shrink-0" aria-label={`${site.brand}, ${t.nav.home}`}>
+      <Logo class="logo-std h-9 w-auto xl:h-10" alt="" />
+      {overlay && <Logo inverse lazy={false} class="logo-inv h-9 w-auto xl:h-10" alt="" />}
+    </a>
+
+    <nav aria-label={lang === 'it' ? 'Navigazione principale' : 'Hauptnavigation'} class="hidden lg:block">
+      <ul class="flex items-center gap-1 xl:gap-2">
+        {navOrder.map((key) => (
+          <li>
+            <a
+              href={routes[key][lang]}
+              class="nav-link"
+              aria-current={current === key ? 'page' : undefined}
+            >
+              {t.nav[key]}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="flex items-center gap-2 sm:gap-3">
+      <LangSwitch lang={lang} alternates={alternates} />
+      <a
+        href={site.dekra.bookingUrl}
+        class="btn btn-primary hidden !min-h-[2.75rem] !py-2 !text-[0.9375rem] lg:inline-flex"
+        target="_blank"
+        rel="noopener"
+      >
+        {t.cta.book}
+        <span class="sr-only">({t.externalBooking})</span>
+        <Icon name="arrow-up-right" size={18} />
+      </a>
+      <button
+        type="button"
+        class="menu-btn lg:hidden"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        data-menu-open
+      >
+        <Icon name="menu" size={22} />
+        <span class="sr-only">{t.menu}</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Menu mobile a tutto schermo -->
+<div id="mobile-menu" class="mobile-menu on-dark" role="dialog" aria-modal="true" aria-label={t.menu} data-menu hidden>
+  <div class="wrap flex h-[var(--header-h)] items-center justify-between">
+    <Logo inverse class="h-9 w-auto" alt={site.brand} />
+    <div class="flex items-center gap-2">
+      <LangSwitch lang={lang} alternates={alternates} tone="dark" />
+      <button type="button" class="menu-btn menu-btn-dark" data-menu-close>
+        <Icon name="x" size={22} />
+        <span class="sr-only">{t.close}</span>
+      </button>
+    </div>
+  </div>
+  <nav aria-label={lang === 'it' ? 'Navigazione principale' : 'Hauptnavigation'} class="wrap mt-6">
+    <ol class="mobile-nav">
+      {(['home', ...navOrder] as RouteKey[]).map((key, i) => (
+        <li>
+          <a href={routes[key][lang]} aria-current={current === key ? 'page' : undefined}>
+            <span class="t-label text-steel-2 t-num">{String(i).padStart(2, '0')}</span>
+            <span>{t.nav[key]}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+  <div class="wrap mt-10 grid gap-3 pb-10 text-steel">
+    <OpenStatus lang={lang} class="text-paper" />
+    <a href={site.phone.href} class="text-2xl font-semibold text-paper t-num" style="font-stretch:112%">{site.phone.display}</a>
+    <p class="text-sm">{site.address.street[lang]}, {site.address.postalCode} {site.address.city[lang]}</p>
+  </div>
+</div>
+
+<style>
+@layer components {
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--color-paper);
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s, transform 0.4s var(--ease-out-expo);
+  }
+  .site-header[data-scrolled='true'] { border-bottom-color: var(--line); }
+
+  /* Modalità overlay (Home): trasparente sulla foto, con un velo in alto per la leggibilità */
+  .site-header[data-overlay] { background: transparent; transition: background-color 0.4s var(--ease-out-quart), border-color 0.3s, transform 0.4s var(--ease-out-expo); }
+  .site-header[data-overlay]::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 -3rem 0;
+    z-index: -1;
+    background: linear-gradient(to bottom, color-mix(in oklab, var(--color-night) 70%, transparent), transparent);
+    pointer-events: none;
+    transition: opacity 0.4s;
+  }
+  .site-header[data-overlay][data-scrolled='true'] { background: var(--color-paper); }
+  .site-header[data-overlay][data-scrolled='true']::before { opacity: 0; }
+  .logo-link { position: relative; display: block; }
+  :global(.logo-inv) { display: none; }
+  .site-header[data-overlay]:not([data-scrolled='true']) :global(.logo-std) { display: none; }
+  .site-header[data-overlay]:not([data-scrolled='true']) :global(.logo-inv) { display: block; }
+  .site-header[data-overlay]:not([data-scrolled='true']) .nav-link { color: var(--color-paper); }
+  .site-header[data-overlay]:not([data-scrolled='true']) .menu-btn { color: var(--color-paper); border-color: color-mix(in oklab, var(--color-paper) 40%, transparent); }
+  .site-header[data-overlay]:not([data-scrolled='true']) :global(.lang-switch ul) { border-color: color-mix(in oklab, var(--color-paper) 40%, transparent); }
+  .site-header[data-overlay]:not([data-scrolled='true']) :global(.lang-switch a) { color: var(--color-paper); }
+  .site-header[data-overlay]:not([data-scrolled='true']) :global(.lang-switch a[aria-current='true']) { background: var(--color-paper); color: var(--color-ink); }
+
+  .nav-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding-inline: 0.7rem;
+    font-size: 0.9375rem;
+    font-weight: 520;
+    text-decoration: none;
+    color: var(--color-ink);
+  }
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    left: 0.7rem;
+    right: 0.7rem;
+    bottom: 0.45rem;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.4s var(--ease-out-expo);
+  }
+  .nav-link:hover::after { transform: scaleX(1); transform-origin: left; }
+  .nav-link[aria-current='page']::after { transform: scaleX(1); background: var(--color-orange); height: 2px; }
+
+  .menu-btn {
+    display: grid;
+    place-items: center;
+    width: 2.875rem;
+    height: 2.875rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 2px;
+  }
+  .menu-btn-dark { border-color: color-mix(in oklab, var(--color-steel) 35%, transparent); color: var(--color-paper); }
+
+  .mobile-menu {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    overflow-y: auto;
+    background: var(--color-night);
+    color: var(--color-paper);
+    overscroll-behavior: contain;
+  }
+  .mobile-menu:not([hidden]) { animation: menu-in 0.45s var(--ease-out-expo); }
+  @keyframes menu-in { from { opacity: 0; transform: translateY(-12px); } }
+
+  .mobile-nav li { border-bottom: 1px solid var(--line-dark); }
+  .mobile-nav a {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    padding-block: 1rem;
+    font-stretch: 125%;
+    font-weight: 620;
+    font-size: clamp(1.5rem, 7vw, 2.2rem);
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    text-decoration: none;
+  }
+  .mobile-nav a[aria-current='page'] span:last-child { color: var(--color-orange); }
+}
+</style>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const menu = document.querySelector<HTMLElement>('[data-menu]');
+  const openBtn = document.querySelector<HTMLButtonElement>('[data-menu-open]');
+  const closeBtn = document.querySelector<HTMLButtonElement>('[data-menu-close]');
+
+  // Header sempre visibile: dopo i primi pixel di scroll prende fondo carta e bordo
+  const onScroll = () => {
+    if (!header) return;
+    header.dataset.scrolled = String(window.scrollY > 8);
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  const setOpen = (open: boolean) => {
+    if (!menu || !openBtn) return;
+    menu.hidden = !open;
+    openBtn.setAttribute('aria-expanded', String(open));
+    document.documentElement.style.overflow = open ? 'hidden' : '';
+    if (open) closeBtn?.focus();
+    else openBtn.focus();
+  };
+  openBtn?.addEventListener('click', () => setOpen(true));
+  closeBtn?.addEventListener('click', () => setOpen(false));
+  menu?.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') setOpen(false);
+    if (e.key === 'Tab') {
+      const f = menu.querySelectorAll<HTMLElement>('a[href], button');
+      const first = f[0];
+      const last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+</script>

@@ -1,0 +1,51 @@
+---
+import { unsplash, unsplashSrcset } from '../lib/img';
+// Immagine Unsplash responsiva servita dalla CDN imgix di Unsplash (AVIF/WebP automatici, ritaglio lato server).
+// Ogni utilizzo è marcato con: TODO: sostituire con foto della sede.
+// Con le foto reali: spostarle in src/assets/ e usare <Image /> di astro:assets con le stesse props.
+interface Props {
+  id: string;
+  alt: string;
+  sizes: string;
+  ratio?: [number, number];
+  widths?: number[];
+  priority?: boolean;
+  position?: string;
+  class?: string;
+  imgClass?: string;
+  /** se true, le proporzioni del riquadro le decide la classe (es. aspect-[4/3] lg:aspect-[4/5]) */
+  fluid?: boolean;
+}
+const {
+  id,
+  alt,
+  sizes,
+  ratio = [4, 3],
+  widths = [480, 768, 1080, 1440, 1920],
+  priority = false,
+  position = 'center',
+  class: cls,
+  imgClass,
+  fluid = false,
+} = Astro.props;
+
+const [rw, rh] = ratio;
+const crop = position === 'center' ? '' : position;
+const src = (w: number) => unsplash(id, w, ratio, crop);
+const srcset = unsplashSrcset(id, widths, ratio, crop);
+const base = widths[Math.min(2, widths.length - 1)];
+---
+<div class:list={['photo', cls]} style={fluid ? undefined : `aspect-ratio:${rw}/${rh}`}>
+  <img
+    src={src(base)}
+    srcset={srcset}
+    sizes={sizes}
+    alt={alt}
+    width={base}
+    height={Math.round((base * rh) / rw)}
+    loading={priority ? 'eager' : 'lazy'}
+    decoding={priority ? 'sync' : 'async'}
+    fetchpriority={priority ? 'high' : 'auto'}
+    class={imgClass}
+  />
+</div>

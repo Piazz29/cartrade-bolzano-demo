@@ -1,0 +1,450 @@
+@import 'tailwindcss';
+
+/* Archivo variabile (peso 100-900, larghezza 62-125%), un solo file latin self-hosted. */
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  src: url('/fonts/archivo-wdth.woff2') format('woff2-variations'), url('/fonts/archivo-wdth.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Fallback calibrati su Archivo (misurati): il testo non cambia a capo quando arriva il font → CLS ~0 */
+@font-face {
+  font-family: 'Archivo Fallback';
+  src: local('Arial'), local('Helvetica Neue'), local('Helvetica');
+  size-adjust: 98%;
+  ascent-override: 90%;
+  descent-override: 22%;
+}
+/* Titoli in Archivo a larghezza 125%: circa +24,5% rispetto ad Arial */
+@font-face {
+  font-family: 'Archivo Wide Fallback';
+  src: local('Arial'), local('Helvetica Neue'), local('Helvetica');
+  size-adjust: 124.5%;
+  ascent-override: 72%;
+  descent-override: 18%;
+}
+
+@theme {
+  --color-paper: #f7f6f3;
+  --color-paper-2: #eeece7;
+  --color-paper-3: #e3e0d9;
+  --color-ink: #0e2340;
+  --color-night: #0a1a30;
+  --color-night-2: #11284a;
+  --color-orange: #e8710a;
+  --color-orange-hover: #f28a2e;
+  --color-orange-ink: #a64f08;
+  --color-steel: #c9d2df;
+  --color-steel-2: #93a0b4;
+  --color-muted: #4a5a70;
+  --color-ok: #1f7a4d;
+  --color-alert: #b3261e;
+
+  --font-sans: 'Archivo', 'Archivo Fallback', ui-sans-serif, system-ui, sans-serif;
+  --font-wide: 'Archivo', 'Archivo Wide Fallback', ui-sans-serif, system-ui, sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+
+  --breakpoint-xs: 26rem;
+}
+
+@layer base {
+  :root {
+    --gutter: 1rem;
+    --line: color-mix(in oklab, var(--color-ink) 14%, transparent);
+    --line-strong: color-mix(in oklab, var(--color-ink) 28%, transparent);
+    --line-dark: color-mix(in oklab, var(--color-steel) 18%, transparent);
+    --section: clamp(4rem, 10vw, 9rem);
+    --header-h: 4rem;
+    color-scheme: light;
+  }
+  @media (min-width: 40rem) {
+    :root { --gutter: 1.5rem; }
+  }
+  @media (min-width: 80rem) {
+    :root { --gutter: 2.5rem; --header-h: 4.5rem; }
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-padding-top: calc(var(--header-h) + 1rem);
+  }
+  html.lenis, html.lenis body { height: auto; }
+  .lenis.lenis-smooth { scroll-behavior: auto !important; }
+
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    font-stretch: 100%;
+    font-weight: 420;
+    font-kerning: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-wide);
+    overflow-wrap: break-word;
+    font-stretch: 125%;
+    font-weight: 640;
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+  p { text-wrap: pretty; }
+  /* Le parole composte tedesche possono superare la colonna: sillabazione solo in tedesco */
+  :lang(de) :is(h1, h2, h3) { -webkit-hyphens: auto; hyphens: auto; }
+  /* iOS Safari ingrandisce la pagina al tocco di campi con testo sotto i 16px: sui touch li teniamo a 16px */
+  @media (pointer: coarse) {
+    input:not([type='checkbox'], [type='radio'], [type='range']), select, textarea { font-size: max(16px, 1em) !important; }
+  }
+  a, button, label { -webkit-tap-highlight-color: transparent; }
+
+  ::selection { background: var(--color-orange); color: var(--color-ink); }
+
+  :focus-visible {
+    outline: 2px solid var(--color-orange);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+  .on-dark :focus-visible { outline-color: var(--color-orange); }
+
+  img { max-width: 100%; height: auto; }
+  main { display: block; overflow-x: clip; }
+
+  input, select, textarea, button { font: inherit; color: inherit; }
+
+  [hidden] { display: none !important; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Tipografia                                                          */
+/* ------------------------------------------------------------------ */
+@utility t-display {
+  font-family: var(--font-wide);
+  font-stretch: 125%;
+  font-weight: 650;
+  font-size: clamp(2.45rem, 6.4vw, 5.6rem);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+@utility t-h1 {
+  font-family: var(--font-wide);
+  font-stretch: 125%;
+  font-weight: 640;
+  font-size: clamp(2.15rem, 6vw, 4.6rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+@utility t-h2 {
+  font-family: var(--font-wide);
+  font-stretch: 125%;
+  font-weight: 630;
+  font-size: clamp(1.75rem, 3.8vw, 3.1rem);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+}
+@utility t-h3 {
+  font-stretch: 118%;
+  font-weight: 620;
+  font-size: clamp(1.2rem, 1.6vw, 1.45rem);
+  line-height: 1.22;
+  letter-spacing: -0.012em;
+}
+@utility t-lead {
+  font-size: clamp(1.125rem, 1.5vw, 1.3rem);
+  line-height: 1.5;
+  font-weight: 400;
+}
+@utility t-label {
+  font-stretch: 112%;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  font-weight: 560;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+@utility t-num {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+}
+
+/* ------------------------------------------------------------------ */
+/* Layout                                                              */
+/* ------------------------------------------------------------------ */
+@utility wrap {
+  width: 100%;
+  max-width: 90rem;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+@utility section-y {
+  padding-block: var(--section);
+}
+@utility grid-12 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  @media (min-width: 64rem) {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+}
+@utility hairline {
+  border-color: var(--line);
+}
+@utility measure {
+  max-width: 62ch;
+}
+
+/* ------------------------------------------------------------------ */
+/* Componenti                                                          */
+/* ------------------------------------------------------------------ */
+@layer components {
+  /* Bottoni: arancio con testo navy (5,1:1). Mai testo bianco su arancio. */
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    min-height: 3.25rem;
+    padding: 0.85rem 1.35rem;
+    border-radius: 2px;
+    font-stretch: 112%;
+    font-weight: 620;
+    font-size: 1rem;
+    line-height: 1.1;
+    letter-spacing: -0.005em;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.25s var(--ease-out-quart), color 0.25s var(--ease-out-quart), border-color 0.25s var(--ease-out-quart), transform 0.2s var(--ease-out-quart);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn .btn-arrow { transition: transform 0.35s var(--ease-out-expo); }
+  .btn:hover .btn-arrow { transform: translateX(4px); }
+  .btn-primary { background: var(--color-orange); color: var(--color-ink); }
+  .btn-primary:hover { background: var(--color-orange-hover); }
+  /* Bottone secondario: il riempimento scorre da sinistra */
+  .btn-ghost {
+    border: 1px solid var(--line-strong);
+    color: var(--color-ink);
+    background-color: transparent;
+    background-image: linear-gradient(var(--color-ink), var(--color-ink));
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: 0% 100%;
+    transition: background-size 0.55s var(--ease-out-expo), color 0.3s var(--ease-out-quart), border-color 0.3s;
+  }
+  .btn-ghost:hover { background-size: 100% 100%; color: var(--color-paper); border-color: var(--color-ink); }
+  .on-dark .btn-ghost { border-color: color-mix(in oklab, var(--color-steel) 40%, transparent); color: var(--color-paper); background-image: linear-gradient(var(--color-paper), var(--color-paper)); }
+  .on-dark .btn-ghost:hover { border-color: var(--color-paper); color: var(--color-ink); }
+  .btn-ink { background: var(--color-ink); color: var(--color-paper); }
+  .btn-ink:hover { background: var(--color-night-2); }
+
+  .link-u {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+    text-decoration-color: color-mix(in oklab, currentColor 40%, transparent);
+    transition: text-decoration-color 0.2s;
+  }
+  .link-u:hover { text-decoration-color: currentColor; }
+
+  /* Intestazione di sezione stile scheda tecnica: numero, riga, etichetta */
+  .sec-head {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding-bottom: 0.9rem;
+  }
+  .sec-head::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: var(--line-strong);
+    transform-origin: left center;
+    transition: transform 1.2s var(--ease-out-expo);
+  }
+  .on-dark .sec-head::after { background: var(--line-dark); }
+
+  /* Campi form */
+  .field { display: grid; gap: 0.45rem; }
+  .field label, .field .label { font-size: 0.875rem; font-weight: 560; }
+  .input {
+    width: 100%;
+    min-height: 3.1rem;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 2px;
+    background: color-mix(in oklab, var(--color-paper) 60%, white);
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .input:hover { border-color: color-mix(in oklab, var(--color-ink) 50%, transparent); }
+  .input:focus { outline: none; border-color: var(--color-ink); box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-orange) 45%, transparent); }
+  .input[aria-invalid='true'] { border-color: var(--color-alert); }
+  textarea.input { min-height: 8rem; resize: vertical; }
+  select.input {
+    appearance: none;
+    padding-right: 2.5rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%230E2340' stroke-width='1.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.95rem center;
+  }
+  .on-dark .input {
+    background: color-mix(in oklab, var(--color-night) 70%, black);
+    border-color: color-mix(in oklab, var(--color-steel) 30%, transparent);
+    color: var(--color-paper);
+  }
+  .on-dark select.input {
+    background-repeat: no-repeat;
+    background-position: right 0.95rem center;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%23C9D2DF' stroke-width='1.5'/%3E%3C/svg%3E");
+  }
+  .field-error { color: var(--color-alert); font-size: 0.875rem; }
+  .on-dark .field-error { color: #ff9a8f; }
+
+  /* Segmenti (radio come interruttore) */
+  .seg {
+    display: inline-grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    border: 1px solid var(--line-strong);
+    border-radius: 2px;
+    padding: 3px;
+    gap: 3px;
+  }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.6rem;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.9375rem;
+    font-weight: 560;
+    cursor: pointer;
+    border-radius: 1px;
+    transition: background-color 0.2s, color 0.2s;
+    text-align: center;
+  }
+  .seg input:checked + label { background: var(--color-ink); color: var(--color-paper); }
+  .seg input:focus-visible + label { outline: 2px solid var(--color-orange); outline-offset: 2px; }
+  .on-dark .seg { border-color: color-mix(in oklab, var(--color-steel) 35%, transparent); }
+  .on-dark .seg input:checked + label { background: var(--color-paper); color: var(--color-ink); }
+
+  /* Chip filtri */
+  .chip input { position: absolute; opacity: 0; pointer-events: none; }
+  .chip label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.5rem;
+    padding: 0.35rem 0.85rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 2px;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+  }
+  .chip label:hover { border-color: var(--color-ink); }
+  .chip input:checked + label { background: var(--color-ink); border-color: var(--color-ink); color: var(--color-paper); }
+  .chip input:focus-visible + label { outline: 2px solid var(--color-orange); outline-offset: 2px; }
+  .on-dark .chip label { border-color: color-mix(in oklab, var(--color-steel) 35%, transparent); }
+  .on-dark .chip label:hover { border-color: var(--color-paper); }
+  .on-dark .chip input:checked + label { background: var(--color-paper); border-color: var(--color-paper); color: var(--color-ink); }
+
+  /* Tabella specifiche */
+  .spec { display: grid; }
+  .spec > div {
+    display: grid;
+    grid-template-columns: minmax(7.5rem, 40%) 1fr;
+    gap: 1rem;
+    padding-block: 0.8rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .spec dt { color: var(--color-muted); font-size: 0.9375rem; }
+  .spec dd { font-weight: 560; font-variant-numeric: tabular-nums; }
+  .on-dark .spec > div { border-color: var(--line-dark); }
+  .on-dark .spec dt { color: var(--color-steel-2); }
+
+  /* Foto: placeholder con tinta del brand finché carica */
+  .photo { background: var(--color-paper-3); overflow: hidden; }
+  .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* Accordion con grid-template-rows (niente animazione di height) */
+  .acc { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.45s var(--ease-out-expo); }
+  .acc > div { overflow: hidden; }
+  details[open] .acc, .acc[data-open='true'] { grid-template-rows: 1fr; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Motion: stati iniziali solo se JS attivo e motion consentito         */
+/* ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: no-preference) {
+  html.js [data-reveal] {
+    transition: opacity 0.9s var(--ease-out-expo), transform 0.9s var(--ease-out-expo);
+  }
+  html.js [data-reveal]:not(.is-in) { opacity: 0; transform: translateY(24px); }
+  html.js [data-reveal-line] { transform-origin: left center; transition: transform 1.2s var(--ease-out-expo); }
+  html.js [data-reveal-line]:not(.is-in) { transform: scaleX(0); }
+  html.js [data-line]:not(.is-in)::after { transform: scaleX(0); }
+  html.js [data-draw] { transition: clip-path 1.8s var(--ease-out-expo) 0.1s; }
+  html.js [data-draw]:not(.is-in) { clip-path: inset(0 100% 0 0); }
+  html.js [data-draw].is-in { clip-path: inset(0 0 0 0); }
+}
+/* Schermata di caricamento attiva: pagina ferma, animazioni in pausa fino all'apertura del sipario */
+html.is-loading { overflow: hidden; }
+/* Il testo della hero aspetta il font sotto al sipario: nessuno spostamento quando Archivo sostituisce il fallback */
+html.is-loading main :is(.hero-content, .phero .content) { visibility: hidden; }
+html.is-loading :is(main, header) *,
+html.is-loading :is(main, header) *::before,
+html.is-loading :is(main, header) *::after { animation-play-state: paused !important; }
+
+/* Transizioni tra pagine (View Transitions native tra documenti, zero JavaScript) */
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) { animation: vt-out 0.32s var(--ease-out-quart) both; }
+  ::view-transition-new(root) { animation: vt-in 0.6s var(--ease-out-expo) both; }
+  ::view-transition-group(site-header), ::view-transition-group(cta-bar) { animation-duration: 0.45s; }
+}
+@keyframes vt-out { to { opacity: 0; transform: translateY(-10px); } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(18px); } }
+.site-header { view-transition-name: site-header; }
+.cta-bar { view-transition-name: cta-bar; }
+
+/* Linea del tetto che si disegna al caricamento (hero) */
+@media (prefers-reduced-motion: no-preference) {
+  html.js .roof-anim { animation: roof-draw 2.2s var(--ease-out-expo) 0.35s both; }
+}
+@keyframes roof-draw { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Spazio per la barra CTA fissa su mobile */
+@media (max-width: 63.99rem) {
+  body { padding-bottom: calc(4.25rem + env(safe-area-inset-bottom)); }
+}

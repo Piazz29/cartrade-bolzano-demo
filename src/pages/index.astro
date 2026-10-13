@@ -1,0 +1,33 @@
+---
+// Radice del sito: manda alla lingua del browser (tedesco se preferito, altrimenti italiano).
+// Senza JavaScript il meta refresh porta comunque a /it/.
+const site = Astro.site!.toString().replace(/\/$/, '');
+---
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Car Trade Bolzano · Revisione, officina, carrozzeria, auto</title>
+    <meta name="robots" content="noindex, follow" />
+    <link rel="canonical" href={`${site}/it/`} />
+    <link rel="alternate" hreflang="it" href={`${site}/it/`} />
+    <link rel="alternate" hreflang="de" href={`${site}/de/`} />
+    <link rel="alternate" hreflang="x-default" href={`${site}/it/`} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script is:inline>
+      (function () {
+        var langs = navigator.languages || [navigator.language || ''];
+        var de = langs.some(function (l) { return /^de\b/i.test(l); });
+        var itFirst = /^it\b/i.test(langs[0] || '');
+        location.replace(de && !itFirst ? '/de/' : '/it/');
+      })();
+    </script>
+    <meta http-equiv="refresh" content="0; url=/it/" />
+    <style>body{background:#F7F6F3;color:#0E2340;font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0}}
+</style>
+  </head>
+  <body>
+    <p><a href="/it/">Italiano</a> · <a href="/de/">Deutsch</a></p>
+  </body>
+</html>

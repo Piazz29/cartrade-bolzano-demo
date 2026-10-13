@@ -1,0 +1,23 @@
+---
+import { site, type Lang } from '../data/site';
+import { ui } from '../i18n/ui';
+interface Props { lang: Lang; class?: string }
+const { lang, class: cls } = Astro.props;
+const t = ui[lang].hours;
+const slots = site.hours.map((h) => `${h.open} – ${h.close}`);
+---
+<dl class:list={['spec', cls]}>
+  <div>
+    <dt>{t.weekdays}</dt>
+    <dd class="grid gap-0.5">{slots.map((s) => <span>{s}</span>)}</dd>
+  </div>
+  <div>
+    <dt>{t.saturday}</dt>
+    {/* TODO: verificare il sabato mattina (DEKRA indica chiuso, altre fonti no) */}
+    <dd>{t.closed}</dd>
+  </div>
+  <div>
+    <dt>{t.sunday}</dt>
+    <dd>{t.closed}</dd>
+  </div>
+</dl>

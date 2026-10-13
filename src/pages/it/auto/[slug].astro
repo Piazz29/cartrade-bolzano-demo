@@ -1,0 +1,11 @@
+---
+import { getCollection } from 'astro:content';
+import CarDetailView from '../../../views/CarDetailView.astro';
+
+export async function getStaticPaths() {
+  const cars = await getCollection('cars');
+  return cars.map((car) => ({ params: { slug: car.id }, props: { car } }));
+}
+const { car } = Astro.props;
+---
+<CarDetailView lang="it" car={car} />

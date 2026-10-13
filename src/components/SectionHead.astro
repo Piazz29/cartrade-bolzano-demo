@@ -1,0 +1,14 @@
+---
+// Intestazione di sezione stile scheda tecnica: numero · etichetta ........ link opzionale
+interface Props { num?: string; label: string; href?: string; linkText?: string; dark?: boolean; class?: string }
+const { num, label, href, linkText, dark = false, class: cls } = Astro.props;
+---
+<div class:list={['sec-head', cls]} data-line>
+  {num && <span class:list={['t-label t-num', dark ? 'text-orange' : 'text-orange-ink']}>{num}</span>}
+  <span class:list={['t-label', dark ? 'text-steel' : 'text-ink']}>{label}</span>
+  {href && (
+    <a href={href} class:list={['ml-auto t-label link-u', dark ? 'text-paper' : 'text-ink']}>
+      {linkText} →
+    </a>
+  )}
+</div>
