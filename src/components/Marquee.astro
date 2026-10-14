@@ -10,22 +10,18 @@ import brands from '../data/brands.json';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const copy = {
-  it: { label: 'Tutte le marche', note: 'Revisione, officina e carrozzeria per ogni marca.', pause: 'Ferma lo scorrimento dei loghi', play: 'Riprendi lo scorrimento dei loghi' },
-  de: { label: 'Alle Marken', note: 'Revision, Werkstatt und Karosserie für jede Marke.', pause: 'Logo-Laufband anhalten', play: 'Logo-Laufband fortsetzen' },
+  it: { label: 'Tutte le marche', note: 'Revisione, officina e carrozzeria per ogni marca.' },
+  de: { label: 'Alle Marken', note: 'Revision, Werkstatt und Karosserie für jede Marke.' },
 }[lang];
 // Correzione ottica: i loghi larghi e bassi vengono ingranditi per pesare come quelli tondi
 const optical: Record<string, number> = { audi: 1.55, ford: 1.5, kia: 1.55, dacia: 1.5, mini: 1.5, jeep: 1.35, opel: 1.25, hyundai: 1.2, toyota: 1.12, volvo: 1.05 };
 ---
-<section class="brands" aria-label={copy.label} data-brands>
+<section class="brands" aria-label={copy.label}>
   <div class="head">
     <div class="head-text">
       <p class="t-label">{copy.label}</p>
       <p class="note">{copy.note}</p>
     </div>
-    <button type="button" class="mq-toggle" aria-pressed="false" aria-label={copy.pause} data-label-pause={copy.pause} data-label-play={copy.play} data-mq-toggle>
-      <span class="i-pause" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><rect x="3" y="2" width="2.5" height="10" rx="0.5" fill="currentColor"/><rect x="8.5" y="2" width="2.5" height="10" rx="0.5" fill="currentColor"/></svg></span>
-      <span class="i-play" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M4 2.2v9.6a.5.5 0 0 0 .76.43l7.6-4.8a.5.5 0 0 0 0-.86l-7.6-4.8A.5.5 0 0 0 4 2.2Z" fill="currentColor"/></svg></span>
-    </button>
   </div>
   <div class="mq" aria-hidden="true">
     <div class="mq-track">
@@ -77,34 +73,6 @@ const optical: Record<string, number> = { audi: 1.55, ford: 1.5, kia: 1.55, daci
   @media (prefers-reduced-motion: reduce) {
     .mq-track { animation-duration: 140s !important; animation-iteration-count: infinite !important; }
   }
-  .brands.is-paused .mq-track { animation-play-state: paused !important; }
 
-  .mq-toggle {
-    flex: none;
-    display: grid;
-    place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    border: 1px solid var(--line-strong);
-    border-radius: 999px;
-    color: var(--color-ink);
-    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-  }
-  .mq-toggle:hover { background: var(--color-ink); color: var(--color-paper); border-color: var(--color-ink); }
-  .mq-toggle .i-play { display: none; }
-  .mq-toggle[aria-pressed='true'] .i-play { display: block; }
-  .mq-toggle[aria-pressed='true'] .i-pause { display: none; }
-  .mq-toggle span { display: block; line-height: 0; }
 }
 </style>
-
-<script>
-  document.querySelectorAll<HTMLElement>('[data-brands]').forEach((root) => {
-    const btn = root.querySelector<HTMLButtonElement>('[data-mq-toggle]')!;
-    btn.addEventListener('click', () => {
-      const paused = root.classList.toggle('is-paused');
-      btn.setAttribute('aria-pressed', String(paused));
-      btn.setAttribute('aria-label', paused ? btn.dataset.labelPlay! : btn.dataset.labelPause!);
-    });
-  });
-</script>

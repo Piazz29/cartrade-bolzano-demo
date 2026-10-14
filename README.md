@@ -62,7 +62,7 @@ URL tedeschi localizzati: `/de/revision/`, `/de/werkstatt-karosserie/`, `/de/fah
 
 0. **Schermata di caricamento** con il logo che si compone: compare ogni volta che si entra nel sito o si ricarica la pagina, non quando si naviga tra le pagine. **Hero a tutto schermo** con la composizione del logo, header trasparente, transizioni morbide tra le pagine.
 
-**Telefoni con "Riduci movimento" attivo** (iPhone: Impostazioni › Accessibilità › Movimento; Android: "Rimuovi animazioni", spesso attivo col risparmio energetico): il sito resta completo ma più calmo. La schermata di caricamento compare con dissolvenze invece del sipario, i loghi delle marche scorrono più lentamente, le altre animazioni d'ingresso sono disattivate. La fascia dei loghi ha un pulsante pausa/riprendi (requisito WCAG 2.2.2).
+**Telefoni con "Riduci movimento" attivo** (iPhone: Impostazioni › Accessibilità › Movimento; Android: "Rimuovi animazioni", spesso attivo col risparmio energetico): il sito resta completo ma più calmo. La schermata di caricamento compare con dissolvenze invece del sipario, i loghi delle marche scorrono più lentamente, le altre animazioni d'ingresso sono disattivate. La fascia dei loghi non ha un pulsante pausa (scelta per la demo): per la piena conformità WCAG 2.2.2 andrebbe aggiunto prima del lancio.
 
 1. **Calcolatore scadenza revisione** (Home e pagina Revisione): mese e anno di immatricolazione o ultima revisione → scadenza esatta secondo il Codice della Strada (4 anni, poi ogni 2, a fine mese), giorni mancanti, misuratore del ciclo, file calendario `.ics` con promemoria a 30 giorni, "Avvisami prima della scadenza" via email o WhatsApp (solo interfaccia).
 2. **Barra fissa su mobile**: Chiama · WhatsApp · Prenota (portale DEKRA).
