@@ -1,7 +1,8 @@
 ---
 // Schermata di caricamento con il logo che si compone.
-// - Compare solo al primo ingresso nella sessione (sessionStorage), mai con "riduci movimento" e mai senza JavaScript:
+// - Compare ogni volta che si entra nel sito o si ricarica (non navigando tra le pagine), mai senza JavaScript:
 //   la decisione la prende uno script inline nel <head> (Base.astro), che aggiunge html.is-loading prima del primo rendering.
+// - Con "riduci movimento" (html.calm): stesso contenuto, ma il logo appare in dissolvenza e l'uscita è una dissolvenza.
 // - Avanza con il caricamento reale (font + foto principale), dura almeno ~1,6 s e al massimo ~3,8 s
 //   (più una rete di sicurezza a 4,5 s nel <head>).
 // - Mentre è attiva, le animazioni della pagina sono in pausa: partono quando il sipario si alza.
@@ -53,6 +54,8 @@ const services = lang === 'it' ? 'Revisione · Officina · Carrozzeria · Auto' 
     transform: scaleX(0);
     transform-origin: left;
   }
+  /* In uscita non deve più intercettare i tocchi (nella versione calma resta sopra la pagina mentre svanisce) */
+  .pl.is-leaving { pointer-events: none; }
   .pl.is-leaving { transform: translateY(-100%); transition: transform 1s cubic-bezier(0.76, 0, 0.24, 1) 0.28s; }
   .pl.is-leaving::after { transform: scaleX(1); transition: transform 0.4s var(--ease-out-expo); }
 
@@ -80,7 +83,17 @@ const services = lang === 'it' ? 'Revisione · Officina · Carrozzeria · Auto' 
 
   .pl-meter { position: relative; height: 1px; margin-top: 2.25rem; background: color-mix(in oklab, var(--color-steel) 22%, transparent); overflow: hidden; }
   .pl-bar { position: absolute; inset: 0; background: var(--color-orange); transform: scaleX(0); transform-origin: left; transition: transform 0.35s var(--ease-out-quart); }
-  .pl-services { margin-top: 1rem; text-align: center; white-space: nowrap; font-size: clamp(0.5625rem, 2.6vw, 0.75rem); color: var(--color-steel-2); letter-spacing: 0.14em; opacity: 0; animation: pl-fade 0.8s var(--ease-out-quart) 1.2s both; }
+  /* Versione calma ("riduci movimento"): niente scorrimenti, solo dissolvenze.
+     Le regole sono !important nel layer components per prevalere sull'azzeramento globale delle animazioni. */
+  :global(html.calm) .pl .band { clip-path: none !important; animation: none !important; }
+  :global(html.calm) .pl .band img { transform: none !important; opacity: 1 !important; animation: none !important; }
+  :global(html.calm) .pl .pl-logo { animation: pl-fade 0.7s ease-out both !important; opacity: 0; }
+  :global(html.calm) .pl .pl-corner, :global(html.calm) .pl .pl-services { animation: pl-fade 0.7s ease-out 0.2s both !important; }
+  :global(html.calm) .pl.is-leaving { transform: none !important; opacity: 0; transition: opacity 0.6s ease-out 0.1s !important; }
+  :global(html.calm) .pl.is-leaving::after { transition: none !important; }
+  :global(html.calm) .pl .pl-bar { transition: transform 0.3s linear !important; }
+
+  .pl-services { margin-top: 1rem; text-align: center; text-wrap: balance; line-height: 1.7; font-size: clamp(0.625rem, 2.6vw, 0.75rem); color: var(--color-steel-2); letter-spacing: 0.14em; opacity: 0; animation: pl-fade 0.8s var(--ease-out-quart) 1.2s both; }
 }
 </style>
 
@@ -120,12 +133,14 @@ const services = lang === 'it' ? 'Revisione · Officina · Carrozzeria · Auto' 
       else finish();
     };
     requestAnimationFrame(tick);
+    // Rete di sicurezza: se il telefono rallenta requestAnimationFrame (scheda in background, risparmio energetico)
+    // la schermata si chiude comunque
+    setTimeout(() => { shown = 1; finish(); }, MAX + 600);
 
     const finish = () => {
       if (finished) return;
       finished = true;
       ready.then(() => {
-        try { sessionStorage.setItem('ct-intro', '1'); } catch {}
         pl.classList.add('is-leaving');
         // Le animazioni della pagina partono mentre il sipario si alza
         requestAnimationFrame(() => html.classList.remove('is-loading'));

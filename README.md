@@ -60,7 +60,9 @@ URL tedeschi localizzati: `/de/revision/`, `/de/werkstatt-karosserie/`, `/de/fah
 
 ## Funzioni da mostrare al cliente
 
-0. **Schermata di caricamento** con il logo che si compone (solo al primo ingresso; per rivederla aprire una nuova scheda o finestra anonima) e **hero a tutto schermo** con la composizione del logo, header trasparente, transizioni morbide tra le pagine.
+0. **Schermata di caricamento** con il logo che si compone: compare ogni volta che si entra nel sito o si ricarica la pagina, non quando si naviga tra le pagine. **Hero a tutto schermo** con la composizione del logo, header trasparente, transizioni morbide tra le pagine.
+
+**Telefoni con "Riduci movimento" attivo** (iPhone: Impostazioni › Accessibilità › Movimento; Android: "Rimuovi animazioni", spesso attivo col risparmio energetico): il sito resta completo ma più calmo. La schermata di caricamento compare con dissolvenze invece del sipario, i loghi delle marche scorrono più lentamente, le altre animazioni d'ingresso sono disattivate. La fascia dei loghi ha un pulsante pausa/riprendi (requisito WCAG 2.2.2).
 
 1. **Calcolatore scadenza revisione** (Home e pagina Revisione): mese e anno di immatricolazione o ultima revisione → scadenza esatta secondo il Codice della Strada (4 anni, poi ogni 2, a fine mese), giorni mancanti, misuratore del ciclo, file calendario `.ics` con promemoria a 30 giorni, "Avvisami prima della scadenza" via email o WhatsApp (solo interfaccia).
 2. **Barra fissa su mobile**: Chiama · WhatsApp · Prenota (portale DEKRA).
@@ -72,7 +74,7 @@ URL tedeschi localizzati: `/de/revision/`, `/de/werkstatt-karosserie/`, `/de/fah
 
 ## Qualità verificata
 
-- **Browser mobili** (test automatici Playwright su tutte le pagine IT/DE, con tocco): Safari su iPhone 15 Pro, iPhone 15 Pro Max e iPhone SE (WebKit 27.2), Chrome su Pixel 7 e Samsung Internet su Galaxy S9+ (Chromium 156). Controllati: errori JavaScript, scroll orizzontale, immagini, font, schermata di caricamento, barra fissa, menu, calcolatore, filtri, galleria, modulo con foto, cambio lingua, mappa. Firefox non è stato eseguito (bloccato dall'ambiente di test): il codice usa solo funzioni supportate da Firefox 113+. Supporto minimo: iOS/Safari 16.4+, Chrome/Samsung Internet degli ultimi due anni.
+- **Browser mobili** (test automatici Playwright su tutte le pagine IT/DE, con tocco): Safari su iPhone 15 Pro, iPhone 15 Pro Max e iPhone SE (WebKit 27.2), Chrome su Pixel 7 e Samsung Internet su Galaxy S9+ (Chromium 156), più iPhone e Android con "Riduci movimento" attivo. Controllati: errori JavaScript, scroll orizzontale, immagini, font, schermata di caricamento, barra fissa, menu, calcolatore, filtri, galleria, modulo con foto, cambio lingua, mappa. Firefox non è stato eseguito (bloccato dall'ambiente di test): il codice usa solo funzioni supportate da Firefox 113+. Supporto minimo: iOS/Safari 16.4+, Chrome/Samsung Internet degli ultimi due anni.
 
 - **Lighthouse mobile** (build di produzione, rete 4G lenta simulata): Accessibilità 100, Best practice 100, SEO 100, Performance 96–99 su tutte le pagine misurate; CLS ≈ 0; LCP 1,8–2,5 s. L'LCP oscilla di qualche decimo perché le foto arrivano dalla CDN di Unsplash: con le foto reali servite dal sito stesso migliorerà.
 - **axe-core** (WCAG 2.2 AA): 0 violazioni su tutte le pagine, a 390 e 1440 px.

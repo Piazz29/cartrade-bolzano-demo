@@ -99,14 +99,26 @@ const ld = [business, ...jsonLd];
     <link rel="preconnect" href="https://images.unsplash.com" />
 
     <script is:inline>
-      // JS attivo + schermata di caricamento solo al primo ingresso nella sessione (mai con "riduci movimento")
+      // Schermata di caricamento: ogni volta che si ENTRA nel sito (link esterno, URL digitato, ricarica),
+      // non quando si naviga tra le pagine. Con "riduci movimento" compare in versione calma (html.calm).
+      // ?intro=0 la salta (test automatici).
       (function () {
         var d = document.documentElement;
         d.classList.replace('no-js', 'js');
         try {
-          if (sessionStorage.getItem('ct-intro') || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+          if (/[?&]intro=0\b/.test(location.search)) return;
+          var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+          var type = nav ? nav.type : 'navigate';
+          var fromRoot = sessionStorage.getItem('ct-entry') === '1'; // arrivo da "/" che reindirizza alla lingua
+          sessionStorage.removeItem('ct-entry');
+          var internal = false;
+          if (document.referrer) {
+            try { internal = new URL(document.referrer).origin === location.origin; } catch (e) {}
+          }
+          if (type === 'back_forward' || (internal && type !== 'reload' && !fromRoot)) return;
           d.classList.add('is-loading');
-          setTimeout(function () { d.classList.remove('is-loading'); }, 4500); // rete di sicurezza
+          if (matchMedia('(prefers-reduced-motion: reduce)').matches) d.classList.add('calm');
+          setTimeout(function () { d.classList.remove('is-loading'); }, 5000); // rete di sicurezza
         } catch (e) {}
       })();
     </script>

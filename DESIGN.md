@@ -47,10 +47,10 @@ Ease-out esponenziali (`cubic-bezier(.16,1,.3,1)`), niente rimbalzi. GSAP + Scro
 2. Indice servizi: righe che entrano in sequenza; su desktop una foto segue il cursore sulla riga attiva.
 3. Fiducia: il 4,5 conta da 0 quando entra in vista.
 4. Divisori: le righe sottili si allungano (scaleX) all'ingresso.
-Lenis solo su desktop con puntatore fine. Con `prefers-reduced-motion` tutto è statico e visibile; senza JavaScript il contenuto è comunque leggibile.
+Lenis solo su desktop con puntatore fine. Con `prefers-reduced-motion` niente spostamenti né parallax: restano la schermata di caricamento (dissolvenze) e la fascia dei loghi (lenta, con pausa). Senza JavaScript il contenuto è comunque leggibile.
 
 ## Ingresso, hero e navigazione
-- **Schermata di caricamento** (`Preloader.astro`): solo al primo ingresso nella sessione. Il logo si compone in tre fasce (linea del tetto che si disegna, CARTRADE che sale da una maschera, filetto arancio e BOLZANO), con contatore 000→100 e barra legati al caricamento reale di font e foto. Uscita a sipario con bordo arancio, durata 1,6–3,8 s. Mai con "riduci movimento" o senza JavaScript. Le animazioni della pagina restano in pausa sotto il sipario e partono quando si alza.
+- **Schermata di caricamento** (`Preloader.astro`): a ogni ingresso nel sito e a ogni ricarica, mai navigando tra le pagine; con "riduci movimento" in versione calma (dissolvenze). Il logo si compone in tre fasce (linea del tetto che si disegna, CARTRADE che sale da una maschera, filetto arancio e BOLZANO), con contatore 000→100 e barra legati al caricamento reale di font e foto. Uscita a sipario con bordo arancio, durata 1,6–3,8 s. Mai con "riduci movimento" o senza JavaScript. Le animazioni della pagina restano in pausa sotto il sipario e partono quando si alza.
 - **Hero Home**: foto a tutto schermo virata sul blu del marchio (filtro + navy in moltiplica + velo dal basso). La composizione ricalca il logo: linea del tetto sopra il titolo, filetto arancio con "BOLZANO · BOZEN" sotto. Header trasparente sulla foto che diventa carta allo scorrimento. Fascia dati scura subito sotto.
 - **Hero fotografica delle pagine interne** (`PhotoHero.astro`, oggi su Azienda): stesso linguaggio della Home. Su mobile la foto sta in alto e sfuma nel blu, per non ingrandire troppo foto a bassa risoluzione.
 - **Fascia scorrevole** con i servizi in tipografia larga (piena/contorno alternate), separati dalla linea del tetto.

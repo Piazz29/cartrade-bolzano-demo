@@ -10,16 +10,22 @@ import brands from '../data/brands.json';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const copy = {
-  it: { label: 'Tutte le marche', note: 'Revisione, officina e carrozzeria per ogni marca.' },
-  de: { label: 'Alle Marken', note: 'Revision, Werkstatt und Karosserie für jede Marke.' },
+  it: { label: 'Tutte le marche', note: 'Revisione, officina e carrozzeria per ogni marca.', pause: 'Ferma lo scorrimento dei loghi', play: 'Riprendi lo scorrimento dei loghi' },
+  de: { label: 'Alle Marken', note: 'Revision, Werkstatt und Karosserie für jede Marke.', pause: 'Logo-Laufband anhalten', play: 'Logo-Laufband fortsetzen' },
 }[lang];
 // Correzione ottica: i loghi larghi e bassi vengono ingranditi per pesare come quelli tondi
 const optical: Record<string, number> = { audi: 1.55, ford: 1.5, kia: 1.55, dacia: 1.5, mini: 1.5, jeep: 1.35, opel: 1.25, hyundai: 1.2, toyota: 1.12, volvo: 1.05 };
 ---
-<section class="brands" aria-label={copy.label}>
+<section class="brands" aria-label={copy.label} data-brands>
   <div class="head">
-    <p class="t-label">{copy.label}</p>
-    <p class="note">{copy.note}</p>
+    <div class="head-text">
+      <p class="t-label">{copy.label}</p>
+      <p class="note">{copy.note}</p>
+    </div>
+    <button type="button" class="mq-toggle" aria-pressed="false" aria-label={copy.pause} data-label-pause={copy.pause} data-label-play={copy.play} data-mq-toggle>
+      <span class="i-pause" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><rect x="3" y="2" width="2.5" height="10" rx="0.5" fill="currentColor"/><rect x="8.5" y="2" width="2.5" height="10" rx="0.5" fill="currentColor"/></svg></span>
+      <span class="i-play" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M4 2.2v9.6a.5.5 0 0 0 .76.43l7.6-4.8a.5.5 0 0 0 0-.86l-7.6-4.8A.5.5 0 0 0 4 2.2Z" fill="currentColor"/></svg></span>
+    </button>
   </div>
   <div class="mq" aria-hidden="true">
     <div class="mq-track">
@@ -44,12 +50,14 @@ const optical: Record<string, number> = { audi: 1.55, ford: 1.5, kia: 1.55, daci
     border-block: 1px solid var(--line);
     background: var(--color-paper);
   }
-  .head { padding: 1.25rem var(--gutter) 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.75rem; }
+  .head { padding: 1.25rem var(--gutter) 0; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .head-text { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.75rem; }
   .head .t-label { color: var(--color-ink); }
   .note { font-size: 0.875rem; color: var(--color-muted); }
   @media (min-width: 64rem) {
     .brands { grid-template-columns: 17rem minmax(0, 1fr); align-items: center; }
-    .head { flex-direction: column; gap: 0.4rem; padding: 0 1.5rem 0 var(--gutter); border-right: 1px solid var(--line); align-self: stretch; justify-content: center; }
+    .head { padding: 0 1.25rem 0 var(--gutter); border-right: 1px solid var(--line); align-self: stretch; }
+    .head-text { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
     .note { max-width: 24ch; }
   }
   @media (min-width: 90rem) { .head { padding-left: calc((100vw - 90rem) / 2 + var(--gutter)); } .brands { grid-template-columns: calc((100vw - 90rem) / 2 + 17rem) minmax(0, 1fr); } }
@@ -65,6 +73,38 @@ const optical: Record<string, number> = { audi: 1.55, ford: 1.5, kia: 1.55, daci
   .logo { display: grid; place-items: center; flex: none; width: calc(clamp(2.5rem, 4.2vw, 3.5rem) * var(--s)); height: clamp(2.5rem, 4.2vw, 3.5rem); }
   .logo svg { width: 100%; height: calc(100% * var(--s)); fill: color-mix(in oklab, var(--color-ink) 72%, transparent); overflow: visible; }
   @keyframes mq { to { transform: translateX(-50%); } }
-  @media (prefers-reduced-motion: reduce) { .mq-track { animation: none; } }
+  /* "Riduci movimento": scorre comunque, molto più lento (le regole vincono sull'azzeramento globale) */
+  @media (prefers-reduced-motion: reduce) {
+    .mq-track { animation-duration: 140s !important; animation-iteration-count: infinite !important; }
+  }
+  .brands.is-paused .mq-track { animation-play-state: paused !important; }
+
+  .mq-toggle {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    color: var(--color-ink);
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  }
+  .mq-toggle:hover { background: var(--color-ink); color: var(--color-paper); border-color: var(--color-ink); }
+  .mq-toggle .i-play { display: none; }
+  .mq-toggle[aria-pressed='true'] .i-play { display: block; }
+  .mq-toggle[aria-pressed='true'] .i-pause { display: none; }
+  .mq-toggle span { display: block; line-height: 0; }
 }
 </style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-brands]').forEach((root) => {
+    const btn = root.querySelector<HTMLButtonElement>('[data-mq-toggle]')!;
+    btn.addEventListener('click', () => {
+      const paused = root.classList.toggle('is-paused');
+      btn.setAttribute('aria-pressed', String(paused));
+      btn.setAttribute('aria-label', paused ? btn.dataset.labelPlay! : btn.dataset.labelPause!);
+    });
+  });
+</script>

@@ -20,6 +20,7 @@ const site = Astro.site!.toString().replace(/\/$/, '');
         var langs = navigator.languages || [navigator.language || ''];
         var de = langs.some(function (l) { return /^de\b/i.test(l); });
         var itFirst = /^it\b/i.test(langs[0] || '');
+        try { sessionStorage.setItem('ct-entry', '1'); } catch (e) {}
         location.replace(de && !itFirst ? '/de/' : '/it/');
       })();
     </script>

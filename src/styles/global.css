@@ -444,7 +444,9 @@ html.is-loading :is(main, header) *::after { animation-play-state: paused !impor
   }
 }
 
-/* Spazio per la barra CTA fissa su mobile */
+/* Spazio per la barra CTA fissa su mobile. scroll-padding-bottom: quando la pagina scorre fino a un elemento
+   (focus da tastiera, primo campo con errore nei moduli) questo non finisce sotto la barra (WCAG 2.4.11) */
 @media (max-width: 63.99rem) {
   body { padding-bottom: calc(4.25rem + env(safe-area-inset-bottom)); }
+  html { scroll-padding-bottom: calc(5.25rem + env(safe-area-inset-bottom)); }
 }
