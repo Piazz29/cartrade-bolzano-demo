@@ -1,0 +1,160 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import Icon from '../../components/Icon.astro';
+import { richiediLogin } from '../../lib/server/pagina';
+import { ETICHETTE_INTERESSI } from '../../lib/crm/campagne';
+import { INTERESSI } from '../../lib/crm/types';
+
+export const prerender = false;
+const no = richiediLogin(Astro);
+if (no) return no;
+---
+<AdminLayout title="Clienti" current="clienti">
+  <div class="a-head">
+    <div>
+      <h1 class="a-h1">Clienti</h1>
+      <p class="a-sub" data-count aria-live="polite">Caricamento…</p>
+    </div>
+  </div>
+
+  <form class="filters" data-filters role="search" onsubmit="return false">
+    <div class="search">
+      <label for="q" class="sr-only">Cerca per nome, targa, email o telefono</label>
+      <Icon name="search" size={18} class="search-ico" />
+      <input id="q" name="q" type="search" class="input" placeholder="Nome, targa, email…" autocomplete="off" enterkeyhint="search" />
+    </div>
+    <details class="more" data-more>
+      <summary class="btn btn-ghost btn-sm"><Icon name="filter" size={18} /> Filtri <span class="t-num" data-nf></span></summary>
+      <div class="grid-f">
+        <div class="field">
+          <label for="f-entro">Scadenza revisione</label>
+          <select id="f-entro" name="entro" class="input">
+            <option value="">Tutte</option>
+            <option value="30">Entro 30 giorni</option>
+            <option value="60">Entro 60 giorni</option>
+            <option value="90">Entro 90 giorni</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-int">Interesse</label>
+          <select id="f-int" name="interesse" class="input">
+            <option value="">Tutti</option>
+            {INTERESSI.map((i) => <option value={i}>{ETICHETTE_INTERESSI[i].it}</option>)}
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-lingua">Lingua</label>
+          <select id="f-lingua" name="lingua" class="input">
+            <option value="">Tutte</option>
+            <option value="it">Italiano</option>
+            <option value="de">Tedesco</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-off">Consenso offerte</label>
+          <select id="f-off" name="offerte" class="input">
+            <option value="">Indifferente</option>
+            <option value="si">Sì</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-canale">Canale</label>
+          <select id="f-canale" name="canale" class="input">
+            <option value="">Tutti</option>
+            <option value="email">Email</option>
+            <option value="whatsapp">WhatsApp</option>
+          </select>
+        </div>
+        <div class="flex items-end">
+          <button type="button" class="btn btn-ghost btn-sm w-full" data-clear>Azzera filtri</button>
+        </div>
+      </div>
+    </details>
+  </form>
+
+  <ul class="rows mt-2" data-list></ul>
+</AdminLayout>
+
+<style>
+  .filters { display: grid; gap: 0.75rem; margin-bottom: 0.5rem; }
+  .search { position: relative; }
+  .search :global(.search-ico) { position: absolute; left: 0.8rem; top: 50%; transform: translateY(-50%); color: var(--color-muted); pointer-events: none; }
+  .search .input { padding-left: 2.5rem; }
+  .more summary { list-style: none; cursor: pointer; width: max-content; }
+  .more summary::-webkit-details-marker { display: none; }
+  .grid-f { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.75rem; padding: 0.9rem; background: var(--color-paper-2); border: 1px solid var(--line); }
+  @media (min-width: 64rem) {
+    .filters { grid-template-columns: minmax(0, 1fr) auto; align-items: start; }
+    .grid-f { grid-column: 1 / -1; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .more { display: contents; }
+    .more summary { grid-column: 2; grid-row: 1; }
+    .more:not([open]) .grid-f { display: none; }
+  }
+</style>
+
+<script>
+  import { carica, aggiornaOgni, type Dati } from '../../admin/store';
+  import { rigaCliente, scheletro, vuoto } from '../../admin/ui';
+  import { filtra, type Filtri } from '../../lib/crm/regole';
+
+  const form = document.querySelector<HTMLFormElement>('[data-filters]')!;
+  const list = document.querySelector<HTMLElement>('[data-list]')!;
+  const count = document.querySelector<HTMLElement>('[data-count]')!;
+  const nf = document.querySelector<HTMLElement>('[data-nf]')!;
+  const more = document.querySelector<HTMLDetailsElement>('[data-more]')!;
+  const keys = ['q', 'entro', 'interesse', 'lingua', 'offerte', 'canale'] as const;
+  const field = (k: string) => form.elements.namedItem(k) as HTMLInputElement | HTMLSelectElement;
+  let dati: Dati | null = null;
+  const visti = new Set<string>();
+  let primo = true;
+
+  // Filtri dall'URL (link condivisibili, es. dalla panoramica: ?entro=30)
+  const params = new URLSearchParams(location.search);
+  keys.forEach((k) => params.get(k) && (field(k).value = params.get(k)!));
+  if (keys.slice(1).some((k) => params.get(k))) more.open = true;
+
+  const filtri = (): Filtri => ({
+    q: field('q').value,
+    scadenzaEntro: Number(field('entro').value) as Filtri['scadenzaEntro'],
+    interesse: field('interesse').value as Filtri['interesse'],
+    lingua: field('lingua').value as Filtri['lingua'],
+    offerte: field('offerte').value as Filtri['offerte'],
+    canale: field('canale').value as Filtri['canale'],
+  });
+
+  function render() {
+    if (!dati) return;
+    const f = filtri();
+    const out = filtra(dati.clienti, f);
+    const veri = out.filter((c) => !c.esempio).length;
+    const attivi = keys.slice(1).filter((k) => field(k).value).length;
+    nf.textContent = attivi ? `(${attivi})` : '';
+    count.textContent = `${out.length} ${out.length === 1 ? 'cliente' : 'clienti'}${out.length !== dati.clienti.length ? ` su ${dati.clienti.length}` : ''}${veri ? ` · ${veri} ${veri === 1 ? 'nuovo' : 'nuovi'} in cima` : ''}`;
+    list.innerHTML = out.length
+      ? out.map((c) => rigaCliente(c, { flash: !primo && !c.esempio && !visti.has(c.id) })).join('')
+      : `<li>${vuoto('Nessun cliente con questi filtri.', ' Prova ad allargare la ricerca o azzera i filtri.')}</li>`;
+    dati.clienti.filter((c) => !c.esempio).forEach((c) => visti.add(c.id));
+    primo = false;
+    const q = new URLSearchParams();
+    keys.forEach((k) => field(k).value && q.set(k, field(k).value));
+    history.replaceState(null, '', `${location.pathname}${q.size ? `?${q}` : ''}`);
+  }
+
+  form.addEventListener('input', render);
+  form.addEventListener('change', render);
+  document.querySelector('[data-clear]')!.addEventListener('click', () => {
+    keys.slice(1).forEach((k) => (field(k).value = ''));
+    render();
+  });
+
+  list.innerHTML = scheletro(8);
+  carica().then((d) => {
+    dati = d;
+    render();
+  });
+  aggiornaOgni(10, (d) => {
+    dati = d;
+    render();
+  });
+</script>

@@ -1,0 +1,114 @@
+---
+// Locandina A5 per il bancone, bilingue. Il QR (SVG, pacchetto `qrcode`) porta all'iscrizione con ?demo=<DEMO_KEY>:
+// solo chi arriva da qui riceve l'email di benvenuto. Il QR si genera sul server a ogni richiesta della pagina
+// (non in build): una pagina prerenderizzata pubblicherebbe il DEMO_KEY in un file statico accessibile a tutti.
+import QRCode from 'qrcode';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import Icon from '../../components/Icon.astro';
+import RoofLine from '../../components/RoofLine.astro';
+import { richiediLogin } from '../../lib/server/pagina';
+import { config } from '../../lib/server/config';
+import { site } from '../../data/site';
+import { routes } from '../../i18n/routes';
+
+export const prerender = false;
+const no = richiediLogin(Astro);
+if (no) return no;
+
+const url = `${Astro.url.origin}${routes.promemoria.it}${config.demoKey ? `?demo=${encodeURIComponent(config.demoKey)}` : ''}`;
+const qr = await QRCode.toString(url, { type: 'svg', margin: 0, errorCorrectionLevel: 'M', color: { dark: '#0E2340', light: '#0000' } });
+---
+<AdminLayout title="Locandina QR" current="locandina" wide>
+  <div class="a-head no-print">
+    <div>
+      <h1 class="a-h1">Locandina per il bancone</h1>
+      <p class="a-sub">Formato A5. Stampala a colori, al 100%, senza margini aggiunti dalla stampante.</p>
+    </div>
+    <button type="button" class="btn btn-primary" onclick="window.print()"><Icon name="printer" size={18} /> Stampa</button>
+  </div>
+  {!config.demoKey && (
+    <p class="sim-banner no-print" role="note"><Icon name="alert" size={18} class="shrink-0" /> DEMO_KEY non impostato: chi si iscrive da questo QR viene salvato, ma non riceve l’email di benvenuto.</p>
+  )}
+  <details class="no-print mb-6 text-sm">
+    <summary class="cursor-pointer font-semibold">Indirizzo del QR</summary>
+    <code class="mt-2 block overflow-x-auto rounded-[2px] border border-[var(--line)] bg-paper-2 p-3 text-xs">{url}</code>
+    <p class="mt-2 text-muted">Il QR punta a questo indirizzo dell’anteprima: se cambia il dominio, ristampa la locandina.</p>
+  </details>
+
+  <div class="stage">
+    <article class="sheet" aria-label="Anteprima della locandina A5">
+      <header class="s-top">
+        <img src="/brand/logo.svg" alt="Car Trade Bolzano" width="904" height="282" class="s-logo" />
+        <p class="t-label s-dekra">Centro revisioni affiliato DEKRA<br /><span lang="de">DEKRA-Partner für die Revision</span></p>
+      </header>
+      <RoofLine class="s-roof" weight={2} draw={false} />
+      <h2 class="s-h">Ti ricordiamo noi la revisione<span class="dot">.</span></h2>
+      <p class="s-h-de" lang="de">Wir erinnern Sie an die Revision.</p>
+
+      <div class="s-mid">
+        <div class="s-qr" set:html={qr} role="img" aria-label="Codice QR per l'iscrizione ai promemoria" />
+        <div class="s-cta">
+          <p class="s-scan">Inquadra e iscriviti in 30 secondi.</p>
+          <p class="s-scan-de" lang="de">Code scannen, in 30 Sekunden angemeldet.</p>
+          <ol class="s-points">
+            <li><b>30 e 7 giorni prima</b><span lang="de">30 und 7 Tage vorher</span></li>
+            <li><b>Email o WhatsApp</b><span lang="de">E-Mail oder WhatsApp</span></li>
+            <li><b>Gratis, disdici quando vuoi</b><span lang="de">Kostenlos, jederzeit abbestellbar</span></li>
+          </ol>
+        </div>
+      </div>
+
+      <footer class="s-foot">
+        <span>{site.address.street.it} · {site.address.postalCode} {site.address.city.it}</span>
+        <span class="t-num">{site.phone.display}</span>
+      </footer>
+    </article>
+  </div>
+</AdminLayout>
+
+<style>
+  .stage { display: grid; place-items: center; padding: 1rem 0 2rem; overflow-x: auto; }
+  /* A5 = 148 × 210 mm. A schermo la scaliamo per stare nella colonna. */
+  .sheet {
+    --u: min(1mm, calc((100vw - 2rem) / 148));
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: calc(148 * var(--u));
+    height: calc(210 * var(--u));
+    padding: calc(11 * var(--u)) calc(11 * var(--u)) 0;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    box-shadow: 0 1px 0 var(--line), 0 18px 50px -20px rgb(10 26 48 / 0.35);
+    overflow: hidden;
+  }
+  @media (min-width: 64rem) { .sheet { --u: 1mm; } }
+  .s-top { display: flex; align-items: flex-start; justify-content: space-between; gap: calc(4 * var(--u)); }
+  .s-logo { width: calc(46 * var(--u)); height: auto; }
+  .s-dekra { text-align: right; font-size: calc(2.5 * var(--u)); line-height: 1.4; color: var(--color-muted); }
+  .sheet :global(.s-roof) { display: block; width: 100%; height: calc(10 * var(--u)); margin-top: calc(9 * var(--u)); }
+  .s-h { margin-top: calc(5 * var(--u)); font-family: var(--font-wide); font-stretch: 125%; font-weight: 650; font-size: calc(11.5 * var(--u)); line-height: 0.98; letter-spacing: -0.035em; }
+  .s-h .dot { color: var(--color-orange); }
+  .s-h-de { margin-top: calc(3 * var(--u)); font-stretch: 118%; font-weight: 560; font-size: calc(5 * var(--u)); color: var(--color-muted); letter-spacing: -0.01em; }
+  .s-mid { display: grid; grid-template-columns: calc(56 * var(--u)) 1fr; gap: calc(7 * var(--u)); align-items: center; margin-top: auto; margin-bottom: calc(9 * var(--u)); }
+  .s-qr { position: relative; padding: calc(4 * var(--u)); background: var(--color-paper); outline: calc(0.6 * var(--u)) solid var(--color-ink); }
+  .s-qr::after { content: ''; position: absolute; right: calc(-2.2 * var(--u)); bottom: calc(-2.2 * var(--u)); width: calc(14 * var(--u)); height: calc(14 * var(--u)); border-right: calc(1.4 * var(--u)) solid var(--color-orange); border-bottom: calc(1.4 * var(--u)) solid var(--color-orange); }
+  .s-qr :global(svg) { display: block; width: 100%; height: auto; }
+  .s-scan { font-stretch: 118%; font-weight: 640; font-size: calc(5.6 * var(--u)); line-height: 1.12; letter-spacing: -0.015em; }
+  .s-scan-de { margin-top: calc(1.5 * var(--u)); font-size: calc(3.6 * var(--u)); line-height: 1.3; color: var(--color-muted); }
+  .s-points { margin-top: calc(5 * var(--u)); border-top: calc(0.3 * var(--u)) solid var(--line-strong); }
+  .s-points li { display: grid; padding-block: calc(2 * var(--u)); border-bottom: calc(0.3 * var(--u)) solid var(--line); font-size: calc(3.2 * var(--u)); line-height: 1.3; }
+  .s-points b { font-weight: 620; }
+  .s-points span { color: var(--color-muted); }
+  .s-foot { display: flex; justify-content: space-between; gap: calc(3 * var(--u)); margin-inline: calc(-11 * var(--u)); padding: calc(5 * var(--u)) calc(11 * var(--u)); background: var(--color-night); color: var(--color-paper); font-size: calc(3.2 * var(--u)); font-weight: 560; }
+
+  @media print {
+    @page { size: A5 portrait; margin: 0; }
+    :global(.topbar), :global(.sidenav), :global(.tabbar), :global(.toasts), :global(.sim-banner), :global(.skip), .no-print { display: none !important; }
+    :global(.content) { padding: 0 !important; max-width: none !important; }
+    :global(.shell) { display: block !important; }
+    :global(body.admin) { background: #fff; }
+    .stage { padding: 0; display: block; }
+    .sheet { --u: 1mm; box-shadow: none; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>

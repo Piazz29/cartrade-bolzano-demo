@@ -13,14 +13,8 @@ export default defineConfig({
   trailingSlash: 'ignore',
   // Il sito pubblico resta prerenderizzato. Solo /api/* e /admin/* sono on-demand (export const prerender = false).
   adapter: vercel(),
-  i18n: {
-    locales: ['it', 'de'],
-    defaultLocale: 'it',
-    routing: {
-      prefixDefaultLocale: true,
-      redirectToDefaultLocale: false,
-    },
-  },
+  // Niente i18n di Astro: le rotte IT/DE sono gestite a mano (src/i18n/routes.ts, slug localizzati).
+  // Il suo middleware manderebbe in 404 le pagine on-demand senza prefisso di lingua (/admin/).
   env: {
     schema: {
       SUPABASE_URL: secret(),

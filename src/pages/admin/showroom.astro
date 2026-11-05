@@ -1,0 +1,217 @@
+---
+// Showroom: elenco auto e "Aggiungi auto" dal telefono, con anteprima della scheda come apparirà sul sito.
+// Le auto aggiunte qui restano nell'admin (Supabase): il sito pubblico è statico. Come funzionerà in produzione: README.
+import { getCollection } from 'astro:content';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import Icon from '../../components/Icon.astro';
+import { richiediLogin } from '../../lib/server/pagina';
+import { formatPrice } from '../../data/site';
+import { carLabels, formatKm } from '../../i18n/cars';
+import { carUrl } from '../../i18n/routes';
+
+export const prerender = false;
+const no = richiediLogin(Astro);
+if (no) return no;
+const cars = await getCollection('cars');
+const L = carLabels.it;
+const thisYear = new Date().getFullYear();
+---
+<AdminLayout title="Showroom" current="showroom">
+  <div class="a-head">
+    <div>
+      <h1 class="a-h1">Showroom</h1>
+      <p class="a-sub">Fotografa l’auto, compila cinque campi e vedi subito la scheda come apparirà sul sito.</p>
+    </div>
+  </div>
+
+  <div class="grid gap-x-10 lg:grid-cols-[minmax(0,1fr)_20rem]">
+    <section aria-labelledby="t-add">
+      <div class="a-sec-head"><h2 id="t-add" class="a-h2">Aggiungi auto</h2></div>
+      <form class="add" data-add novalidate>
+        <label class="shot" data-shot>
+          <input type="file" name="foto" accept="image/*" capture="environment" class="sr-only" data-file />
+          <span class="shot-empty" data-shot-empty><Icon name="camera" size={28} /><span class="font-semibold">Scatta o scegli la foto</span><span class="text-sm text-muted">Orizzontale, auto intera, luce di giorno</span></span>
+        </label>
+        <p class="field-error" data-foto-err hidden></p>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="field"><label for="marca">Marca *</label><input id="marca" name="marca" class="input" required autocomplete="off" list="marche" maxlength="60" /></div>
+          <div class="field"><label for="modello">Modello *</label><input id="modello" name="modello" class="input" required autocomplete="off" maxlength="60" /></div>
+          <div class="field col-span-2"><label for="versione">Versione</label><input id="versione" name="versione" class="input" placeholder="es. 1.5 TSI Life" maxlength="80" /></div>
+          <div class="field"><label for="prezzo">Prezzo (€) *</label><input id="prezzo" name="prezzo" class="input t-num" inputmode="numeric" required placeholder="18900" /></div>
+          <div class="field"><label for="km">Chilometri *</label><input id="km" name="km" class="input t-num" inputmode="numeric" required placeholder="42000" /></div>
+          <div class="field"><label for="anno">Anno *</label>
+            <select id="anno" name="anno" class="input t-num" required>
+              {Array.from({ length: 26 }, (_, i) => thisYear - i).map((y, i) => <option value={y} selected={i === 3}>{y}</option>)}
+            </select>
+          </div>
+          <div class="field"><label for="alim">Alimentazione</label>
+            <select id="alim" name="alimentazione" class="input">
+              <option value="petrol">Benzina</option><option value="diesel">Diesel</option><option value="hybrid">Ibrida</option><option value="phev">Ibrida plug-in</option><option value="electric">Elettrica</option><option value="lpg">GPL</option>
+            </select>
+          </div>
+          <fieldset class="col-span-2">
+            <legend class="mb-2 text-[0.8125rem] font-[560]">Cambio</legend>
+            <div class="seg"><input type="radio" name="cambio" id="cm" value="manual" checked /><label for="cm">Manuale</label><input type="radio" name="cambio" id="ca" value="automatic" /><label for="ca">Automatico</label></div>
+          </fieldset>
+        </div>
+        <datalist id="marche">{['Audi', 'BMW', 'Citroën', 'Dacia', 'Fiat', 'Ford', 'Hyundai', 'Jeep', 'Kia', 'Mercedes-Benz', 'Mini', 'Opel', 'Peugeot', 'Renault', 'Seat', 'Škoda', 'Suzuki', 'Toyota', 'Volkswagen', 'Volvo'].map((m) => <option value={m} />)}</datalist>
+        <p class="field-error" data-err role="alert" hidden></p>
+        <button type="submit" class="btn btn-primary w-full sm:w-auto" data-save><Icon name="plus" size={18} /> Salva auto</button>
+      </form>
+    </section>
+
+    <aside class="a-sec lg:mt-0" aria-labelledby="t-prev">
+      <div class="a-sec-head"><h2 id="t-prev" class="a-h2">Anteprima sul sito</h2></div>
+      <article class="car mt-3" aria-live="polite">
+        <div class="car-photo" data-p-photo><span>Foto</span></div>
+        <p class="t-label mt-4 text-muted" data-p-make>Marca</p>
+        <p class="t-h3 mt-1.5" data-p-model>Modello</p>
+        <p class="mt-1 truncate text-[0.9375rem] text-muted" data-p-version>&nbsp;</p>
+        <ul class="specs mt-4 t-num">
+          <li data-p-year>–</li><li data-p-km>– km</li><li data-p-fuel>–</li><li data-p-gear>–</li>
+        </ul>
+        <p class="mt-4 t-num text-[1.375rem] font-semibold" style="font-stretch:115%" data-p-price>– €</p>
+      </article>
+    </aside>
+  </div>
+
+  <section class="a-sec" aria-labelledby="t-list">
+    <div class="a-sec-head"><h2 id="t-list" class="a-h2">Auto</h2><span class="t-label text-muted" data-n></span></div>
+    <ul class="rows" data-added></ul>
+    <ul class="rows">
+      {cars.map((c) => (
+        <li class="row">
+          <span>
+            <a class="row-name link-u" href={carUrl(c.id, 'it')} target="_blank" rel="noopener">{c.data.make} {c.data.model}</a>
+            <span class="row-meta"><span class="tag tag-line">Sul sito</span> {c.data.demo && <span class="tag tag-ex">Demo</span>} {c.data.year} · {formatKm(c.data.km, 'it')} · {L.fuel[c.data.fuel]}</span>
+          </span>
+          <span class="row-side"><strong>{formatPrice(c.data.price, 'it')}</strong></span>
+        </li>
+      ))}
+    </ul>
+  </section>
+</AdminLayout>
+
+<style>
+  .add { display: grid; gap: 1rem; padding-top: 0.75rem; }
+  .shot { position: relative; display: grid; place-items: center; aspect-ratio: 4 / 3; max-height: 18rem; overflow: hidden; border: 1.5px dashed var(--line-strong); border-radius: 2px; background: var(--color-paper-2); cursor: pointer; }
+  .shot:hover { border-color: var(--color-orange); }
+  .shot:focus-within { outline: 2px solid var(--color-orange); outline-offset: 3px; }
+  .shot-empty { display: grid; justify-items: center; gap: 0.35rem; text-align: center; padding: 1rem; }
+  .shot :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .car-photo { display: grid; place-items: center; aspect-ratio: 4 / 3; background: var(--color-paper-3); color: var(--color-muted); overflow: hidden; }
+  .car-photo :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .specs { display: grid; grid-template-columns: 1fr 1fr; font-size: 0.875rem; border-top: 1px solid var(--line); }
+  .specs li { padding: 0.45rem 0; border-bottom: 1px solid var(--line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .specs li:nth-child(odd) { padding-right: 0.75rem; border-right: 1px solid var(--line); }
+  .specs li:nth-child(even) { padding-left: 0.75rem; }
+  [data-added] :global(.thumb) { width: 4.5rem; aspect-ratio: 4 / 3; object-fit: cover; background: var(--color-paper-3); }
+</style>
+
+<script>
+  import { aggiungiAuto, carica } from '../../admin/store';
+  import { esc, occupato, toast } from '../../admin/ui';
+  import type { Auto } from '../../lib/crm/types';
+
+  const FUEL: Record<string, string> = { petrol: 'Benzina', diesel: 'Diesel', hybrid: 'Ibrida', phev: 'Ibrida plug-in', electric: 'Elettrica', lpg: 'GPL' };
+  const GEAR: Record<string, string> = { manual: 'Manuale', automatic: 'Automatico' };
+  const eur = new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+  const num = new Intl.NumberFormat('it-IT');
+  const form = document.querySelector<HTMLFormElement>('[data-add]')!;
+  const file = form.querySelector<HTMLInputElement>('[data-file]')!;
+  const shot = form.querySelector<HTMLElement>('[data-shot]')!;
+  const q = (s: string) => document.querySelector<HTMLElement>(s)!;
+  const v = (n: string) => (form.elements.namedItem(n) as HTMLInputElement).value.trim();
+  let foto: File | null = null;
+  let anteprima: string | null = null;
+
+  /** Foto ridimensionata nel browser: lato lungo 1600 px per il sito, 640 px per l'anteprima */
+  async function ridimensiona(f: File, lato: number, q = 0.82): Promise<Blob | null> {
+    try {
+      const bmp = await createImageBitmap(f);
+      const k = Math.min(1, lato / Math.max(bmp.width, bmp.height));
+      const c = Object.assign(document.createElement('canvas'), { width: Math.round(bmp.width * k), height: Math.round(bmp.height * k) });
+      c.getContext('2d')!.drawImage(bmp, 0, 0, c.width, c.height);
+      return await new Promise((r) => c.toBlob(r, 'image/jpeg', q));
+    } catch {
+      return null;
+    }
+  }
+  const dataUrl = (b: Blob) => new Promise<string>((r) => { const fr = new FileReader(); fr.onload = () => r(String(fr.result)); fr.readAsDataURL(b); });
+
+  file.addEventListener('change', async () => {
+    const f = file.files?.[0];
+    const err = q('[data-foto-err]');
+    err.hidden = true;
+    if (!f) return;
+    const big = await ridimensiona(f, 1600);
+    const small = await ridimensiona(f, 640, 0.7);
+    if (!big || !small) {
+      err.textContent = 'Questa foto non si riesce a leggere. Prova con un’altra o scattala di nuovo.';
+      err.hidden = false;
+      return;
+    }
+    foto = new File([big], 'auto.jpg', { type: 'image/jpeg' });
+    anteprima = await dataUrl(small);
+    shot.querySelector('img')?.remove();
+    shot.append(Object.assign(document.createElement('img'), { src: anteprima, alt: '' }));
+    q('[data-shot-empty]').hidden = true;
+    preview();
+  });
+
+  function preview() {
+    q('[data-p-make]').textContent = v('marca') || 'Marca';
+    q('[data-p-model]').textContent = v('modello') || 'Modello';
+    q('[data-p-version]').textContent = v('versione') || ' ';
+    q('[data-p-year]').textContent = v('anno');
+    q('[data-p-km]').textContent = v('km') ? `${num.format(Number(v('km').replace(/\D/g, '')))} km` : '– km';
+    q('[data-p-fuel]').textContent = FUEL[v('alimentazione')];
+    q('[data-p-gear]').textContent = GEAR[(form.querySelector('input[name="cambio"]:checked') as HTMLInputElement).value];
+    q('[data-p-price]').textContent = v('prezzo') ? eur.format(Number(v('prezzo').replace(/\D/g, ''))) : '– €';
+    q('[data-p-photo]').innerHTML = anteprima ? `<img src="${anteprima}" alt="">` : '<span>Foto</span>';
+  }
+  form.addEventListener('input', preview);
+  form.addEventListener('change', preview);
+  preview();
+
+  function renderAdded(list: Auto[]) {
+    q('[data-n]').textContent = list.length ? `${list.length} aggiunte qui` : '';
+    q('[data-added]').innerHTML = list.map((a) => `<li class="row" style="grid-template-columns:auto minmax(0,1fr) auto">
+      ${a.foto_url ? `<img class="thumb" src="${esc(a.foto_url)}" alt="">` : '<span class="thumb"></span>'}
+      <span><span class="row-name">${esc(a.marca)} ${esc(a.modello)}</span><span class="row-meta"><span class="tag tag-new">Nuova</span>${a.locale ? ' <span class="tag tag-line">Locale</span>' : ''} ${a.anno} · ${num.format(a.km)} km · ${esc(FUEL[a.alimentazione] ?? '')}</span></span>
+      <span class="row-side"><strong>${esc(eur.format(a.prezzo))}</strong><span class="text-muted">solo admin</span></span></li>`).join('');
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = q('[data-err]');
+    const miss = ['marca', 'modello', 'prezzo', 'km'].filter((k) => !v(k));
+    form.querySelectorAll<HTMLInputElement>('input[required]').forEach((i) => i.setAttribute('aria-invalid', miss.includes(i.name) ? 'true' : 'false'));
+    if (miss.length) {
+      err.textContent = 'Mancano marca, modello, prezzo o chilometri.';
+      err.hidden = false;
+      form.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+      return;
+    }
+    err.hidden = true;
+    const fd = new FormData(form);
+    fd.delete('foto');
+    if (foto) fd.set('foto', foto);
+    try {
+      const { risultato } = await occupato(form.querySelector<HTMLButtonElement>('[data-save]')!, 'Salvataggio…', () => aggiungiAuto(fd, anteprima));
+      toast(risultato);
+      form.reset();
+      foto = null;
+      anteprima = null;
+      shot.querySelector('img')?.remove();
+      q('[data-shot-empty]').hidden = false;
+      preview();
+      renderAdded((await carica()).auto);
+    } catch {
+      err.textContent = 'Controlla i campi: prezzo, chilometri e anno devono essere numeri validi.';
+      err.hidden = false;
+    }
+  });
+
+  carica().then((d) => renderAdded(d.auto));
+</script>

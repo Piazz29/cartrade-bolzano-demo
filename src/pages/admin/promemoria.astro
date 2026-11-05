@@ -1,0 +1,174 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { richiediLogin } from '../../lib/server/pagina';
+
+export const prerender = false;
+const no = richiediLogin(Astro);
+if (no) return no;
+---
+<AdminLayout title="Promemoria" current="promemoria">
+  <div class="a-head">
+    <div>
+      <h1 class="a-h1">Promemoria automatici</h1>
+      <p class="a-sub">Partono da soli a chi ha dato il consenso. Con il link alla prenotazione DEKRA dentro.</p>
+    </div>
+  </div>
+
+  <div class="grid gap-x-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+    <div>
+      <section aria-labelledby="t-regole">
+        <div class="a-sec-head"><h2 id="t-regole" class="a-h2">Regole</h2></div>
+        <form class="rules" data-rules novalidate>
+          <fieldset class="rule">
+            <legend class="sr-only">Revisione</legend>
+            <label class="switch"><input type="checkbox" name="rev" /> Scadenza revisione</label>
+            <div class="rule-fields">
+              <div class="field">
+                <label for="r1">Primo avviso, giorni prima</label>
+                <input id="r1" name="r1" type="number" min="1" max="120" inputmode="numeric" class="input t-num" />
+              </div>
+              <div class="field">
+                <label for="r2">Secondo avviso, giorni prima</label>
+                <input id="r2" name="r2" type="number" min="0" max="120" inputmode="numeric" class="input t-num" />
+              </div>
+            </div>
+          </fieldset>
+          <fieldset class="rule">
+            <legend class="sr-only">Tagliando</legend>
+            <label class="switch"><input type="checkbox" name="tag" /> Tagliando</label>
+            <div class="rule-fields">
+              <div class="field">
+                <label for="t1">Mesi dopo l’ultimo tagliando</label>
+                <input id="t1" name="t1" type="number" min="1" max="36" inputmode="numeric" class="input t-num" />
+              </div>
+            </div>
+          </fieldset>
+          <p class="text-sm text-muted">Il secondo avviso a 0 lo disattiva. Se un cliente si iscrive dopo la data del primo avviso, riceve subito quello successivo.</p>
+          <div><button type="submit" class="btn btn-ink btn-sm">Salva regole</button></div>
+        </form>
+      </section>
+
+      <section class="a-sec" aria-labelledby="t-next">
+        <div class="a-sec-head">
+          <h2 id="t-next" class="a-h2">Prossimi invii</h2>
+          <span class="t-label text-muted">30 giorni</span>
+        </div>
+        <ul class="rows" data-next></ul>
+      </section>
+    </div>
+
+    <section class="a-sec lg:mt-0" aria-labelledby="t-prev">
+      <div class="a-sec-head"><h2 id="t-prev" class="a-h2">Anteprima</h2></div>
+      <div class="flex flex-wrap gap-3" data-prev-ctrl>
+        <div class="seg" role="radiogroup" aria-label="Messaggio">
+          <input type="radio" name="p-tipo" id="p-rev" value="revisione" checked /><label for="p-rev">Revisione</label>
+          <input type="radio" name="p-tipo" id="p-tag" value="tagliando" /><label for="p-tag">Tagliando</label>
+        </div>
+        <div class="seg" role="radiogroup" aria-label="Lingua">
+          <input type="radio" name="p-lang" id="p-it" value="it" checked /><label for="p-it">IT</label>
+          <input type="radio" name="p-lang" id="p-de" value="de" /><label for="p-de">DE</label>
+        </div>
+        <div class="seg" role="radiogroup" aria-label="Canale">
+          <input type="radio" name="p-ch" id="p-mail" value="email" checked /><label for="p-mail">Email</label>
+          <input type="radio" name="p-ch" id="p-wa" value="whatsapp" /><label for="p-wa">WhatsApp</label>
+        </div>
+      </div>
+      <p class="mt-3 text-sm" data-prev-subject></p>
+      <iframe class="preview-frame mt-3" style="height:46rem" title="Anteprima dell’email di promemoria" data-prev-mail loading="lazy"></iframe>
+      <div class="wa-chat mt-3" data-prev-wa hidden><p class="wa-bubble" data-prev-wa-text></p></div>
+    </section>
+  </div>
+</AdminLayout>
+
+<style>
+  .rules { display: grid; gap: 1rem; padding-top: 0.75rem; }
+  .rule { display: grid; gap: 0.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--line); }
+  .rule-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+  .rule:has(input[type='checkbox']:not(:checked)) .rule-fields { opacity: 0.5; }
+</style>
+
+<script>
+  import { carica, inviaPromemoria, regole, salvaRegole, type Dati } from '../../admin/store';
+  import { dataBreve, esc, occupato, scheletro, toast, vuoto } from '../../admin/ui';
+  import { prossimiInvii, type Regole } from '../../lib/crm/regole';
+  import { promemoria, testoWhatsApp } from '../../lib/crm/messaggi';
+  import { renderEmail } from '../../lib/email/render';
+  import { addDays, isoDate } from '../../lib/revisione';
+  import { nomeCompleto, type Cliente } from '../../lib/crm/types';
+
+  const form = document.querySelector<HTMLFormElement>('[data-rules]')!;
+  const f = (n: string) => form.elements.namedItem(n) as HTMLInputElement;
+  const list = document.querySelector<HTMLElement>('[data-next]')!;
+  let dati: Dati | null = null;
+
+  const fill = (r: Regole) => {
+    f('rev').checked = r.revisione.attiva;
+    f('r1').value = String(r.revisione.giorniPrima[0] ?? 30);
+    f('r2').value = String(r.revisione.giorniPrima[1] ?? 0);
+    f('tag').checked = r.tagliando.attiva;
+    f('t1').value = String(r.tagliando.mesiDopo);
+  };
+  fill(regole());
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const n = (k: string, min: number, max: number, def: number) => Math.min(max, Math.max(min, Math.round(Number(f(k).value)) || def));
+    const g = [n('r1', 1, 120, 30), n('r2', 0, 120, 7)].filter((x) => x > 0);
+    const r: Regole = { revisione: { attiva: f('rev').checked, giorniPrima: [...new Set(g)].sort((a, b) => b - a) }, tagliando: { attiva: f('tag').checked, mesiDopo: n('t1', 1, 36, 12) } };
+    salvaRegole(r);
+    fill(r);
+    toast({ messaggio: 'Regole salvate. Il calendario degli invii è aggiornato.', tono: 'ok' });
+    renderList();
+    // TODO produzione: salvare le regole nel database e leggerle dal job pianificato (vedi README)
+  });
+
+  function renderList() {
+    if (!dati) return;
+    const invii = prossimiInvii(dati.clienti, regole(), dati.eventi, 30);
+    list.innerHTML = invii.length
+      ? invii.slice(0, 40).map((i, k) => `<li class="row${!i.cliente.esempio ? ' is-new' : ''}">
+          <span><a class="row-name link-u" href="/admin/cliente/?id=${encodeURIComponent(i.cliente.id)}">${esc(nomeCompleto(i.cliente))}</a>
+          <span class="row-meta">${i.cliente.esempio ? '<span class="tag tag-ex">Esempio</span>' : '<span class="tag tag-new">Nuovo</span>'} ${i.tipo === 'revisione' ? `Revisione · ${i.giorniPrima} gg prima` : 'Tagliando'} · ${i.cliente.canale === 'whatsapp' ? 'WhatsApp' : 'email'}</span></span>
+          <span class="row-side"><strong>${esc(dataBreve(i.data))}</strong><button type="button" class="btn btn-ghost btn-sm mt-1" data-send="${k}">Invia ora</button></span></li>`).join('')
+      : `<li>${vuoto('Nessun invio nei prossimi 30 giorni.', '')}</li>`;
+    list.querySelectorAll<HTMLButtonElement>('[data-send]').forEach((b) =>
+      b.addEventListener('click', async () => {
+        const i = invii[Number(b.dataset.send)];
+        const r = await occupato(b, 'Invio…', () => inviaPromemoria(i.cliente, i.tipo, i.chiave, isoDate(i.scadenza)));
+        toast(r);
+        dati = await carica();
+        renderList();
+      }),
+    );
+  }
+
+  // Anteprima con un cliente immaginario, scadenza tra 30 giorni
+  const frame = document.querySelector<HTMLIFrameElement>('[data-prev-mail]')!;
+  const prevWa = document.querySelector<HTMLElement>('[data-prev-wa]')!;
+  function renderPreview() {
+    const val = (n: string) => (document.querySelector(`input[name="${n}"]:checked`) as HTMLInputElement).value;
+    const lang = val('p-lang') as 'it' | 'de';
+    const tipo = val('p-tipo') as 'revisione' | 'tagliando';
+    const now = new Date();
+    const c: Cliente = {
+      id: 'anteprima', creato_il: now.toISOString(), nome: lang === 'de' ? 'Andreas' : 'Anna', cognome: lang === 'de' ? 'Hofer' : 'Rossi', email: 'cliente@example.com', telefono: '', targa: 'AB123CD',
+      rif_tipo: 'rev', rif_mese: 1, rif_anno: 2024, scadenza: isoDate(addDays(now, 30)), ultimo_tagliando: null, interessi: ['revisione'], canale: 'email', lingua: lang,
+      consenso_privacy_il: now.toISOString(), consenso_promemoria: true, consenso_offerte: true, origine: 'qr',
+    };
+    const cont = promemoria(c, tipo, location.origin, now, tipo === 'tagliando' ? addDays(now, 3) : undefined);
+    const mail = val('p-ch') === 'email';
+    frame.hidden = !mail;
+    prevWa.hidden = mail;
+    document.querySelector('[data-prev-subject]')!.innerHTML = mail ? `<span class="text-muted">Oggetto:</span> <strong>${esc(cont.oggetto)}</strong>` : '<span class="text-muted">Messaggio WhatsApp</span>';
+    if (mail) frame.srcdoc = renderEmail(cont, { baseUrl: location.origin });
+    else document.querySelector('[data-prev-wa-text]')!.innerHTML = `${esc(testoWhatsApp(tipo === 'tagliando' ? 'tagliando' : 'promemoria', c, location.origin))}<small>09:00</small>`;
+  }
+  document.querySelector('[data-prev-ctrl]')!.addEventListener('change', renderPreview);
+  renderPreview();
+
+  list.innerHTML = scheletro(5);
+  carica().then((d) => {
+    dati = d;
+    renderList();
+  });
+</script>

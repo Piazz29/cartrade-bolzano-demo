@@ -73,10 +73,15 @@ const copy = {
     doneMailSent: 'Email di conferma inviata a {email}.',
     doneMailLater: 'Conferma registrata. Ti scriviamo a {email}.',
     doneReminder: 'Promemoria · {n} giorni prima',
-    doneNowReminder: 'Promemoria · entro pochi giorni',
-    doneTagliando: 'Promemoria tagliando · tra 12 mesi',
-    doneOffers: 'Offerte di stagione · poche all’anno',
+    doneNowReminder: 'Promemoria revisione',
+    doneTagliando: 'Promemoria tagliando',
+    doneOffers: 'Offerte di stagione, poche all’anno',
     doneNoOffers: 'Niente offerte: hai scelto solo i promemoria.',
+    whenToday: 'Oggi',
+    whenSoon: 'A breve',
+    whenYear: 'Tra 12 mesi',
+    whenSometimes: 'Ogni tanto',
+    whenNever: 'Mai',
     doneVia: { email: 'via email', whatsapp: 'su WhatsApp' },
     doneBook: 'Prenota subito la revisione',
     doneBack: 'Torna al sito',
@@ -152,10 +157,15 @@ const copy = {
     doneMailSent: 'Bestätigung an {email} gesendet.',
     doneMailLater: 'Anmeldung gespeichert. Wir schreiben an {email}.',
     doneReminder: 'Erinnerung · {n} Tage vorher',
-    doneNowReminder: 'Erinnerung · in den nächsten Tagen',
-    doneTagliando: 'Erinnerung Inspektion · in 12 Monaten',
-    doneOffers: 'Saisonale Angebote · wenige im Jahr',
+    doneNowReminder: 'Erinnerung Revision',
+    doneTagliando: 'Erinnerung Inspektion',
+    doneOffers: 'Saisonale Angebote, wenige im Jahr',
     doneNoOffers: 'Keine Angebote: Sie haben nur die Erinnerungen gewählt.',
+    whenToday: 'Heute',
+    whenSoon: 'In Kürze',
+    whenYear: 'In 12 Monaten',
+    whenSometimes: 'Gelegentlich',
+    whenNever: 'Nie',
     doneVia: { email: 'per E-Mail', whatsapp: 'per WhatsApp' },
     doneBook: 'Revision jetzt buchen',
     doneBack: 'Zur Website',
@@ -196,22 +206,8 @@ const id = 'pm';
   </PageHero>
 
   <section class="wrap grid-12 gap-y-12 pt-6 pb-[var(--section)] lg:pt-10">
-    <aside class="col-span-4 lg:order-2 lg:col-span-4 lg:col-start-9" aria-labelledby="pm-side">
-      <div class="lg:sticky lg:top-28">
-        <h2 id="pm-side" class="t-label text-ink">{copy.sideLabel}</h2>
-        <ol class="side mt-4">
-          {copy.side.map(([w, d], i) => (
-            <li>
-              <span class="t-label t-num text-orange-ink">{String(i + 1).padStart(2, '0')}</span>
-              <span><strong class="block font-semibold">{w}</strong><span class="text-muted">{d}</span></span>
-            </li>
-          ))}
-        </ol>
-        <p class="mt-5 text-sm text-muted">{copy.note}</p>
-      </div>
-    </aside>
 
-    <div class="col-span-4 lg:order-1 lg:col-span-7" data-pm data-lang={lang} data-copy={JSON.stringify(copy)} data-booking={site.dekra.bookingUrl}>
+    <div class="col-span-4 lg:col-span-7 lg:row-start-1" data-pm data-lang={lang} data-copy={JSON.stringify(copy)} data-booking={site.dekra.bookingUrl}>
       <form class="pm-form" novalidate data-pm-form aria-describedby="pm-req">
         <p id="pm-req" class="text-sm text-muted"><span aria-hidden="true">*</span> = {copy.required}</p>
         <p class="form-alert" role="alert" data-pm-alert hidden></p>
@@ -382,6 +378,20 @@ const id = 'pm';
         </div>
       </div>
     </div>
+    <aside class="col-span-4 lg:col-span-4 lg:col-start-9 lg:row-start-1" aria-labelledby="pm-side">
+      <div class="lg:sticky lg:top-28">
+        <h2 id="pm-side" class="t-label text-ink">{copy.sideLabel}</h2>
+        <ol class="side mt-4">
+          {copy.side.map(([w, d], i) => (
+            <li>
+              <span class="t-label t-num text-orange-ink">{String(i + 1).padStart(2, '0')}</span>
+              <span><strong class="block font-semibold">{w}</strong><span class="text-muted">{d}</span></span>
+            </li>
+          ))}
+        </ol>
+        <p class="mt-5 text-sm text-muted">{copy.note}</p>
+      </div>
+    </aside>
   </section>
 </Base>
 
@@ -444,6 +454,8 @@ const id = 'pm';
     const el = <T extends HTMLElement = HTMLInputElement>(name: string) => form.elements.namedItem(name) as unknown as T;
     const params = new URLSearchParams(location.search);
     const demoKey = params.get('demo') ?? '';
+    // Il QR porta alla pagina italiana: chi passa al tedesco si porta dietro il parametro del QR
+    if (location.search) document.querySelectorAll<HTMLAnchorElement>('[data-lang-link]').forEach((a) => (a.search = location.search));
 
     // Arrivo dal calcolatore: mese, anno e tipo già scelti
     const pMese = Number(params.get('mese'));
@@ -616,20 +628,19 @@ const id = 'pm';
 
       const via = copy.doneVia[d.canale];
       const rows: [string, string, string?][] = [];
-      rows.push([lang === 'de' ? 'Heute' : 'Oggi', (mailSent ? copy.doneMailSent : copy.doneMailLater).replace('{email}', d.email)]);
+      rows.push([copy.whenToday, (mailSent ? copy.doneMailSent : copy.doneMailLater).replace('{email}', d.email)]);
       if (d.consenso_promemoria) {
         const avvisi = dateAvvisi(isoDate(s.date));
         if (avvisi.length) avvisi.forEach((a) => rows.push([fmtShort.format(a.data), copy.doneReminder.replace('{n}', String(a.giorni)), via]));
-        else if (parseIsoDate(isoDate(s.date)) >= new Date(new Date().toDateString())) rows.push(['', copy.doneNowReminder, via]);
-        if (d.interessi.includes('tagliando')) rows.push(['', copy.doneTagliando, via]);
+        else if (parseIsoDate(isoDate(s.date)) >= new Date(new Date().toDateString())) rows.push([copy.whenSoon, copy.doneNowReminder, via]);
+        if (d.interessi.includes('tagliando')) rows.push([copy.whenYear, copy.doneTagliando, via]);
       }
-      rows.push(['', d.consenso_offerte ? copy.doneOffers : copy.doneNoOffers]);
+      rows.push([d.consenso_offerte ? copy.whenSometimes : copy.whenNever, d.consenso_offerte ? copy.doneOffers : copy.doneNoOffers]);
       const list = t('[data-done-list]');
       list.innerHTML = '';
       rows.forEach(([when, what, sub]) => {
         const li = document.createElement('li');
-        const w = Object.assign(document.createElement('span'), { className: 'when', textContent: when || '·' });
-        if (!when) w.setAttribute('aria-hidden', 'true');
+        const w = Object.assign(document.createElement('span'), { className: 'when', textContent: when });
         const x = document.createElement('span');
         x.className = 'what';
         x.append(Object.assign(document.createElement('strong'), { textContent: what }));

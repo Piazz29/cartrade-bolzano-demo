@@ -1,0 +1,250 @@
+---
+// Guscio dell'area admin (/admin/, solo italiano). Progettato prima per il telefono:
+// barra in basso con le 4 sezioni più usate + "Altro"; da 1024 px barra laterale.
+// Stessi colori e caratteri del sito, ma registro "prodotto": scala fissa, poco movimento, stati chiari.
+import '../styles/global.css';
+import Icon from '../components/Icon.astro';
+import { statoServizi } from '../lib/server/config';
+import type { IconName } from '../lib/icons';
+
+interface Props {
+  title: string;
+  current?: string;
+  /** larghezza piena (es. locandina, anteprime email) */
+  wide?: boolean;
+}
+const { title, current, wide = false } = Astro.props;
+const stato = statoServizi();
+
+const nav: { key: string; href: string; label: string; icon: IconName; main?: boolean }[] = [
+  { key: 'home', href: '/admin/', label: 'Panoramica', icon: 'grid', main: true },
+  { key: 'clienti', href: '/admin/clienti/', label: 'Clienti', icon: 'users', main: true },
+  { key: 'promemoria', href: '/admin/promemoria/', label: 'Promemoria', icon: 'bell', main: true },
+  { key: 'campagne', href: '/admin/campagne/', label: 'Campagne', icon: 'megaphone', main: true },
+  { key: 'recensioni', href: '/admin/recensioni/', label: 'Recensioni', icon: 'star' },
+  { key: 'showroom', href: '/admin/showroom/', label: 'Showroom', icon: 'car' },
+  { key: 'email', href: '/admin/email/', label: 'Modelli email', icon: 'mail' },
+  { key: 'locandina', href: '/admin/locandina/', label: 'Locandina QR', icon: 'qr' },
+  { key: 'demo', href: '/admin/#demo', label: 'Ripristina demo', icon: 'refresh' },
+];
+const altroAttivo = nav.some((n) => !n.main && n.key === current);
+const mancanti = [!stato.db && 'Supabase', !stato.email && 'invio email'].filter(Boolean);
+---
+<!doctype html>
+<html lang="it" class="no-js admin-html">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#0A1A30" />
+    <title>{title} · Admin Car Trade</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script is:inline>document.documentElement.classList.replace('no-js', 'js');</script>
+  </head>
+  <body class="admin">
+    <a href="#main" class="skip">Vai al contenuto</a>
+    <header class="topbar on-dark">
+      <a href="/admin/" class="brand" aria-label="Car Trade, area admin: panoramica">
+        <img src="/brand/logo-inverse.svg" alt="" width="904" height="282" />
+        <span class="t-label">Admin</span>
+      </a>
+      <p class:list={['mode t-label', stato.db ? 'is-live' : 'is-sim']} data-mode title={stato.db ? 'Dati salvati su Supabase' : 'Dati salvati in questo browser'}>
+        <span class="dot" aria-hidden="true"></span><span data-mode-text>{stato.db ? 'Dati reali' : 'Simulato'}</span>
+      </p>
+      <form method="post" action="/api/admin/logout" class="ml-2">
+        <button type="submit" class="iconbtn" aria-label="Esci dall'admin"><Icon name="logout" size={20} /></button>
+      </form>
+    </header>
+
+    <div class="shell">
+      <nav class="sidenav" aria-label="Sezioni dell'admin">
+        <ul>
+          {nav.map((n) => (
+            <li>
+              <a href={n.href} aria-current={n.key === current ? 'page' : undefined}><Icon name={n.icon} size={20} /> {n.label}</a>
+            </li>
+          ))}
+        </ul>
+        <p class="side-note">Il gestionale DEKRA resta com’è. Qui ci sono i tuoi clienti, che tornano da te.</p>
+      </nav>
+
+      <main id="main" tabindex="-1" class:list={['content', wide && 'is-wide']}>
+        <p class="sim-banner" role="note" data-sim-banner hidden={mancanti.length === 0}>
+          <Icon name="alert" size={18} class="shrink-0" />
+          <span data-sim-text>{mancanti.length ? `Modalità simulata: ${mancanti.join(' e ')} non configurat${mancanti.length > 1 ? 'i' : 'o'}. Le azioni funzionano, ma restano in questo browser e nessun messaggio parte davvero.` : ''}</span>
+        </p>
+        <slot />
+      </main>
+    </div>
+
+    <nav class="tabbar" aria-label="Sezioni principali">
+      <ul>
+        {nav.filter((n) => n.main).map((n) => (
+          <li>
+            <a href={n.href} aria-current={n.key === current ? 'page' : undefined}><Icon name={n.icon} size={22} /><span>{n.label}</span></a>
+          </li>
+        ))}
+        <li>
+          <button type="button" aria-expanded="false" aria-controls="altro" data-altro class:list={[altroAttivo && 'is-current']}>
+            <Icon name="more" size={22} /><span>Altro</span>
+          </button>
+        </li>
+      </ul>
+      <div id="altro" class="altro" hidden data-altro-panel>
+        <ul>
+          {nav.filter((n) => !n.main).map((n) => (
+            <li><a href={n.href} aria-current={n.key === current ? 'page' : undefined}><Icon name={n.icon} size={20} /> {n.label}</a></li>
+          ))}
+        </ul>
+      </div>
+    </nav>
+
+    <div class="toasts" role="status" aria-live="polite" data-toasts></div>
+
+    <script>
+      const btn = document.querySelector<HTMLButtonElement>('[data-altro]');
+      const panel = document.querySelector<HTMLElement>('[data-altro-panel]');
+      if (btn && panel) {
+        const set = (open: boolean) => {
+          panel.hidden = !open;
+          btn.setAttribute('aria-expanded', String(open));
+        };
+        btn.addEventListener('click', () => set(Boolean(panel.hidden)));
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && !panel.hidden) {
+            set(false);
+            btn.focus();
+          }
+        });
+        document.addEventListener('click', (e) => {
+          if (!panel.hidden && !panel.contains(e.target as Node) && !btn.contains(e.target as Node)) set(false);
+        });
+      }
+    </script>
+
+    <style is:global>
+      @layer components {
+        .admin { background: var(--color-paper); font-size: 1rem; line-height: 1.5; }
+        .admin .skip { position: fixed; left: 1rem; top: 0.75rem; z-index: 100; padding: 0.75rem 1rem; background: var(--color-ink); color: var(--color-paper); font-weight: 600; transform: translateY(-200%); }
+        .admin .skip:focus { transform: none; }
+        .admin main:focus { outline: none; }
+
+        .topbar { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 0.75rem; height: 3.5rem; padding: 0 1rem; padding-top: env(safe-area-inset-top); background: var(--color-night); color: var(--color-paper); }
+        .topbar .brand { display: flex; align-items: center; gap: 0.6rem; margin-right: auto; text-decoration: none; }
+        .topbar .brand img { height: 1.6rem; width: auto; }
+        .topbar .brand .t-label { padding: 0.2rem 0.4rem; border: 1px solid var(--line-dark); color: var(--color-steel); border-radius: 2px; }
+        .mode { display: inline-flex; align-items: center; gap: 0.45rem; color: var(--color-steel); }
+        .mode .dot { width: 0.5rem; height: 0.5rem; border-radius: 999px; background: #9fe3bd; }
+        .mode.is-sim .dot { background: var(--color-orange); }
+        .iconbtn { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: 2px; color: inherit; }
+        .iconbtn:hover { background: color-mix(in oklab, var(--color-paper) 10%, transparent); }
+
+        .shell { display: block; }
+        .sidenav { display: none; }
+        .content { width: 100%; max-width: 72rem; margin-inline: auto; padding: 1.25rem 1rem calc(5.5rem + env(safe-area-inset-bottom)); }
+        .content.is-wide { max-width: 90rem; }
+
+        .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: var(--color-paper); border-top: 1px solid var(--line-strong); padding-bottom: env(safe-area-inset-bottom); }
+        .tabbar > ul { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+        .tabbar a, .tabbar button { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.2rem; width: 100%; min-height: 3.75rem; font-size: 0.6875rem; font-weight: 560; letter-spacing: 0.01em; color: var(--color-muted); text-decoration: none; }
+        .tabbar [aria-current='page'], .tabbar .is-current { color: var(--color-ink); }
+        .tabbar [aria-current='page']::before, .tabbar .is-current::before { content: ''; position: absolute; top: -1px; left: 22%; right: 22%; height: 2px; background: linear-gradient(to right, var(--color-ink) 72%, var(--color-orange) 72%); }
+        .altro { position: absolute; right: 0.5rem; bottom: calc(100% + 0.5rem); width: min(16rem, calc(100vw - 1rem)); padding: 0.4rem; background: var(--color-paper); border: 1px solid var(--line-strong); box-shadow: 0 12px 32px -12px rgb(10 26 48 / 0.35); }
+        .altro a { display: flex; align-items: center; gap: 0.75rem; min-height: 2.9rem; padding: 0 0.75rem; text-decoration: none; font-weight: 560; }
+        .altro a:hover, .altro [aria-current='page'] { background: var(--color-paper-2); }
+
+        @media (min-width: 64rem) {
+          .tabbar { display: none; }
+          .topbar { padding-inline: 1.5rem; }
+          .shell { display: grid; grid-template-columns: 15.5rem minmax(0, 1fr); min-height: calc(100vh - 3.5rem); background: linear-gradient(to right, var(--color-paper-2) 15.5rem, var(--color-paper) 15.5rem); }
+          .sidenav { display: flex; flex-direction: column; justify-content: space-between; position: sticky; top: 3.5rem; height: calc(100vh - 3.5rem); padding: 1.25rem 0.75rem; background: var(--color-paper-2); border-right: 1px solid var(--line); }
+          .sidenav a { display: flex; align-items: center; gap: 0.75rem; min-height: 2.75rem; padding: 0 0.75rem; border-radius: 2px; text-decoration: none; font-weight: 560; color: var(--color-ink); }
+          .sidenav a:hover { background: color-mix(in oklab, var(--color-ink) 6%, transparent); }
+          .sidenav [aria-current='page'] { background: var(--color-ink); color: var(--color-paper); }
+          .side-note { padding: 0.75rem; font-size: 0.8125rem; line-height: 1.45; color: var(--color-muted); border-top: 1px solid var(--line); }
+          .content { padding: 2rem 2.5rem 4rem; }
+        }
+
+        .sim-banner { display: flex; align-items: flex-start; gap: 0.6rem; margin-bottom: 1.25rem; padding: 0.7rem 0.85rem; font-size: 0.875rem; line-height: 1.45; background: color-mix(in oklab, var(--color-orange) 12%, var(--color-paper)); border: 1px solid color-mix(in oklab, var(--color-orange) 45%, transparent); border-radius: 2px; }
+        .sim-banner svg { color: var(--color-orange-ink); margin-top: 0.1rem; }
+
+        /* Tipografia "prodotto": scala fissa */
+        .a-h1 { font-family: var(--font-wide); font-stretch: 118%; font-weight: 640; font-size: 1.625rem; line-height: 1.1; letter-spacing: -0.02em; }
+        @media (min-width: 64rem) { .a-h1 { font-size: 2rem; } }
+        .a-h2 { font-family: var(--font-wide); font-stretch: 112%; font-weight: 620; font-size: 1.1875rem; line-height: 1.2; letter-spacing: -0.01em; }
+        .a-sub { margin-top: 0.4rem; color: var(--color-muted); font-size: 0.9375rem; max-width: 60ch; }
+        .a-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
+        .a-sec { margin-top: 2.25rem; }
+        .a-sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding-bottom: 0.65rem; margin-bottom: 0.25rem; border-bottom: 1px solid var(--line-strong); }
+        .a-sec-head a { font-size: 0.875rem; font-weight: 560; }
+
+        /* Bottoni compatti dell'admin (stessa forma del sito) */
+        .admin .btn { min-height: 2.75rem; padding: 0.6rem 1rem; font-size: 0.9375rem; gap: 0.5rem; }
+        .admin .btn-sm { min-height: 2.5rem; padding: 0.45rem 0.8rem; font-size: 0.875rem; }
+        .admin .btn[disabled], .admin .btn[aria-busy='true'] { opacity: 0.6; cursor: progress; }
+        .admin .btn-wa { background: #1f7a4d; color: var(--color-paper); }
+        .admin .btn-wa:hover { background: #18643f; }
+
+        /* Etichette di stato */
+        .tag { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.15rem 0.45rem; font-size: 0.6875rem; font-weight: 620; letter-spacing: 0.06em; text-transform: uppercase; border-radius: 2px; white-space: nowrap; font-stretch: 108%; }
+        .tag-new { background: var(--color-orange); color: var(--color-ink); }
+        .tag-ex { background: var(--color-paper-3); color: var(--color-muted); }
+        .tag-ok { background: color-mix(in oklab, var(--color-ok) 14%, var(--color-paper)); color: var(--color-ok); }
+        .tag-warn { background: color-mix(in oklab, var(--color-orange) 18%, var(--color-paper)); color: var(--color-orange-ink); }
+        .tag-err { background: color-mix(in oklab, var(--color-alert) 12%, var(--color-paper)); color: var(--color-alert); }
+        .tag-line { border: 1px solid var(--line-strong); color: var(--color-ink); }
+
+        .plate-tag { display: inline-block; padding: 0.1rem 0.4rem; border: 1px solid var(--line-strong); border-radius: 2px; font-stretch: 112%; font-weight: 600; font-size: 0.8125rem; letter-spacing: 0.08em; font-variant-numeric: tabular-nums; background: var(--color-paper); white-space: nowrap; }
+
+        /* Strisce di numeri (stile scheda tecnica, niente card) */
+        .kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line-strong); }
+        .kpis > div { padding: 0.9rem 0.75rem 1rem 0; border-bottom: 1px solid var(--line); }
+        .kpis > div:nth-child(even) { padding-left: 0.85rem; border-left: 1px solid var(--line); }
+        .kpis dt { font-size: 0.8125rem; color: var(--color-muted); }
+        .kpis dd { font-stretch: 118%; font-weight: 640; font-size: 1.75rem; line-height: 1.1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+        .kpis dd small { font-size: 0.8125rem; font-weight: 500; font-stretch: 100%; letter-spacing: 0; color: var(--color-muted); }
+        @media (min-width: 48rem) {
+          .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+          .kpis > div { padding-left: 1rem !important; border-left: 1px solid var(--line); }
+          .kpis > div:nth-child(3n + 1) { padding-left: 0 !important; border-left: 0; }
+        }
+
+        /* Righe elenco */
+        .rows > li { border-bottom: 1px solid var(--line); }
+        .row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.25rem 0.75rem; align-items: center; padding: 0.8rem 0; text-decoration: none; color: inherit; }
+        a.row:hover { background: color-mix(in oklab, var(--color-ink) 4%, transparent); }
+        a.row:hover .row-name { text-decoration: underline; text-underline-offset: 0.2em; }
+        .row-name { font-weight: 600; }
+        .row-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.6rem; font-size: 0.8125rem; color: var(--color-muted); }
+        .row-side { text-align: right; font-variant-numeric: tabular-nums; font-size: 0.875rem; }
+        .row-side strong { display: block; font-size: 0.9375rem; }
+        .row.is-new { background: color-mix(in oklab, var(--color-orange) 7%, transparent); padding-inline: 0.75rem; margin-inline: -0.75rem; }
+        .row.flash { animation: row-flash 2.4s var(--ease-out-quart); }
+        @keyframes row-flash { from { background: color-mix(in oklab, var(--color-orange) 22%, transparent); } }
+        .empty { padding: 1.5rem 0; color: var(--color-muted); }
+        .empty strong { display: block; color: var(--color-ink); margin-bottom: 0.25rem; }
+
+        .skeleton { height: 3.5rem; margin-bottom: 1px; background: linear-gradient(90deg, var(--color-paper-2), var(--color-paper-3), var(--color-paper-2)); background-size: 200% 100%; animation: sk 1.2s linear infinite; }
+        @keyframes sk { to { background-position: -200% 0; } }
+
+        .toasts { position: fixed; left: 50%; bottom: calc(4.75rem + env(safe-area-inset-bottom)); z-index: 60; display: grid; gap: 0.5rem; width: min(26rem, calc(100vw - 2rem)); transform: translateX(-50%); pointer-events: none; }
+        @media (min-width: 64rem) { .toasts { bottom: 1.5rem; left: auto; right: 1.5rem; transform: none; } }
+        .toast { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.8rem 1rem; background: var(--color-ink); color: var(--color-paper); font-size: 0.9375rem; line-height: 1.4; border-radius: 2px; box-shadow: 0 10px 30px -10px rgb(10 26 48 / 0.5); animation: toast-in 0.25s var(--ease-out-quart); pointer-events: auto; }
+        .toast.is-warn { background: var(--color-orange); color: var(--color-ink); }
+        .toast.is-err { background: var(--color-alert); color: var(--color-paper); }
+        @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } }
+
+        .admin .input { min-height: 2.75rem; padding: 0.55rem 0.75rem; font-size: 1rem; }
+        .admin select.input { padding-right: 2.25rem; }
+        .admin .field label { font-size: 0.8125rem; }
+        .switch { display: inline-flex; align-items: center; gap: 0.6rem; min-height: 2.75rem; font-weight: 560; cursor: pointer; }
+        .switch input { width: 1.25rem; height: 1.25rem; accent-color: var(--color-ink); }
+
+        .preview-frame { width: 100%; border: 1px solid var(--line-strong); background: var(--color-paper-2); }
+        .wa-bubble { position: relative; max-width: 22rem; padding: 0.65rem 0.8rem 1.3rem; background: #dcf8c6; color: #111b21; border-radius: 8px 0 8px 8px; font-size: 0.9375rem; line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; }
+        .wa-bubble small { position: absolute; right: 0.6rem; bottom: 0.3rem; font-size: 0.6875rem; color: #54656f; }
+        .wa-chat { padding: 1rem; background: #efeae2; border: 1px solid var(--line); display: flex; justify-content: flex-end; }
+      }
+    </style>
+  </body>
+</html>

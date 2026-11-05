@@ -1,0 +1,99 @@
+---
+// Anteprima dei modelli email (stesso codice che usa il server per gli invii veri).
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { richiediLogin } from '../../lib/server/pagina';
+
+export const prerender = false;
+const no = richiediLogin(Astro);
+if (no) return no;
+const modelli = [
+  ['benvenuto', 'Benvenuto, iscrizione confermata'],
+  ['promemoria', 'Promemoria revisione'],
+  ['tagliando', 'Promemoria tagliando'],
+  ['promozione', 'Promozione (gomme invernali)'],
+  ['recensione', 'Richiesta recensione'],
+  ['richiesta', 'Nuova richiesta di preventivo (per il titolare)'],
+];
+---
+<AdminLayout title="Modelli email" current="email" wide>
+  <div class="a-head">
+    <div>
+      <h1 class="a-h1">Modelli email</h1>
+      <p class="a-sub">Costruiti a tabelle con stili in linea: si leggono bene su Gmail, Outlook, Apple Mail e sul telefono.</p>
+    </div>
+  </div>
+  <div class="layout">
+    <fieldset class="list">
+      <legend class="sr-only">Modello</legend>
+      <ul>
+        {modelli.map(([k, l], i) => (
+          <li><input type="radio" name="tpl" id={`t-${k}`} value={k} checked={i === 0} /><label for={`t-${k}`}>{l}</label></li>
+        ))}
+      </ul>
+    </fieldset>
+    <div>
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="seg" role="radiogroup" aria-label="Lingua" data-lang-seg>
+          <input type="radio" name="lang" id="l-it" value="it" checked /><label for="l-it">Italiano</label>
+          <input type="radio" name="lang" id="l-de" value="de" /><label for="l-de">Deutsch</label>
+        </div>
+        <div class="seg" role="radiogroup" aria-label="Larghezza">
+          <input type="radio" name="w" id="w-m" value="390" checked /><label for="w-m">Telefono</label>
+          <input type="radio" name="w" id="w-d" value="720" /><label for="w-d">Computer</label>
+        </div>
+      </div>
+      <p class="mt-3 text-sm" data-subject></p>
+      <p class="mt-1 text-sm text-muted" data-note></p>
+      <iframe class="preview-frame mt-3" title="Anteprima del modello email" data-frame style="height:52rem"></iframe>
+    </div>
+  </div>
+</AdminLayout>
+
+<style>
+  .layout { display: grid; gap: 1.5rem; }
+  @media (min-width: 64rem) { .layout { grid-template-columns: 17rem minmax(0, 1fr); align-items: start; } }
+  .list ul { border-top: 1px solid var(--line); }
+  .list li { border-bottom: 1px solid var(--line); }
+  .list input { position: absolute; opacity: 0; }
+  .list label { display: block; padding: 0.75rem 0.85rem; cursor: pointer; font-weight: 560; font-size: 0.9375rem; }
+  .list input:checked + label { background: var(--color-ink); color: var(--color-paper); }
+  .list input:focus-visible + label { outline: 2px solid var(--color-orange); outline-offset: -2px; }
+  [data-frame] { display: block; margin-inline: auto; transition: width 0.2s var(--ease-out-quart); }
+</style>
+
+<script>
+  import { benvenuto, campagna, nuovaRichiesta, promemoria, recensione, type Contenuto } from '../../lib/crm/messaggi';
+  import { renderEmail } from '../../lib/email/render';
+  import { esc } from '../../admin/ui';
+  import { addDays, isoDate } from '../../lib/revisione';
+  import type { Cliente } from '../../lib/crm/types';
+
+  const frame = document.querySelector<HTMLIFrameElement>('[data-frame]')!;
+  const val = (n: string) => (document.querySelector(`input[name="${n}"]:checked`) as HTMLInputElement).value;
+
+  function render() {
+    const tpl = val('tpl');
+    const lang = (tpl === 'richiesta' ? 'it' : val('lang')) as 'it' | 'de';
+    document.querySelectorAll<HTMLInputElement>('input[name="lang"]').forEach((i) => (i.disabled = tpl === 'richiesta'));
+    const now = new Date();
+    const c: Cliente = {
+      id: 'anteprima', creato_il: now.toISOString(), nome: lang === 'de' ? 'Andreas' : 'Anna', cognome: lang === 'de' ? 'Hofer' : 'Rossi', email: 'cliente@example.com', telefono: '+390000000000', targa: 'AB123CD',
+      rif_tipo: 'rev', rif_mese: now.getMonth() + 1, rif_anno: now.getFullYear() - 2, scadenza: isoDate(addDays(now, 42)), ultimo_tagliando: null, interessi: ['revisione', 'gomme'], canale: 'email', lingua: lang,
+      consenso_privacy_il: now.toISOString(), consenso_promemoria: true, consenso_offerte: true, origine: 'qr',
+    };
+    const base = location.origin;
+    const cont: Contenuto =
+      tpl === 'benvenuto' ? benvenuto(c, base)
+      : tpl === 'promemoria' ? promemoria({ ...c, scadenza: isoDate(addDays(now, 7)) }, 'revisione', base)
+      : tpl === 'tagliando' ? promemoria(c, 'tagliando', base, now, addDays(now, 5))
+      : tpl === 'promozione' ? campagna('gomme-invernali', c, base)
+      : tpl === 'recensione' ? recensione(c)
+      : nuovaRichiesta({ tipo: 'carrozzeria', nome: 'Mario Bianchi', telefono: '+390000000000', email: 'cliente@example.com', auto: 'Volkswagen Golf 2018', targa: 'FG123HJ', messaggio: 'Graffio sulla portiera posteriore destra, circa 20 cm, dopo un parcheggio. Vorrei sapere quanto costa sistemarlo.', preferenza: 'whatsapp', lingua: 'it', variante: 'quote', pagina: '/it/officina-carrozzeria/' }, 3);
+    document.querySelector('[data-subject]')!.innerHTML = `<span class="text-muted">Oggetto:</span> <strong>${esc(cont.oggetto)}</strong>`;
+    document.querySelector('[data-note]')!.textContent = tpl === 'richiesta' ? 'Arriva al titolare (DEMO_OWNER_EMAIL), con le foto in allegato. Sempre in italiano.' : `Anteprima nella casella: “${cont.preheader}”`;
+    frame.style.width = `min(100%, ${val('w')}px)`;
+    frame.srcdoc = renderEmail(cont, { baseUrl: base });
+  }
+  document.querySelector('.layout')!.addEventListener('change', render);
+  render();
+</script>
