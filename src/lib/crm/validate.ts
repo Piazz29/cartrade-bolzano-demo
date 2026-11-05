@@ -50,7 +50,8 @@ export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 export function normalizzaTelefono(raw: string): string {
   let n = raw.replace(/[\s./()-]/g, '');
   if (n.startsWith('00')) n = `+${n.slice(2)}`;
-  if (!n.startsWith('+') && /^3\d{8,9}$/.test(n)) n = `+39${n}`;
+  // Cellulari (3…) e fissi (0…) italiani scritti senza prefisso
+  if (!n.startsWith('+') && /^(3\d{8,9}|0\d{5,10})$/.test(n)) n = `+39${n}`;
   return n;
 }
 export const telefonoValido = (n: string) => /^\+\d{8,15}$/.test(n);

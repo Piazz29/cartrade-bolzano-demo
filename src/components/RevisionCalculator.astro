@@ -2,8 +2,10 @@
 // Calcolatore scadenza revisione (art. 80 Codice della Strada, autovetture uso privato):
 // prima revisione entro 4 anni dalla prima immatricolazione, poi ogni 2 anni,
 // sempre entro la fine del mese di riferimento.
-// "Avvisami" è solo interfaccia in questa demo: TODO collegare a un servizio di invio (email/WhatsApp Business API).
+// La regola sta in lib/revisione.ts (unica fonte). "Avvisami" porta all'iscrizione ai promemoria
+// (/it/promemoria/, /de/erinnerung/) con mese, anno e tipo già compilati.
 import { site, type Lang } from '../data/site';
+import { routes } from '../i18n/routes';
 import { ui } from '../i18n/ui';
 import Icon from './Icon.astro';
 
@@ -36,19 +38,8 @@ const copy = {
     todayMark: 'Oggi',
     ics: 'Aggiungi al calendario',
     notify: 'Avvisami prima della scadenza',
-    notifyIntro: 'Un promemoria 30 giorni prima. Niente pubblicità.',
-    channel: 'Come preferisci essere avvisato?',
-    email: 'Email',
-    whatsapp: 'WhatsApp',
-    emailLabel: 'Il tuo indirizzo email',
-    phoneLabel: 'Il tuo numero WhatsApp',
-    consent: 'Acconsento a ricevere il promemoria. Posso annullarlo in qualsiasi momento.',
+    notifyIntro: 'Ti scriviamo noi via email o WhatsApp, 30 e 7 giorni prima. Ti iscrivi in 30 secondi, con la data già inserita.',
     submit: 'Attiva il promemoria',
-    done: 'Fatto. Ti scriveremo il {date}, 30 giorni prima della scadenza.',
-    demo: 'Demo: il promemoria non viene ancora inviato.',
-    errEmail: 'Inserisci un indirizzo email valido, ad esempio nome@esempio.it',
-    errPhone: 'Inserisci un numero di cellulare, ad esempio 333 123 4567',
-    errConsent: 'Serve il consenso per inviarti il promemoria.',
     note: 'Vale per autovetture ad uso privato. Taxi, NCC e veicoli con più di 8 posti hanno la revisione annuale.',
     icsTitle: 'Scadenza revisione auto',
     icsDesc: 'Prenota la revisione da Car Trade Bolzano',
@@ -78,19 +69,8 @@ const copy = {
     todayMark: 'Heute',
     ics: 'In den Kalender eintragen',
     notify: 'Vor Ablauf erinnern',
-    notifyIntro: 'Eine Erinnerung 30 Tage vorher. Keine Werbung.',
-    channel: 'Wie möchten Sie erinnert werden?',
-    email: 'E-Mail',
-    whatsapp: 'WhatsApp',
-    emailLabel: 'Ihre E-Mail-Adresse',
-    phoneLabel: 'Ihre WhatsApp-Nummer',
-    consent: 'Ich möchte die Erinnerung erhalten und kann sie jederzeit abbestellen.',
+    notifyIntro: 'Wir schreiben Ihnen per E-Mail oder WhatsApp, 30 und 7 Tage vorher. Anmeldung in 30 Sekunden, das Datum ist schon eingetragen.',
     submit: 'Erinnerung aktivieren',
-    done: 'Erledigt. Wir melden uns am {date}, 30 Tage vor Ablauf.',
-    demo: 'Demo: Die Erinnerung wird noch nicht verschickt.',
-    errEmail: 'Bitte eine gültige E-Mail-Adresse eingeben, z. B. name@beispiel.it',
-    errPhone: 'Bitte eine Handynummer eingeben, z. B. 333 123 4567',
-    errConsent: 'Für die Erinnerung brauchen wir Ihre Zustimmung.',
     note: 'Gilt für Pkw im Privatgebrauch. Taxis, Mietwagen mit Fahrer und Fahrzeuge mit mehr als 8 Sitzplätzen müssen jährlich zur Revision.',
     icsTitle: 'Revision Auto fällig',
     icsDesc: 'Revision bei Car Trade Bozen buchen',
@@ -174,53 +154,13 @@ const example = new Date(now.getFullYear(), now.getMonth() - 18, 1);
       </button>
     </div>
 
-    <!-- Promemoria: divulgazione progressiva, niente modale -->
+    <!-- Promemoria: stesso flusso dell'iscrizione pubblica, con la data già scelta qui -->
     <div class="notify mt-8 border-t border-[var(--line-dark)] pt-6">
-      <button type="button" class="notify-toggle" aria-expanded="false" data-notify-toggle aria-controls={`${id}-notify`}>
-        <Icon name="bell" size={20} />
-        <span>{copy.notify}</span>
-        <Icon name="chevron" size={18} class="chev" />
-      </button>
-      <div class="acc" id={`${id}-notify`} data-notify-panel data-open="false">
-        <div>
-          <form class="grid gap-5 pt-5" data-notify-form novalidate>
-            <p class="text-sm text-steel">{copy.notifyIntro}</p>
-            <fieldset>
-              <legend class="mb-2 text-sm font-semibold">{copy.channel}</legend>
-              <div class="seg">
-                <input type="radio" name={`${id}-ch`} id={`${id}-ch-mail`} value="email" checked />
-                <label for={`${id}-ch-mail`}>{copy.email}</label>
-                <input type="radio" name={`${id}-ch`} id={`${id}-ch-wa`} value="whatsapp" />
-                <label for={`${id}-ch-wa`}>{copy.whatsapp}</label>
-              </div>
-            </fieldset>
-            <div class="field" data-field-email>
-              <label for={`${id}-email`}>{copy.emailLabel}</label>
-              <input id={`${id}-email`} type="email" class="input" autocomplete="email" inputmode="email" aria-describedby={`${id}-email-err`} />
-              <p id={`${id}-email-err`} class="field-error" hidden></p>
-            </div>
-            <div class="field" data-field-phone hidden>
-              <label for={`${id}-phone`}>{copy.phoneLabel}</label>
-              <input id={`${id}-phone`} type="tel" class="input t-num" autocomplete="tel" inputmode="tel" placeholder="+39" aria-describedby={`${id}-phone-err`} />
-              <p id={`${id}-phone-err`} class="field-error" hidden></p>
-            </div>
-            <div>
-              <label class="flex items-start gap-3 text-sm text-steel">
-                <input type="checkbox" class="mt-0.5 size-5 shrink-0 accent-[var(--color-orange)]" data-consent aria-describedby={`${id}-consent-err`} />
-                <span>{copy.consent}</span>
-              </label>
-              <p id={`${id}-consent-err`} class="field-error mt-2" hidden></p>
-            </div>
-            <div>
-              <button type="submit" class="btn btn-ghost">{copy.submit}</button>
-            </div>
-          </form>
-          <div class="done mt-5" data-notify-done hidden tabindex="-1">
-            <p class="flex items-start gap-3 font-semibold"><Icon name="check" size={22} class="shrink-0 text-orange" /><span data-done-text></span></p>
-            <p class="mt-2 text-sm text-steel-2">{copy.demo}</p>
-          </div>
-        </div>
-      </div>
+      <p class="flex items-center gap-3 font-semibold text-paper"><Icon name="bell" size={20} class="text-orange" /> {copy.notify}</p>
+      <p class="mt-2 max-w-[52ch] text-sm text-steel">{copy.notifyIntro}</p>
+      <a href={routes.promemoria[lang]} class="btn btn-ghost mt-5" data-notify-link data-base={routes.promemoria[lang]}>
+        {copy.submit} <Icon name="arrow" size={18} class="btn-arrow" />
+      </a>
     </div>
   </div>
   <noscript><p class="mt-4 text-steel">{copy.noscript}</p></noscript>
@@ -289,29 +229,15 @@ const example = new Date(now.getFullYear(), now.getMonth() - 18, 1);
     white-space: nowrap;
   }
 
-  .notify-toggle {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    width: 100%;
-    min-height: 2.75rem;
-    font-weight: 600;
-    text-align: left;
-    color: var(--color-paper);
-  }
-  .notify-toggle .chev { margin-left: auto; transition: transform 0.4s var(--ease-out-expo); }
-  .notify-toggle[aria-expanded='true'] .chev { transform: rotate(180deg); }
   .estimate button { color: var(--color-paper); }
 }
 </style>
 
 <script>
+  import { calcolaScadenza, DAY, giorniA } from '../lib/revisione';
   type Copy = Record<string, any>;
 
   const pad = (n: number) => String(n).padStart(2, '0');
-  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const lastDayOfMonth = (y: number, m1: number) => new Date(y, m1, 0); // m1 = mese 1-12
-  const DAY = 86_400_000;
 
   function setup(root: HTMLElement) {
     const copy: Copy = JSON.parse(root.dataset.copy!);
@@ -330,26 +256,27 @@ const example = new Date(now.getFullYear(), now.getMonth() - 18, 1);
 
     const mode = () => [...modes].find((m) => m.checked)?.value ?? 'rev';
 
+    const notifyLink = $<HTMLAnchorElement>('[data-notify-link]');
+    // Il parametro ?demo= (QR della locandina) segue la persona fino all'iscrizione
+    const demo = new URLSearchParams(location.search).get('demo');
+
     function render() {
-      const today = startOfDay(new Date());
       const y = Number(year.value);
       const m = Number(month.value);
       const isReg = mode() === 'reg';
-      const years = isReg ? 4 : 2;
-      let d = lastDayOfMonth(y + years, m);
-      let estimated = false;
-      const first = d;
-
-      // Dall'immatricolazione con prima scadenza già passata: stima la prossima ogni 2 anni
-      if (isReg && d < today) {
-        while (d < today) d = lastDayOfMonth(d.getFullYear() + 2, d.getMonth() + 1);
-        estimated = true;
-      }
+      const s = calcolaScadenza(isReg ? 'reg' : 'rev', m, y);
+      const d = s.date;
+      const estimated = s.estimated;
+      const first = s.first;
+      const today = new Date(new Date().toDateString());
       deadline = d;
-      const cycleStart = new Date(d.getFullYear() - (isReg && !estimated ? 4 : 2), d.getMonth(), 1);
-      const days = Math.round((d.getTime() - today.getTime()) / DAY);
+      const cycleStart = s.cycleStart;
+      const days = giorniA(d);
       const state = days < 0 ? 'expired' : days <= 60 ? 'soon' : 'ok';
       root.dataset.state = state;
+      const q = new URLSearchParams({ tipo: isReg ? 'reg' : 'rev', mese: String(m), anno: String(y) });
+      if (demo) q.set('demo', demo);
+      notifyLink.href = `${notifyLink.dataset.base}?${q}`;
 
       $('[data-date]').textContent = fmtLong.format(d).replace(/\./g, '');
       $('[data-countdown]').textContent =
@@ -405,54 +332,6 @@ const example = new Date(now.getFullYear(), now.getMonth() - 18, 1);
       a.click();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-    });
-
-    // Promemoria (solo UI)
-    const toggle = $<HTMLButtonElement>('[data-notify-toggle]');
-    const panel = $<HTMLElement>('[data-notify-panel]');
-    toggle.addEventListener('click', () => {
-      const open = toggle.getAttribute('aria-expanded') !== 'true';
-      toggle.setAttribute('aria-expanded', String(open));
-      panel.dataset.open = String(open);
-    });
-    const form = $<HTMLFormElement>('[data-notify-form]');
-    const fEmail = $<HTMLElement>('[data-field-email]');
-    const fPhone = $<HTMLElement>('[data-field-phone]');
-    const channel = () => (form.querySelector<HTMLInputElement>('input[name$="-ch"]:checked')?.value ?? 'email');
-    form.querySelectorAll('input[name$="-ch"]').forEach((r) =>
-      r.addEventListener('change', () => {
-        const wa = channel() === 'whatsapp';
-        fEmail.hidden = wa;
-        fPhone.hidden = !wa;
-      }),
-    );
-    const setErr = (input: HTMLInputElement, msg: string) => {
-      const err = root.querySelector<HTMLElement>(`#${input.getAttribute('aria-describedby')}`)!;
-      err.textContent = msg;
-      err.hidden = !msg;
-      input.setAttribute('aria-invalid', msg ? 'true' : 'false');
-      return !msg;
-    };
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const wa = channel() === 'whatsapp';
-      const email = fEmail.querySelector('input')!;
-      const phone = fPhone.querySelector('input')!;
-      const consent = form.querySelector<HTMLInputElement>('[data-consent]')!;
-      let ok = true;
-      if (wa) ok = setErr(phone, /^\+?[\d\s]{9,15}$/.test(phone.value.trim()) ? '' : copy.errPhone) && ok;
-      else ok = setErr(email, /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.value.trim()) ? '' : copy.errEmail) && ok;
-      ok = setErr(consent, consent.checked ? '' : copy.errConsent) && ok;
-      if (!ok) {
-        form.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
-        return;
-      }
-      const remind = new Date((deadline ?? new Date()).getTime() - 30 * DAY);
-      const done = $<HTMLElement>('[data-notify-done]');
-      $('[data-done-text]').textContent = copy.done.replace('{date}', fmtNum.format(remind));
-      form.hidden = true;
-      done.hidden = false;
-      done.focus();
     });
 
     render();

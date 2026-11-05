@@ -10,6 +10,9 @@ export const routes = {
   showroom: { it: '/it/auto/', de: '/de/fahrzeuge/' },
   azienda: { it: '/it/azienda/', de: '/de/unternehmen/' },
   contatti: { it: '/it/contatti/', de: '/de/kontakt/' },
+  // Fuori dal menu: linkate da footer, Home, Revisione e calcolatore
+  promemoria: { it: '/it/promemoria/', de: '/de/erinnerung/' },
+  privacy: { it: '/it/privacy/', de: '/de/datenschutz/' },
 } as const;
 
 export type RouteKey = keyof typeof routes;

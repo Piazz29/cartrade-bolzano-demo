@@ -1,10 +1,11 @@
 ---
 // Modulo richiesta (preventivo officina/carrozzeria o contatto generico).
-// SOLO FRONTEND per la demo: nessun dato viene inviato.
-// TODO: collegare a un endpoint (es. Formspree, Netlify Forms o funzione serverless con invio email)
-// e caricare le foto su uno storage (S3/R2) prima dell'invio.
-import { type Lang } from '../data/site';
+// Invia a /api/richiesta: arriva via email al titolare (DEMO_OWNER_EMAIL) con le foto allegate.
+// Le foto vengono ridimensionate nel browser (lato lungo 1600 px, JPEG) prima dell'invio:
+// 6 foto stanno sotto il limite di 4,5 MB delle funzioni Vercel e arrivano leggere anche su rete mobile.
+import { site, type Lang } from '../data/site';
 import Icon from './Icon.astro';
+import { routes } from '../i18n/routes';
 
 interface Props { lang: Lang; variant?: 'quote' | 'contact'; id?: string; dark?: boolean; carName?: string }
 const { lang, variant = 'quote', id = 'req', dark = true, carName } = Astro.props;
@@ -36,9 +37,13 @@ const copy = {
     submit: isQuote ? 'Invia la richiesta di preventivo' : 'Invia il messaggio',
     sending: 'Invio in corso…',
     // TODO: confermare con il cliente i tempi di risposta reali
-    doneTitle: 'Richiesta pronta.',
+    doneTitle: 'Richiesta inviata.',
     doneText: 'Ti rispondiamo entro un giorno lavorativo, nel modo che hai scelto.',
-    demo: 'Demo: in questa versione il modulo non invia dati.',
+    errSend: 'La richiesta non è partita. Riprova, oppure mandacela su WhatsApp: il testo è già pronto.',
+    errBusy: 'Abbiamo ricevuto molte richieste in poco tempo. Riprova tra qualche minuto o chiamaci.',
+    sendWa: 'Invia su WhatsApp',
+    preparing: 'Preparo le foto…',
+    honeypot: 'Lascia vuoto questo campo',
     again: 'Nuova richiesta',
     errRequired: 'Campo obbligatorio.',
     errPhone: 'Inserisci un numero di telefono valido, ad esempio 333 123 4567.',
@@ -74,9 +79,13 @@ const copy = {
     privacy: 'Ich habe die Datenschutzerklärung gelesen und stimme der Verarbeitung meiner Daten zur Beantwortung zu.',
     submit: isQuote ? 'Angebot anfordern' : 'Nachricht senden',
     sending: 'Wird gesendet…',
-    doneTitle: 'Anfrage bereit.',
+    doneTitle: 'Anfrage gesendet.',
     doneText: 'Wir antworten innerhalb eines Werktags, auf dem gewünschten Weg.',
-    demo: 'Demo: In dieser Version werden keine Daten gesendet.',
+    errSend: 'Die Anfrage wurde nicht gesendet. Bitte erneut versuchen oder per WhatsApp schicken: Der Text ist schon vorbereitet.',
+    errBusy: 'Gerade kommen viele Anfragen an. Bitte in ein paar Minuten erneut versuchen oder anrufen.',
+    sendWa: 'Per WhatsApp senden',
+    preparing: 'Fotos werden vorbereitet…',
+    honeypot: 'Dieses Feld bitte leer lassen',
     again: 'Neue Anfrage',
     errRequired: 'Pflichtfeld.',
     errPhone: 'Bitte eine gültige Telefonnummer eingeben, z. B. 333 123 4567.',
@@ -91,8 +100,10 @@ const copy = {
 }[lang];
 const defaultMsg = carName ? (lang === 'it' ? `Vorrei informazioni su: ${carName}.` : `Ich interessiere mich für: ${carName}.`) : '';
 ---
-<div class:list={['req', dark && 'on-dark']} data-req data-copy={JSON.stringify(copy)}>
+<div class:list={['req', dark && 'on-dark']} data-req data-copy={JSON.stringify(copy)} data-wa={site.whatsapp.number}>
   <form class="grid gap-7" novalidate data-req-form aria-describedby={`${id}-req-note`}>
+    <input type="hidden" name="variant" value={variant} />
+    <input type="hidden" name="lang" value={lang} />
     <p id={`${id}-req-note`} class="text-sm text-steel-2"><span aria-hidden="true">*</span> = {copy.required}</p>
     <fieldset>
       <legend class="mb-3 text-[0.9375rem] font-semibold">{copy.type}</legend>
@@ -171,10 +182,20 @@ const defaultMsg = carName ? (lang === 'it' ? `Vorrei informazioni su: ${carName
     <div>
       <label class="flex items-start gap-3 text-sm">
         <input type="checkbox" name="privacy" class="mt-0.5 size-5 shrink-0 accent-[var(--color-orange)]" aria-describedby={`${id}-privacy-err`} />
-        {/* TODO: collegare il link all'informativa privacy reale */}
-        <span class="text-steel">{copy.privacy}</span>
+        {/* TODO: informativa privacy definitiva (oggi pagina segnaposto) */}
+        <span class="text-steel">{copy.privacy} <a href={routes.privacy[lang]} class="link-u font-semibold" target="_blank" rel="noopener">{lang === 'it' ? 'Informativa' : 'Datenschutz'}<span class="sr-only"> ({lang === 'it' ? 'si apre in una nuova scheda' : 'öffnet in neuem Tab'})</span></a></span>
       </label>
       <p id={`${id}-privacy-err`} class="field-error mt-2" hidden></p>
+    </div>
+
+    <div class="hp" aria-hidden="true">
+      <label for={`${id}-sito`}>{copy.honeypot}</label>
+      <input id={`${id}-sito`} name="sito_web" tabindex="-1" autocomplete="off" />
+    </div>
+
+    <div class="send-err" role="alert" data-send-err hidden>
+      <p data-send-err-text></p>
+      <a href="#" class="btn btn-ghost mt-4" target="_blank" rel="noopener" data-send-wa>{copy.sendWa}</a>
     </div>
 
     <div>
@@ -190,7 +211,6 @@ const defaultMsg = carName ? (lang === 'it' ? `Vorrei informazioni su: ${carName
     <p class="t-h3 mt-5">{copy.doneTitle}</p>
     <p class="mt-2 text-steel" data-done-text>{copy.doneText}</p>
     <p class="mt-1 text-sm text-steel-2" data-done-summary></p>
-    <p class="mt-4 text-sm text-steel-2">{copy.demo}</p>
     <button type="button" class="btn btn-ghost mt-6" data-again>{copy.again}</button>
   </div>
 </div>
@@ -234,6 +254,11 @@ const defaultMsg = carName ? (lang === 'it' ? `Vorrei informazioni su: ${carName
     color: var(--color-paper);
   }
   .done { padding-block: 1rem; }
+  .done:focus { outline: none; }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .send-err { padding: 1rem 1.1rem; border: 1px solid var(--color-alert); border-radius: 2px; }
+  .on-dark .send-err { border-color: #ff9a8f; }
+  .send-err p { font-weight: 560; }
   .done-icon { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 999px; background: var(--color-orange); color: var(--color-ink); }
 }
 </style>
@@ -241,6 +266,25 @@ const defaultMsg = carName ? (lang === 'it' ? `Vorrei informazioni su: ${carName
 <script>
   const MAX = 6;
   const MAX_SIZE = 10 * 1024 * 1024;
+  const MAX_SEND = 1.4 * 1024 * 1024;
+
+  /** Ridimensiona una foto (lato lungo 1600 px, JPEG 0,82). Se il browser non sa decodificarla e pesa poco, la manda così com'è. */
+  async function shrink(file: File): Promise<File | null> {
+    try {
+      const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' } as ImageBitmapOptions);
+      const k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(bmp.width * k);
+      canvas.height = Math.round(bmp.height * k);
+      canvas.getContext('2d')!.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+      bmp.close();
+      const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, 'image/jpeg', 0.82));
+      if (blob && blob.size <= MAX_SEND) return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
+    } catch {
+      /* formato non decodificabile qui */
+    }
+    return ['image/jpeg', 'image/png', 'image/webp'].includes(file.type) && file.size <= MAX_SEND ? file : null;
+  }
 
   document.querySelectorAll<HTMLElement>('[data-req]').forEach((root) => {
     const copy = JSON.parse(root.dataset.copy!);
@@ -339,11 +383,51 @@ const defaultMsg = carName ? (lang === 'it' ? `Vorrei informazioni su: ${carName
       const btn = form.querySelector<HTMLButtonElement>('[data-submit]')!;
       const label = btn.querySelector('[data-submit-label]')!;
       const original = label.textContent;
+      const sendErr = root.querySelector<HTMLElement>('[data-send-err]')!;
+      sendErr.hidden = true;
       btn.disabled = true;
+      btn.setAttribute('aria-busy', 'true');
+      label.textContent = files.length ? copy.preparing : copy.sending;
+
+      const fd = new FormData(form);
+      fd.set('page', location.pathname);
+      fd.delete('privacy');
+      fd.set('privacy', f.privacy.checked ? 'on' : '');
+      for (const file of files) {
+        const small = await shrink(file);
+        if (small) fd.append('foto', small, small.name);
+      }
       label.textContent = copy.sending;
-      await new Promise((r) => setTimeout(r, 700)); // simulazione invio (demo)
+      let error = '';
+      try {
+        const res = await fetch('/api/richiesta', { method: 'POST', body: fd, signal: AbortSignal.timeout(30000) });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 422 && data.errors) {
+          const map: Record<string, HTMLInputElement | HTMLTextAreaElement> = { name: f.name, phone: f.phone, email: f.email, message: f.message, privacy: f.privacy };
+          Object.entries(data.errors as Record<string, string>).forEach(([k, code]) => map[k] && setErr(map[k], code === 'phone' ? copy.errPhone : code === 'email' ? copy.errEmail : code === 'privacy' ? copy.errPrivacy : copy.errRequired));
+          form.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+          error = 'validation';
+        } else if (!res.ok || !data.ok) {
+          error = res.status === 429 ? 'busy' : 'send';
+        }
+      } catch {
+        error = 'send';
+      }
       btn.disabled = false;
+      btn.removeAttribute('aria-busy');
       label.textContent = original;
+
+      if (error === 'busy' || error === 'send') {
+        // Piano B sempre funzionante: lo stesso testo, pronto su WhatsApp
+        const lines = [f.message.value.trim(), '', f.name.value.trim(), f.phone.value.trim(), f.email.value.trim()].filter((x, i) => x || i === 1);
+        const wa = root.querySelector<HTMLAnchorElement>('[data-send-wa]')!;
+        wa.href = `https://wa.me/${root.dataset.wa}?text=${encodeURIComponent(lines.join('\n'))}`;
+        root.querySelector('[data-send-err-text]')!.textContent = error === 'busy' ? copy.errBusy : copy.errSend;
+        sendErr.hidden = false;
+        sendErr.scrollIntoView({ block: 'center' });
+        return;
+      }
+      if (error) return;
       root.querySelector('[data-done-summary]')!.textContent = files.length ? `${files.length} ${files.length === 1 ? copy.summaryPhoto : copy.summaryPhotos}` : '';
       form.hidden = true;
       done.hidden = false;
