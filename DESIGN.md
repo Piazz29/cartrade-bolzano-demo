@@ -47,7 +47,7 @@ Ease-out esponenziali (`cubic-bezier(.16,1,.3,1)`), niente rimbalzi. GSAP + Scro
 2. Indice servizi: righe che entrano in sequenza; su desktop una foto segue il cursore sulla riga attiva.
 3. Fiducia: il 4,5 conta da 0 quando entra in vista.
 4. Divisori: le righe sottili si allungano (scaleX) all'ingresso.
-Lenis solo su desktop con puntatore fine. Con `prefers-reduced-motion` niente spostamenti né parallax: restano la schermata di caricamento (dissolvenze) e la fascia dei loghi (più lenta). Senza JavaScript il contenuto è comunque leggibile.
+Lenis solo su desktop con puntatore fine. Con `prefers-reduced-motion` niente spostamenti né parallax: restano la schermata di caricamento (dissolvenze) e la fascia dei loghi (più lenta, con pulsante pausa/riprendi per WCAG 2.2.2). Senza JavaScript il contenuto è comunque leggibile.
 
 ## Ingresso, hero e navigazione
 - **Schermata di caricamento** (`Preloader.astro`): a ogni ingresso nel sito e a ogni ricarica, mai navigando tra le pagine; con "riduci movimento" in versione calma (dissolvenze). Il logo si compone in tre fasce (linea del tetto che si disegna, CARTRADE che sale da una maschera, filetto arancio e BOLZANO), con contatore 000→100 e barra legati al caricamento reale di font e foto. Uscita a sipario con bordo arancio, durata 1,6–3,8 s. Mai con "riduci movimento" o senza JavaScript. Le animazioni della pagina restano in pausa sotto il sipario e partono quando si alza.
@@ -62,3 +62,14 @@ Lenis solo su desktop con puntatore fine. Con `prefers-reduced-motion` niente sp
 - **Selettore lingua** IT/DE sempre visibile nell'header, anche su mobile, come interruttore a due segmenti.
 - **Calcolatore scadenza revisione**: mese/anno, risultato grande in stile cruscotto, conto alla rovescia, file .ics, "Avvisami" (email/WhatsApp, demo).
 - **Scheda auto**: foto 4:3, marca piccola, modello largo, riga specifiche (anno · km · alimentazione · cambio) e prezzo tabulare.
+- **Promemoria revisione** (`/it/promemoria/`): modulo in quattro blocchi numerati come una scheda tecnica (01 dati, 02 auto, 03 canale, 04 consensi), anteprima della scadenza mentre si compila, conferma con la data grande in stile cruscotto e la cronologia dei messaggi.
+
+## Area admin (registro "prodotto")
+Scena d'uso: il titolare al bancone o in officina, telefono in una mano, tra un cliente e l'altro; a volte al computer in ufficio. Quindi **prima il telefono**: barra in basso con quattro sezioni + "Altro", azioni grandi; da 1024 px barra laterale.
+- Stessi token del sito (carta, navy, arancio, Archivo) ma **scala fissa** (titoli 1,625–2 rem, niente clamp), poco movimento (solo stati: caricamento, conferma, comparsa di un cliente nuovo), nessuna animazione d'ingresso.
+- Numeri in **strisce con righe sottili** (come la fascia dati della Home), mai card con icone. Elenchi a righe, non a schede.
+- Etichette di stato piccole e maiuscole: **Nuovo** (arancio pieno, clienti veri), **Esempio** (grigio), scadenze (arancio chiaro entro 30 giorni, rosso se scaduta). Tutte sopra 4,5:1.
+- Conferme distruttive in due passi sul bottone stesso ("Prepara l'invio" → "Conferma l'invio"), niente finestre modali.
+- Esiti delle azioni in un avviso in basso (`role=status`), il fuoco torna sul bottone usato.
+- Email: tabelle e stili in linea, larghezza 600 px, filetto navy + arancio come la linea del tetto, bottone arancio con testo navy, piede navy con indirizzo e orari.
+
