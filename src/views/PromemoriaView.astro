@@ -43,7 +43,7 @@ const copy = {
     preview: 'Scadenza',
     previewEst: 'stima',
     interessi: 'Ti interessano anche',
-    interessiHint: 'Facoltativo. Ci aiuta a mandarti solo quello che ti serve.',
+    interessiHint: 'Ci aiuta a mandarti solo quello che ti serve.',
     canale: 'Canale preferito',
     lingua: 'Lingua dei messaggi',
     privacy: 'Ho letto l’{link}.',
@@ -128,7 +128,7 @@ const copy = {
     preview: 'Fällig bis',
     previewEst: 'Schätzung',
     interessi: 'Außerdem interessiert mich',
-    interessiHint: 'Optional. So schicken wir Ihnen nur, was Sie brauchen.',
+    interessiHint: 'So schicken wir Ihnen nur, was Sie brauchen.',
     canale: 'Bevorzugter Kanal',
     lingua: 'Sprache der Nachrichten',
     privacy: 'Ich habe die {link} gelesen.',
@@ -215,7 +215,7 @@ const id = 'pm';
         <!-- 01 -->
         <fieldset class="block">
           <legend class="block-head"><span class="t-label t-num text-orange-ink">01</span><span class="t-label">{copy.s1}</span></legend>
-          <div class="grid gap-5 sm:grid-cols-2">
+          <div class="grid items-start gap-5 sm:grid-cols-2">
             <div class="field">
               <label for={`${id}-nome`}>{copy.nome} <span aria-hidden="true">*</span></label>
               <input id={`${id}-nome`} name="nome" class="input" autocomplete="given-name" required maxlength="60" aria-describedby={`${id}-nome-err`} />

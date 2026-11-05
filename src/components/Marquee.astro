@@ -97,13 +97,14 @@ const optical: Record<string, number> = { audi: 1.55, ford: 1.5, kia: 1.55, daci
 }
 </style>
 
-<script>
-  document.querySelectorAll<HTMLElement>('[data-brands]').forEach((root) => {
-    const btn = root.querySelector<HTMLButtonElement>('[data-mq-toggle]')!;
-    btn.addEventListener('click', () => {
-      const paused = root.classList.toggle('is-paused');
+<!-- Inline: 6 righe, una richiesta di rete in meno sulla Home -->
+<script is:inline>
+  document.querySelectorAll('[data-brands]').forEach(function (root) {
+    var btn = root.querySelector('[data-mq-toggle]');
+    btn.addEventListener('click', function () {
+      var paused = root.classList.toggle('is-paused');
       btn.setAttribute('aria-pressed', String(paused));
-      btn.setAttribute('aria-label', paused ? btn.dataset.labelPlay! : btn.dataset.labelPause!);
+      btn.setAttribute('aria-label', paused ? btn.dataset.labelPlay : btn.dataset.labelPause);
     });
   });
 </script>
