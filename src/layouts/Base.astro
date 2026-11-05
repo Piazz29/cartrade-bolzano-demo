@@ -24,7 +24,31 @@ const t = ui[lang];
 const siteUrl = Astro.site!.toString().replace(/\/$/, '');
 const canonical = `${siteUrl}${alternates[lang]}`;
 const og = ogImage ?? `${siteUrl}/og/og-${lang}.jpg`;
-const fullTitle = title.includes('Car Trade') ? title : `${title} · Car Trade Bolzano`;
+const fullTitle = title.includes('Car Trade') ? title : `${title} · Car Trade ${lang === 'de' ? 'Bozen' : 'Bolzano'}`;
+
+// Zona servita: Bolzano e comuni vicini, con i nomi ufficiali nella lingua della pagina
+const AREA: Record<Lang, [string, string][]> = {
+  it: [['City', 'Bolzano'], ['City', 'Laives'], ['City', 'Appiano sulla Strada del Vino'], ['AdministrativeArea', 'Oltradige'], ['AdministrativeArea', 'Bassa Atesina']],
+  de: [['City', 'Bozen'], ['City', 'Leifers'], ['City', 'Eppan an der Weinstraße'], ['AdministrativeArea', 'Überetsch'], ['AdministrativeArea', 'Unterland']],
+};
+const OFFERTE: Record<Lang, [string, string][]> = {
+  it: [
+    ['Revisione auto', 'Centro revisioni affiliato DEKRA per autovetture, prenotazione online.'],
+    ['Tagliando', 'Manutenzione programmata secondo le specifiche del costruttore, per tutte le marche.'],
+    ['Meccanica', 'Freni, distribuzione, frizione, diagnosi elettronica.'],
+    ['Carrozzeria', 'Riparazione di ammaccature e graffi, raddrizzatura, verniciatura. Preventivo anche da foto.'],
+    ['Gomme', 'Cambio gomme stagionale: in provincia di Bolzano le invernali servono dal 15 novembre al 15 aprile.'],
+    ['Vendita auto usate e km 0', 'Auto usate selezionate e km 0 con garanzia, controllate in officina.'],
+  ],
+  de: [
+    ['Fahrzeugrevision', 'DEKRA-Partner für die Revision von Pkw, Online-Buchung.'],
+    ['Inspektion', 'Wartung nach Herstellervorgaben, für alle Marken.'],
+    ['Mechanik', 'Bremsen, Zahnriemen, Kupplung, elektronische Diagnose.'],
+    ['Karosserie', 'Dellen und Kratzer, Richtarbeiten, Lackierung. Angebot auch per Foto.'],
+    ['Reifen', 'Saisonaler Reifenwechsel: In Südtirol gilt die Winterausrüstungspflicht vom 15. November bis 15. April.'],
+    ['Gebrauchtwagen und Tageszulassungen', 'Ausgewählte Gebrauchtwagen und Tageszulassungen mit Garantie, in der Werkstatt geprüft.'],
+  ],
+};
 
 // schema.org: officina + concessionario nella stessa sede
 const business = {
@@ -48,8 +72,17 @@ const business = {
     addressCountry: site.address.country,
   },
   geo: { '@type': 'GeoCoordinates', latitude: site.geo.lat, longitude: site.geo.lng },
-  hasMap: site.mapsUrl,
-  areaServed: { '@type': 'City', name: lang === 'it' ? 'Bolzano' : 'Bozen' },
+  // Scheda Google per cid e pagina DEKRA del centro. Niente Facebook: è fermo al 2018, con un altro indirizzo.
+  hasMap: site.google.mapsCidUrl,
+  sameAs: [site.google.mapsCidUrl, site.dekra.profileUrl],
+  areaServed: AREA[lang].map(([type, name]) => ({ '@type': type, name })),
+  makesOffer: OFFERTE[lang].map(([name, description], i) => ({
+    '@type': 'Offer',
+    itemOffered: { '@type': 'Service', name, description },
+    // La revisione ha la tariffa nazionale fissa; gli altri servizi su preventivo
+    ...(i === 0 ? { price: site.revisionFee.total.toFixed(2), priceCurrency: 'EUR' } : {}),
+    areaServed: { '@type': 'City', name: site.address.city[lang] },
+  })),
   // TODO: aggiungere il sabato se confermato
   openingHoursSpecification: site.hours.map((h) => ({
     '@type': 'OpeningHoursSpecification',

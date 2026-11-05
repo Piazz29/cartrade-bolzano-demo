@@ -17,7 +17,8 @@ const t = ui[lang];
 
 const copy = {
   it: {
-    title: 'Contatti e orari · Car Trade Bolzano',
+    title: 'Contatti e orari del centro revisioni e officina a Bolzano',
+    kicker: 'Centro revisioni e officina · Bolzano',
     description: `Contatti CAR TRADE Bolzano: telefono ${site.phone.display}, WhatsApp, Via Werner von Siemens 4/F. Orari lun-ven 8:30-12:30 e 14:00-18:00.`,
     label: 'Contatti',
     h1: 'Chiamaci, scrivici o passa a trovarci.',
@@ -34,7 +35,8 @@ const copy = {
     whereLabel: 'Dove siamo',
   },
   de: {
-    title: 'Kontakt und Öffnungszeiten · Car Trade Bozen',
+    title: 'Kontakt und Öffnungszeiten: Prüfstelle und Werkstatt in Bozen',
+    kicker: 'Prüfstelle und Werkstatt · Bozen',
     description: `Kontakt CAR TRADE Bozen: Telefon ${site.phone.display}, WhatsApp, Werner-von-Siemens-Straße 4/F. Öffnungszeiten Mo–Fr 8:30–12:30 und 14:00–18:00.`,
     label: 'Kontakt',
     h1: 'Rufen Sie an, schreiben Sie oder kommen Sie vorbei.',
@@ -53,7 +55,7 @@ const copy = {
 }[lang];
 ---
 <Base lang={lang} title={copy.title} description={copy.description} alternates={alternatesFor('contatti')} current="contatti">
-  <PageHero lang={lang} label={copy.label} title={copy.h1} lead={copy.lead}>
+  <PageHero lang={lang} label={copy.label} kicker={copy.kicker} title={copy.h1} lead={copy.lead}>
     <div slot="aside" class="aside">
       <OpenStatus lang={lang} />
       <a href={site.phone.href} class="big-phone t-num mt-4 block">{site.phone.display}</a>

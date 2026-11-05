@@ -11,13 +11,15 @@ import GoogleReviews from '../components/GoogleReviews.astro';
 import Marquee from '../components/Marquee.astro';
 import RevisionCalculator from '../components/RevisionCalculator.astro';
 import MapBlock from '../components/MapBlock.astro';
+import Faq from '../components/Faq.astro';
 import HoursTable from '../components/HoursTable.astro';
 import { site, formatNumber, formatPrice, type Lang } from '../data/site';
 import { routes, alternatesFor } from '../i18n/routes';
 import { ui } from '../i18n/ui';
 import { unsplash, unsplashSrcset } from '../lib/img';
-import { Image, getImage } from 'astro:assets';
-import carrozzeriaImg from '../assets/sede/carrozzeria.webp'; // foto fornita dal cliente
+import { Picture, getImage } from 'astro:assets';
+import { fotoLocale, fotoUnsplash } from '../lib/foto';
+import type { FotoKey } from '../data/foto';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -33,6 +35,7 @@ const copy = {
       'Centro revisioni affiliato DEKRA, officina meccanica, carrozzeria e auto usate e km 0 in Via Werner von Siemens 4/F a Bolzano. Prenota la revisione online.',
     eyebrow: 'Bolzano Sud · Via Werner von Siemens 4/F',
     h1: ['Un solo indirizzo.', 'Tutto per la tua auto.'],
+    kicker: 'Revisione, officina e carrozzeria a Bolzano',
     lead: 'Revisione DEKRA, meccanica e carrozzeria sotto lo stesso tetto a Bolzano Sud. Se la revisione trova un difetto, lo ripariamo qui.',
     svcNav: 'I nostri servizi',
     svc: [
@@ -61,7 +64,7 @@ const copy = {
         text: 'Centro revisioni affiliato DEKRA per autovetture. Prenoti online, aspetti in sede, esci con l’esito sul libretto.',
         facts: ['79,02 € tariffa nazionale', 'Prenotazione online'],
         href: routes.revisione.it,
-        img: '1791419542289-693087bd1044',
+        foto: 'revisione-linea',
         alt: 'Berlina argento sul ponte sollevatore con il cofano aperto',
       },
       {
@@ -70,7 +73,7 @@ const copy = {
         text: 'Tagliandi, freni, distribuzione, diagnosi elettronica. Prima ti diciamo cosa serve e quanto costa, poi mettiamo le mani sull’auto.',
         facts: ['Tagliandi', 'Freni', 'Diagnosi'],
         href: `${routes.officina.it}#officina`,
-        img: '1767681092416-bccf9410bda4',
+        foto: 'officina-ponti',
         alt: 'Officina ordinata con diverse auto in lavorazione',
       },
       {
@@ -79,7 +82,7 @@ const copy = {
         text: 'Graffi, ammaccature, danni alla scocca. Mandaci una foto del danno e ricevi un preventivo senza venire in sede.',
         facts: ['Preventivo da foto', 'Raddrizzatura', 'Verniciatura'],
         href: `${routes.officina.it}#carrozzeria`,
-        img: 'local-carrozzeria',
+        foto: 'carrozzeria',
         alt: 'Carrozziere che lucida la fiancata di un’auto grigia',
       },
       {
@@ -88,7 +91,7 @@ const copy = {
         text: 'Poche auto, scelte una per una e controllate nella nostra officina prima della vendita.',
         facts: ['Usato con garanzia', 'Km 0', 'Permute'],
         href: routes.showroom.it,
-        img: '1655286182008-2a6578c7f487',
+        foto: 'piazzale-auto',
         alt: 'SUV bianco parcheggiato su un piazzale con foglie autunnali',
       },
     ],
@@ -115,11 +118,20 @@ const copy = {
     carsText: 'Usato controllato e km 0 con garanzia. Ogni auto ha la sua scheda completa, con prezzo in chiaro.',
     calcLabel: 'Scadenza revisione',
     calcTitle: 'Quando scade la tua revisione?',
-    calcText: 'Indica il mese e l’anno: calcoliamo la scadenza secondo il Codice della Strada. Se vuoi, ti avvisiamo noi un mese prima.',
+    calcText: 'Indica il mese e l’anno: calcoliamo la scadenza secondo il Codice della Strada. Se vuoi, ti avvisiamo noi 30 e 7 giorni prima.',
     whereLabel: 'Dove siamo',
     whereTitle: 'Zona produttiva Bolzano Sud.',
     // TODO: se c'è parcheggio clienti, dirlo qui (dato da confermare)
     whereText: 'Fuori dal traffico del centro, a pochi minuti dalla città. Prima di venire, una telefonata ti evita l’attesa.',
+    faqLabel: 'Domande frequenti',
+    faq: [
+      { q: 'Quanto costa la revisione a Bolzano e come si prenota?', a: `${formatPrice(site.revisionFee.total, 'it', 2)} tutto compreso: è la tariffa nazionale, uguale in tutti i centri autorizzati. Si prenota online sul portale DEKRA, scegliendo giorno e ora.` },
+      { q: 'Se l’auto non passa la revisione, dove la riparo?', a: 'Qui. Officina e carrozzeria sono nella stessa sede del centro revisioni: ti diciamo cosa serve e quanto costa, ripariamo e ripresenti l’auto a pochi metri di distanza.' },
+      { q: 'Fate tagliandi e riparazioni su tutte le marche?', a: 'Sì. Tagliandi secondo le specifiche del costruttore, freni, distribuzione, diagnosi elettronica e carrozzeria per auto di ogni marca.' },
+      { q: 'Posso avere un preventivo di carrozzeria senza venire in sede?', a: 'Sì. Dal modulo della pagina Officina e carrozzeria carichi fino a 6 foto del danno dal telefono e ti ricontattiamo con una stima.' },
+      { q: 'Mi ricordate voi quando scade la revisione?', a: 'Sì, gratis. Ti iscrivi in 30 secondi alla pagina Promemoria revisione: ti scriviamo via email o WhatsApp 30 e 7 giorni prima della scadenza.' },
+      { q: 'Dove siete e quando siete aperti?', a: `In ${site.address.street.it}, zona produttiva di Bolzano Sud. Dal lunedì al venerdì, 8:30–12:30 e 14:00–18:00.` },
+    ],
   },
   de: {
     title: 'Revision, Werkstatt, Karosserie und Gebrauchtwagen in Bozen',
@@ -127,6 +139,7 @@ const copy = {
       'DEKRA-Partner für die Fahrzeugrevision, Kfz-Werkstatt, Karosserie, Gebrauchtwagen und Tageszulassungen in der Werner-von-Siemens-Straße 4/F in Bozen. Revision online buchen.',
     eyebrow: 'Bozen Süd · Werner-von-Siemens-Straße 4/F',
     h1: ['Eine Adresse.', 'Alles für Ihr Auto.'],
+    kicker: 'Revision, Werkstatt und Karosserie in Bozen',
     lead: 'Revision, Mechanik und Karosserie unter einem Dach in Bozen Süd. Findet die Revision einen Mangel, beheben wir ihn gleich hier.',
     svcNav: 'Unsere Leistungen',
     svc: [
@@ -155,7 +168,7 @@ const copy = {
         text: 'DEKRA-Partner für die Revision von Pkw. Online buchen, vor Ort warten, mit dem Ergebnis im Fahrzeugschein wieder abfahren.',
         facts: ['79,02 € staatlicher Tarif', 'Online-Buchung'],
         href: routes.revisione.de,
-        img: '1791419542289-693087bd1044',
+        foto: 'revisione-linea',
         alt: 'Silberne Limousine mit geöffneter Motorhaube auf der Hebebühne',
       },
       {
@@ -164,7 +177,7 @@ const copy = {
         text: 'Inspektion, Bremsen, Zahnriemen, elektronische Diagnose. Erst sagen wir Ihnen, was nötig ist und was es kostet, dann geht es los.',
         facts: ['Inspektion', 'Bremsen', 'Diagnose'],
         href: `${routes.officina.de}#werkstatt`,
-        img: '1767681092416-bccf9410bda4',
+        foto: 'officina-ponti',
         alt: 'Aufgeräumte Werkstatt mit mehreren Fahrzeugen in Arbeit',
       },
       {
@@ -173,7 +186,7 @@ const copy = {
         text: 'Kratzer, Dellen, Schäden an der Karosserie. Schicken Sie uns ein Foto und erhalten Sie ein Angebot, ohne vorbeizukommen.',
         facts: ['Angebot per Foto', 'Richtarbeiten', 'Lackierung'],
         href: `${routes.officina.de}#karosserie`,
-        img: 'local-carrozzeria',
+        foto: 'carrozzeria',
         alt: 'Karosseriebauer poliert die Seite eines grauen Autos',
       },
       {
@@ -182,7 +195,7 @@ const copy = {
         text: 'Wenige Fahrzeuge, einzeln ausgewählt und vor dem Verkauf in unserer Werkstatt geprüft.',
         facts: ['Mit Garantie', 'Tageszulassungen', 'Inzahlungnahme'],
         href: routes.showroom.de,
-        img: '1655286182008-2a6578c7f487',
+        foto: 'piazzale-auto',
         alt: 'Weißer SUV auf einem Platz mit Herbstlaub',
       },
     ],
@@ -208,34 +221,60 @@ const copy = {
     carsText: 'Geprüfte Gebrauchtwagen und Tageszulassungen mit Garantie. Jedes Fahrzeug mit vollständigem Datenblatt und klarem Preis.',
     calcLabel: 'Fälligkeit Revision',
     calcTitle: 'Wann ist Ihre Revision fällig?',
-    calcText: 'Monat und Jahr angeben: Wir berechnen den Termin nach der Straßenverkehrsordnung. Auf Wunsch erinnern wir Sie einen Monat vorher.',
+    calcText: 'Monat und Jahr angeben: Wir berechnen den Termin nach der Straßenverkehrsordnung. Auf Wunsch erinnern wir Sie 30 und 7 Tage vorher.',
     whereLabel: 'Anfahrt',
     whereTitle: 'Gewerbegebiet Bozen Süd.',
     whereText: 'Abseits vom Stadtverkehr, wenige Minuten vom Zentrum. Ein kurzer Anruf vorab erspart Ihnen Wartezeit.',
+    faqLabel: 'Häufige Fragen',
+    faq: [
+      { q: 'Was kostet die Revision in Bozen und wie bucht man?', a: `${formatPrice(site.revisionFee.total, 'de', 2)} inklusive allem: der staatliche Tarif, in allen zugelassenen Prüfstellen gleich. Gebucht wird online im DEKRA-Portal, mit Wunschtag und Uhrzeit.` },
+      { q: 'Das Auto hat die Revision nicht bestanden: Wo lasse ich es reparieren?', a: 'Gleich hier. Werkstatt und Karosserie sind am selben Standort wie die Prüfstelle: Wir sagen Ihnen, was nötig ist und was es kostet, reparieren und Sie stellen das Auto ein paar Meter weiter erneut vor.' },
+      { q: 'Machen Sie Inspektion und Reparaturen für alle Marken?', a: 'Ja. Inspektion nach Herstellervorgaben, Bremsen, Zahnriemen, elektronische Diagnose und Karosserie für Fahrzeuge aller Marken.' },
+      { q: 'Bekomme ich ein Karosserie-Angebot, ohne vorbeizukommen?', a: 'Ja. Über das Formular auf der Seite Werkstatt & Karosserie laden Sie bis zu 6 Fotos vom Schaden hoch, wir melden uns mit einer Schätzung.' },
+      { q: 'Erinnern Sie mich an die Revision?', a: 'Ja, kostenlos. Melden Sie sich in 30 Sekunden auf der Seite Revisions-Erinnerung an: Wir schreiben Ihnen per E-Mail oder WhatsApp 30 und 7 Tage vor Ablauf.' },
+      { q: 'Wo sind Sie und wann haben Sie geöffnet?', a: `In der ${site.address.street.de}, Gewerbegebiet Bozen Süd. Montag bis Freitag, 8:30–12:30 und 14:00–18:00 Uhr.` },
+    ],
   },
 }[lang];
 
-// Immagini locali (foto del cliente) usate nell'indice servizi: miniatura mobile e anteprima che segue il cursore
-const localPreview = { 'local-carrozzeria': (await getImage({ src: carrozzeriaImg, width: 560, format: 'webp' })).src };
+// Anteprima che segue il cursore sull'indice servizi: foto locale (src/assets/foto/) o segnaposto Unsplash
+const previewSrc = async (key: FotoKey) => {
+  const loc = fotoLocale(key);
+  if (loc) return (await getImage({ src: loc, width: Math.min(560, loc.width), format: 'webp' })).src;
+  const u = fotoUnsplash(key);
+  return u ? unsplash(u.id, 560, [4, 3], u.crop, 70) : '';
+};
+const previews = await Promise.all(copy.services.map((s) => previewSrc(s.foto as FotoKey)));
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: copy.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
 // Titolo in due frasi; ogni parola sale da una maschera, i punti finali sono arancio (come l'accento del logo)
 const lines = copy.h1.map((l) => l.split(' '));
 let wordIndex = 0;
-const heroId = '1771340012319-0b4fca008b54';
-// Foto a tutto schermo: verticale (3:4, centrata su auto e meccanico) per il mobile, panoramica da tablet in su
-const fp = 'focalpoint&fp-x=0.5&fp-y=0.55';
+// Foto a tutto schermo. Con la foto vera (src/assets/foto/hero.*) la ottimizza astro:assets;
+// col segnaposto Unsplash: verticale (3:4, centrata su auto e meccanico) per il mobile, panoramica da tablet in su
+const heroLocal = fotoLocale('hero');
+const heroRemote = fotoUnsplash('hero')!;
+const heroId = heroRemote.id;
+const fp = heroRemote.crop;
+const heroLocalWidths = heroLocal ? [640, 828, 1080, 1440, 1920, 2400].filter((w) => w <= heroLocal.width) : [];
 // Qualità più bassa: la foto è virata e velata di blu, la compressione non si vede
 const heroPortrait = unsplashSrcset(heroId, [480, 640, 828, 1080], [3, 4], fp, 48);
 const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 52);
 ---
-<Base lang={lang} title={copy.title} description={copy.description} alternates={alternatesFor('home')} current="home" overlayHeader>
-  <link slot="head" rel="preload" as="image" media="(max-width: 47.99rem)" imagesrcset={heroPortrait} imagesizes="100vw" fetchpriority="high" />
-  <link slot="head" rel="preload" as="image" media="(min-width: 48rem)" imagesrcset={heroWide} imagesizes="100vw" fetchpriority="high" />
+<Base lang={lang} title={copy.title} description={copy.description} alternates={alternatesFor('home')} current="home" overlayHeader jsonLd={[faqLd]}>
+  {!heroLocal && <link slot="head" rel="preload" as="image" media="(max-width: 47.99rem)" imagesrcset={heroPortrait} imagesizes="100vw" fetchpriority="high" />}
+  {!heroLocal && <link slot="head" rel="preload" as="image" media="(min-width: 48rem)" imagesrcset={heroWide} imagesizes="100vw" fetchpriority="high" />}
   <!-- HERO: foto a tutto schermo, composizione che ricalca il logo (linea del tetto sopra, filetto arancio + BOLZANO sotto) -->
   <section class="hero on-dark">
     <div class="hero-stage">
       <div class="hero-media" aria-hidden="false">
-        {/* TODO: sostituire con foto della sede (officina reale, orizzontale, con l'auto sul ponte) */}
         <div data-parallax="12" class="absolute inset-0">
+          {heroLocal ? (
+            <Picture src={heroLocal} alt={copy.heroAlt} formats={['avif', 'webp']} fallbackFormat="webp" widths={heroLocalWidths} sizes="100vw" loading="eager" fetchpriority="high" class="hero-img" />
+          ) : (
           <picture>
             <source media="(min-width: 48rem)" srcset={heroWide} sizes="100vw" />
             <img
@@ -250,6 +289,7 @@ const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 5
               class="hero-img"
             />
           </picture>
+          )}
         </div>
         <span class="hero-tint" aria-hidden="true"></span>
         <span class="hero-scrim" aria-hidden="true"></span>
@@ -265,6 +305,7 @@ const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 5
           <div class="hero-main">
             <RoofLine tone="paper" class="roof-anim hero-roof" weight={1.5} draw={false} />
             <h1>
+              <span class="hero-kicker t-label hero-fade" style="animation-delay:200ms">{copy.kicker}</span>
               <span class="sr-only">{copy.h1.join(' ')}</span>
               <span class="hero-title block" aria-hidden="true">
                 {lines.map((words) => (
@@ -354,7 +395,7 @@ const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 5
       <ol class="services mt-10 lg:mt-16" data-services>
         {copy.services.map((s, i) => (
           <li data-reveal>
-            <a href={s.href} class="service-row group" data-img={s.img}>
+            <a href={s.href} class="service-row group" data-img={s.foto}>
               <span class="t-label t-num text-orange-ink pt-1">{String(i + 1).padStart(2, '0')}</span>
               <span class="service-main">
                 <span class="service-title">{s.title}</span>
@@ -364,14 +405,7 @@ const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 5
                 </span>
               </span>
               <span class="service-thumb lg:hidden">
-                {s.img === 'local-carrozzeria' ? (
-                  <span class="photo block aspect-square">
-                    <Image src={carrozzeriaImg} alt="" widths={[160, 240]} sizes="96px" class="h-full w-full object-cover" />
-                  </span>
-                ) : (
-                  /* TODO: sostituire con foto della sede */
-                  <Photo id={s.img} alt="" sizes="96px" ratio={[1, 1]} widths={[160, 240]} />
-                )}
+                <Photo foto={s.foto as FotoKey} alt="" sizes="96px" ratio={[1, 1]} widths={[160, 240]} />
               </span>
               <span class="service-arrow" aria-hidden="true"><Icon name="arrow" size={26} /></span>
             </a>
@@ -381,14 +415,14 @@ const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 5
 
       <!-- Anteprima immagine che segue il cursore (solo desktop con mouse) -->
       <div class="cursor-preview" aria-hidden="true" data-cursor-preview>
-        {copy.services.map((s) => (
+        {copy.services.map((s, i) => (
           <img
-            src={localPreview[s.img as keyof typeof localPreview] ?? `https://images.unsplash.com/photo-${s.img}?auto=format&fit=crop&w=560&h=420&q=70`}
+            src={previews[i]}
             alt=""
             width="560"
             height="420"
             loading="lazy"
-            data-preview={s.img}
+            data-preview={s.foto}
           />
         ))}
       </div>
@@ -521,6 +555,24 @@ const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 5
       </div>
     </div>
   </section>
+
+  <!-- DOMANDE FREQUENTI -->
+  <section class="section-y pt-0" aria-labelledby="faq-title">
+    <div class="wrap grid-12 gap-y-10">
+      <div class="col-span-4 lg:col-span-4">
+        <SectionHead num="06" label={copy.faqLabel} />
+        <h2 id="faq-title" class="sr-only">{copy.faqLabel}</h2>
+        <a href={routes.promemoria[lang]} class="reminder-link mt-8">
+          <Icon name="bell" size={20} class="text-orange-ink" />
+          <span>{lang === 'it' ? 'Ti ricordiamo noi la revisione' : 'Wir erinnern Sie an die Revision'}</span>
+          <Icon name="arrow" size={18} class="btn-arrow" />
+        </a>
+      </div>
+      <div class="col-span-4 lg:col-span-8">
+        <Faq items={copy.faq} />
+      </div>
+    </div>
+  </section>
 </Base>
 
 <style>
@@ -538,7 +590,8 @@ const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 5
   @media (min-width: 64rem) { .hero-stage { min-height: max(40rem, calc(100svh - 7.5rem)); } }
 
   .hero-media { position: absolute; inset: 0; z-index: -1; overflow: hidden; background: var(--color-night-2); }
-  .hero-img {
+  /* :global: con la foto vera l'<img> la crea il componente Picture */
+  .hero-media :global(.hero-img) {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -599,6 +652,7 @@ const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 5
     color: var(--color-paper);
   }
   .hero-title .dot { color: var(--color-orange); }
+  .hero-kicker { display: block; margin-bottom: clamp(0.75rem, 1.4vw, 1.1rem); color: var(--color-steel); }
   .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.1em; margin-bottom: -0.1em; }
   .w > span { display: inline-block; animation: word-up 1.1s var(--ease-out-expo) both; }
   @keyframes word-up { from { transform: translateY(110%); } }
@@ -750,6 +804,10 @@ const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 5
   .star::after { content: ''; position: absolute; inset: 0; background: var(--color-orange); clip-path: inset(0 calc(100% - var(--fill)) 0 0); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m12 3.8 2.5 5.2 5.6.7-4.1 3.9 1 5.6L12 16.5l-5 2.7 1-5.6-4.1-3.9 5.6-.7L12 3.8Z'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m12 3.8 2.5 5.2 5.6.7-4.1 3.9 1 5.6L12 16.5l-5 2.7 1-5.6-4.1-3.9 5.6-.7L12 3.8Z'/%3E%3C/svg%3E") center / contain no-repeat; }
   .reason { display: grid; grid-template-columns: 2.5rem 1fr; gap: 0.5rem; padding-block: 1.5rem; border-top: 1px solid var(--line-dark); }
   .reason:last-child { border-bottom: 1px solid var(--line-dark); }
+
+  .reminder-link { display: inline-flex; align-items: center; gap: 0.75rem; min-height: 2.75rem; font-weight: 600; text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 0.25em; }
+  .reminder-link:hover { text-decoration-color: currentColor; }
+  .reminder-link:hover :global(.btn-arrow) { transform: translateX(4px); }
 
   /* Rail auto: scorrimento orizzontale su mobile, griglia su desktop */
   .cars-rail {

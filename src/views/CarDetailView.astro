@@ -23,7 +23,8 @@ const url = `${siteUrl}${carUrl(car.id, lang)}`;
 const copy = {
   it: {
     back: 'Tutte le auto',
-    title: `${fullName}, ${d.year}, ${formatKm(d.km, 'it')}`,
+    title: `${fullName} in vendita, ${d.year}, ${formatKm(d.km, 'it')}`,
+    kicker: d.condition === 'km0' ? 'In vendita a Bolzano' : 'Usato in vendita a Bolzano',
     description: `${fullName} ${L.condition[d.condition].toLowerCase()} in vendita a Bolzano: ${d.year}, ${formatKm(d.km, 'it')}, ${L.fuel[d.fuel].toLowerCase()}, cambio ${L.gearbox[d.gearbox].toLowerCase()}. ${formatPrice(d.price, 'it')}.`,
     wa: `Buongiorno, mi interessa la ${fullName} a ${formatPrice(d.price, 'it')}. È ancora disponibile? ${url}`,
     waCta: 'Scrivici su WhatsApp',
@@ -47,7 +48,8 @@ const copy = {
   },
   de: {
     back: 'Alle Fahrzeuge',
-    title: `${fullName}, ${d.year}, ${formatKm(d.km, 'de')}`,
+    title: `${fullName} zu verkaufen, ${d.year}, ${formatKm(d.km, 'de')}`,
+    kicker: d.condition === 'km0' ? 'Zu verkaufen in Bozen' : 'Gebrauchtwagen in Bozen',
     description: `${fullName} (${L.condition[d.condition]}) in Bozen zu verkaufen: Baujahr ${d.year}, ${formatKm(d.km, 'de')}, ${L.fuel[d.fuel]}, ${L.gearbox[d.gearbox]}. ${formatPrice(d.price, 'de')}.`,
     wa: `Guten Tag, ich interessiere mich für den ${fullName} zu ${formatPrice(d.price, 'de')}. Ist er noch verfügbar? ${url}`,
     waCta: 'Per WhatsApp schreiben',
@@ -178,11 +180,14 @@ const carLd = {
       <!-- Informazioni e azioni -->
       <div class="info">
         <div class="lg:sticky lg:top-28">
-          <p class="t-label flex items-center gap-3 text-muted">
-            {d.make}
-            {d.condition === 'km0' && <span class="rounded-[2px] bg-orange px-1.5 py-1 text-ink">{L.condition.km0}</span>}
-          </p>
-          <h1 class="t-h1 mt-2 !text-[clamp(2.2rem,4.6vw,3.6rem)]">{d.model}</h1>
+          <h1>
+            <span class="t-label flex flex-wrap items-center gap-x-3 gap-y-1 text-muted">
+              {d.make}
+              {d.condition === 'km0' && <span class="rounded-[2px] bg-orange px-1.5 py-1 text-ink">{L.condition.km0}</span>}
+              <span class="font-normal">· {copy.kicker}</span>
+            </span>
+            <span class="t-h1 mt-2 block !text-[clamp(2.2rem,4.6vw,3.6rem)]">{d.model}</span>
+          </h1>
           <p class="mt-2 text-lg text-muted">{version}</p>
 
           <ul class="quad mt-6 t-num">

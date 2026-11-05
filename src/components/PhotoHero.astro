@@ -16,13 +16,15 @@ interface Props {
   lang: Lang;
   label: string;
   title: string[];
+  /** riga piccola dentro l'H1 (servizio + città) */
+  kicker?: string;
   lead?: string;
   image: ImageMetadata;
   alt: string;
   position?: string;
   caption?: string;
 }
-const { lang, label, title, lead, image, alt, position = '50% 50%', caption } = Astro.props;
+const { lang, label, title, kicker, lead, image, alt, position = '50% 50%', caption } = Astro.props;
 const siteUrl = Astro.site!.toString().replace(/\/$/, '');
 const crumbsLd = {
   '@context': 'https://schema.org',
@@ -71,6 +73,7 @@ const widths = [480, 640, image.width].filter((w, i, a) => w <= image.width && a
         <div>
           <RoofLine tone="paper" class="roof-anim phero-roof" weight={1.5} draw={false} />
           <h1>
+            {kicker && <span class="kicker t-label">{kicker}</span>}
             <span class="sr-only">{title.join(' ')}</span>
             <span class="title" aria-hidden="true">
               {lines.map((words) => (
@@ -172,6 +175,7 @@ const widths = [480, 640, image.width].filter((w, i, a) => w <= image.width && a
     letter-spacing: -0.045em;
   }
   .title .dot { color: var(--color-orange); }
+  .kicker { display: block; margin-bottom: 1rem; color: var(--color-steel); }
   .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.1em; margin-bottom: -0.1em; }
   .w > span { display: inline-block; animation: ph-word 1.1s var(--ease-out-expo) both; }
   @keyframes ph-word { from { transform: translateY(110%); } }
