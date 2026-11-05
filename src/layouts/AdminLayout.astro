@@ -156,7 +156,7 @@ const mancanti = [!stato.db && 'Supabase', !stato.email && 'invio email'].filter
         @media (min-width: 64rem) {
           .tabbar { display: none; }
           .topbar { padding-inline: 1.5rem; }
-          .shell { display: grid; grid-template-columns: 15.5rem minmax(0, 1fr); min-height: calc(100vh - 3.5rem); background: linear-gradient(to right, var(--color-paper-2) 15.5rem, var(--color-paper) 15.5rem); }
+          .shell { display: grid; grid-template-columns: 15.5rem minmax(0, 1fr); min-height: calc(100vh - 3.5rem); background: linear-gradient(to right, var(--color-paper-2) calc(15.5rem - 1px), var(--line) calc(15.5rem - 1px) 15.5rem, var(--color-paper) 15.5rem); }
           .sidenav { display: flex; flex-direction: column; justify-content: space-between; position: sticky; top: 3.5rem; height: calc(100vh - 3.5rem); padding: 1.25rem 0.75rem; background: var(--color-paper-2); border-right: 1px solid var(--line); }
           .sidenav a { display: flex; align-items: center; gap: 0.75rem; min-height: 2.75rem; padding: 0 0.75rem; border-radius: 2px; text-decoration: none; font-weight: 560; color: var(--color-ink); }
           .sidenav a:hover { background: color-mix(in oklab, var(--color-ink) 6%, transparent); }

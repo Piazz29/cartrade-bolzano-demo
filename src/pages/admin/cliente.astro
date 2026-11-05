@@ -18,8 +18,8 @@ if (no) return no;
 <style>
   [data-scheda] :global(.actions) { display: grid; gap: 0.6rem; margin-top: 1.25rem; }
   @media (min-width: 40rem) { [data-scheda] :global(.actions) { display: flex; flex-wrap: wrap; align-items: center; } }
-  [data-scheda] :global(.wa) { display: flex; gap: 0.5rem; }
-  [data-scheda] :global(.wa select) { flex: 1; min-width: 0; }
+  [data-scheda] :global(.wa) { display: grid; gap: 0.5rem; }
+  @media (min-width: 40rem) { [data-scheda] :global(.wa) { display: flex; } [data-scheda] :global(.wa select) { width: auto; min-width: 15rem; } }
   [data-scheda] :global(.done-panel) { margin-top: 0.75rem; padding: 1rem; background: var(--color-paper-2); border: 1px solid var(--line); }
   [data-scheda] :global(.cols) { display: grid; gap: 0 2.5rem; }
   @media (min-width: 64rem) { [data-scheda] :global(.cols) { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); } }
