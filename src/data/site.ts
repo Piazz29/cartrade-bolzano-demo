@@ -1,6 +1,9 @@
 // Dati aziendali reali. Unica fonte per header, footer, schema.org e contatti.
 // Fonti: sito attuale cartradebolzano.it, scheda DEKRA, brief del cliente.
 
+const GOOGLE_PLACE_ID = 'ChIJ_xxnNNadgkcRzUuQfA86rBI';
+const GOOGLE_CID = '1345514226865687501';
+
 export const site = {
   name: 'CAR TRADE SRL',
   brand: 'Car Trade Bolzano',
@@ -37,13 +40,16 @@ export const site = {
   // Voto e numero sono il valore di ottobre 2026: con la chiave API vengono aggiornati in pagina dai dati live.
   google: {
     name: 'Centro Revisioni Dekra - Car Trade Srl',
-    placeId: 'ChIJ_xxnNNadgkcRzUuQfA86rBI',
-    cid: '1345514226865687501',
+    placeId: GOOGLE_PLACE_ID,
+    cid: GOOGLE_CID,
     rating: 4.5,
     reviewCount: 61,
-    url: 'https://www.google.com/maps/place/?q=place_id:ChIJ_xxnNNadgkcRzUuQfA86rBI',
-    reviewsUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJ_xxnNNadgkcRzUuQfA86rBI',
-    writeReviewUrl: 'https://search.google.com/local/writereview?placeid=ChIJ_xxnNNadgkcRzUuQfA86rBI',
+    url: `https://www.google.com/maps/place/?q=place_id:${GOOGLE_PLACE_ID}`,
+    reviewsUrl: `https://www.google.com/maps/place/?q=place_id:${GOOGLE_PLACE_ID}`,
+    // Link "scrivi una recensione" costruito dal Place ID (usato dal sito e dalla richiesta recensione dell'admin)
+    writeReviewUrl: `https://search.google.com/local/writereview?placeid=${GOOGLE_PLACE_ID}`,
+    // Scheda Google per cid: usata in schema.org (hasMap, sameAs) e in llms.txt
+    mapsCidUrl: `https://maps.google.com/?cid=${GOOGLE_CID}`,
     // Chiave browser della Google Maps Platform (vedi .env.example). Senza chiave: mappa pubblica + link alle recensioni.
     apiKey: (import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY as string | undefined) || '',
   },
