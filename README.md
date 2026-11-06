@@ -127,7 +127,7 @@ Verifica: apri l'URL di anteprima dal telefono **in rete mobile** (non dal Wi-Fi
 
 ### 5. Prova
 
-1. Apri `/admin/` → login → in alto deve comparire **"Dati reali"** (pallino verde) e nessun avviso di modalità simulata.
+1. Apri `/admin/` → login → in alto deve comparire **"Collegato"** (pallino verde) e nessun avviso di modalità simulata.
 2. `/admin/locandina/` → nessun avviso su `DEMO_KEY` → inquadra il QR dallo schermo col telefono → iscriviti con la tua email.
 3. Entro un minuto arriva l'email di benvenuto; entro 10 secondi compari nella Panoramica come **Nuovo**.
 4. Alla fine: **Ripristina demo**.
@@ -175,7 +175,7 @@ Scorri veloce: **Showroom** (*"fotografi l'auto col telefono e vedi subito la sc
 
 ## Checklist del giorno prima
 
-- [ ] Variabili impostate su Vercel (Preview) e **Redeploy** fatto; in `/admin/` compare **Dati reali** senza avvisi.
+- [ ] Variabili impostate su Vercel (Preview) e **Redeploy** fatto; in `/admin/` compare **Collegato** senza avvisi.
 - [ ] **Deployment Protection disattivata**: l'URL di anteprima si apre da un telefono in rete mobile, senza login Vercel.
 - [ ] Dominio `auralpdigital.com` **Verified** su Resend.
 - [ ] **Prova completa con il tuo numero e la tua email**: QR → iscrizione → benvenuto → "Nuovo" in admin → promemoria → WhatsApp → campagna Gomme invernali → lavoro completato → ripristino. Controlla che le email arrivino in **Posta in arrivo** (Gmail e iCloud), non in Spam.

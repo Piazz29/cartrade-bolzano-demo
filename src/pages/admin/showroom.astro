@@ -94,18 +94,20 @@ const thisYear = new Date().getFullYear();
 
 <style>
   .add { display: grid; gap: 1rem; padding-top: 0.75rem; }
-  .shot { position: relative; display: grid; place-items: center; aspect-ratio: 4 / 3; max-height: 18rem; overflow: hidden; border: 1.5px dashed var(--line-strong); border-radius: 2px; background: var(--color-paper-2); cursor: pointer; }
+  .shot { position: relative; display: grid; place-items: center; aspect-ratio: 4 / 3; max-height: 18rem; overflow: hidden; border: 1.5px dashed var(--a-line-strong); border-radius: var(--r-lg); background: var(--a-surface); cursor: pointer; transition: border-color 0.2s, transform 0.16s var(--ease-out-quart); }
   .shot:hover { border-color: var(--color-orange); }
+  .shot:active { transform: scale(0.99); }
   .shot:focus-within { outline: 2px solid var(--color-orange); outline-offset: 3px; }
   .shot-empty { display: grid; justify-items: center; gap: 0.35rem; text-align: center; padding: 1rem; }
   .shot :global(img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .car-photo { display: grid; place-items: center; aspect-ratio: 4 / 3; background: var(--color-paper-3); color: var(--color-muted); overflow: hidden; }
+  .car { padding: 0.75rem 0.75rem 1rem; background: var(--a-surface); border: 1px solid var(--a-line); border-radius: var(--r-lg); box-shadow: var(--a-shadow); }
+  .car-photo { display: grid; place-items: center; aspect-ratio: 4 / 3; background: var(--a-surface-3); color: var(--a-muted); border-radius: var(--r-md); overflow: hidden; }
   .car-photo :global(img) { width: 100%; height: 100%; object-fit: cover; }
   .specs { display: grid; grid-template-columns: 1fr 1fr; font-size: 0.875rem; border-top: 1px solid var(--line); }
   .specs li { padding: 0.45rem 0; border-bottom: 1px solid var(--line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .specs li:nth-child(odd) { padding-right: 0.75rem; border-right: 1px solid var(--line); }
   .specs li:nth-child(even) { padding-left: 0.75rem; }
-  [data-added] :global(.thumb) { width: 4.5rem; aspect-ratio: 4 / 3; object-fit: cover; background: var(--color-paper-3); }
+  [data-added] :global(.thumb) { width: 4.5rem; aspect-ratio: 4 / 3; object-fit: cover; background: var(--a-surface-3); border-radius: var(--r-sm); }
 </style>
 
 <script>

@@ -38,7 +38,7 @@ const configurata = Boolean(config.adminPassword);
           <button type="submit" class="btn btn-primary w-full" data-submit>Entra <Icon name="arrow" size={18} class="btn-arrow" /></button>
         </form>
       ) : (
-        <p class="mt-8 rounded-[2px] border border-[var(--line-dark)] p-4 text-sm text-steel">
+        <p class="mt-8 rounded-[12px] border border-[var(--line-dark)] p-4 text-sm text-steel">
           Accesso non configurato: imposta la variabile <code class="text-paper">ADMIN_DEMO_PASSWORD</code> su Vercel e rifai il deploy.
         </p>
       )}
@@ -48,6 +48,21 @@ const configurata = Boolean(config.adminPassword);
       .login { min-height: 100svh; display: grid; place-items: center; padding: 1.5rem 1rem; background: var(--color-night); color: var(--color-paper); }
       .box { width: min(100%, 24rem); }
       .logo { height: 2.75rem; width: auto; }
+      .login :global(.input) { min-height: 3.1rem; border-radius: 12px; }
+      .login :global(.input:focus) { border-color: var(--color-orange); box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-orange) 30%, transparent); }
+      .login :global(.btn) { border-radius: 12px; transition: background-color 0.18s, opacity 0.18s, transform 0.16s var(--ease-out-quart); }
+      .login :global(.btn:active) { transform: scale(0.97); }
+      .login :global(.btn[aria-busy='true']) { opacity: 0.6; }
+      @media (prefers-reduced-motion: no-preference) {
+        .box > * { animation: in 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+        .box > :nth-child(2) { animation-delay: 60ms; }
+        .box > :nth-child(3) { animation-delay: 110ms; }
+        .box > :nth-child(4) { animation-delay: 160ms; }
+        .box > :nth-child(5) { animation-delay: 210ms; }
+        .shake { animation: shake 0.36s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+      }
+      @keyframes in { from { opacity: 0; transform: translateY(10px); } }
+      @keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
     </style>
     <script>
       const form = document.querySelector<HTMLFormElement>('[data-login]');
@@ -62,6 +77,11 @@ const configurata = Boolean(config.adminPassword);
             err.textContent = m;
             err.hidden = !m;
             input.setAttribute('aria-invalid', m ? 'true' : 'false');
+            if (m) {
+              form.classList.remove('shake');
+              void form.offsetWidth;
+              form.classList.add('shake');
+            }
           };
           if (!input.value) return show('Inserisci la password.');
           btn.disabled = true;

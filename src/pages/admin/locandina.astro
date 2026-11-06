@@ -31,7 +31,7 @@ const qr = await QRCode.toString(url, { type: 'svg', margin: 0, errorCorrectionL
   )}
   <details class="no-print mb-6 text-sm">
     <summary class="cursor-pointer font-semibold">Indirizzo del QR</summary>
-    <code class="mt-2 block overflow-x-auto rounded-[2px] border border-[var(--line)] bg-paper-2 p-3 text-xs">{url}</code>
+    <code class="mt-2 block overflow-x-auto rounded-[11px] border border-[var(--line)] bg-paper p-3 text-xs">{url}</code>
     <p class="mt-2 text-muted">Il QR punta a questo indirizzo dell’anteprima: se cambia il dominio, ristampa la locandina.</p>
   </details>
 
@@ -70,6 +70,16 @@ const qr = await QRCode.toString(url, { type: 'svg', margin: 0, errorCorrectionL
   .stage { display: grid; place-items: center; padding: 1rem 0 2rem; overflow-x: auto; }
   /* A5 = 148 × 210 mm. A schermo la scaliamo per stare nella colonna. */
   .sheet {
+    /* La locandina resta chiara anche col tema scuro: è carta */
+    --color-paper: #f7f6f3;
+    --color-paper-2: #eeece7;
+    --color-paper-3: #e3e0d9;
+    --color-ink: #0e2340;
+    --color-muted: #4a5a70;
+    --color-orange-ink: #a64f08;
+    --line: color-mix(in oklab, #0e2340 14%, transparent);
+    --line-strong: color-mix(in oklab, #0e2340 28%, transparent);
+    color-scheme: light;
     --u: min(1mm, calc((100vw - 2rem) / 148));
     position: relative;
     display: flex;
@@ -79,7 +89,7 @@ const qr = await QRCode.toString(url, { type: 'svg', margin: 0, errorCorrectionL
     padding: calc(11 * var(--u)) calc(11 * var(--u)) 0;
     background: var(--color-paper);
     color: var(--color-ink);
-    box-shadow: 0 1px 0 var(--line), 0 18px 50px -20px rgb(10 26 48 / 0.35);
+    box-shadow: 0 1px 2px rgb(10 26 48 / 0.12), 0 24px 60px -24px rgb(10 26 48 / 0.5);
     overflow: hidden;
   }
   @media (min-width: 64rem) { .sheet { --u: 1mm; } }
@@ -107,7 +117,7 @@ const qr = await QRCode.toString(url, { type: 'svg', margin: 0, errorCorrectionL
     :global(.topbar), :global(.sidenav), :global(.tabbar), :global(.toasts), :global(.sim-banner), :global(.skip), .no-print { display: none !important; }
     :global(.content) { padding: 0 !important; max-width: none !important; }
     :global(.shell) { display: block !important; }
-    :global(body.admin) { background: #fff; }
+    :global(html.admin-html), :global(body.admin) { background: #fff; }
     .stage { padding: 0; display: block; }
     .sheet { --u: 1mm; box-shadow: none; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }

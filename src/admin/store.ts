@@ -93,6 +93,7 @@ function aggiornaBarra(d: Dati) {
   const text = document.querySelector<HTMLElement>('[data-sim-text]');
   const mode = document.querySelector<HTMLElement>('[data-mode]');
   const modeText = document.querySelector<HTMLElement>('[data-mode-text]');
+  const modeInfo = document.querySelector<HTMLElement>('[data-mode-info]');
   let msg = '';
   if (!d.online) msg = 'Server non raggiungibile: modalità simulata. Le azioni restano in questo browser finché la rete non torna.';
   else if (!d.stato.db) msg = 'Modalità simulata: Supabase non configurato. Le azioni funzionano, ma restano in questo browser.';
@@ -104,7 +105,18 @@ function aggiornaBarra(d: Dati) {
   if (mode && modeText) {
     mode.classList.toggle('is-live', d.live);
     mode.classList.toggle('is-sim', !d.live);
-    modeText.textContent = d.live ? 'Dati reali' : 'Simulato';
+    modeText.textContent = d.live ? 'Collegato' : 'Simulato';
+  }
+  if (modeInfo) {
+    const [titolo, testo] = d.live
+      ? ['Collegato al database', 'Iscrizioni ed email partono davvero. I clienti con l’etichetta grigia «Esempio» sono finti e servono solo per la demo.']
+      : !d.online
+        ? ['Server non raggiungibile', 'Le azioni restano in questo browser finché la rete non torna.']
+        : ['Modalità simulata', 'I dati restano in questo browser e nessun messaggio parte davvero.'];
+    modeInfo.innerHTML = '';
+    const b = document.createElement('strong');
+    b.textContent = titolo;
+    modeInfo.append(b, testo);
   }
 }
 

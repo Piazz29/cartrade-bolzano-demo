@@ -73,7 +73,7 @@ if (no) return no;
     </details>
   </form>
 
-  <ul class="rows mt-2" data-list></ul>
+  <ul class="rows mt-3" data-list></ul>
 </AdminLayout>
 
 <style>
@@ -83,7 +83,7 @@ if (no) return no;
   .search .input { padding-left: 2.5rem; }
   .more summary { list-style: none; cursor: pointer; width: max-content; }
   .more summary::-webkit-details-marker { display: none; }
-  .grid-f { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.75rem; padding: 0.9rem; background: var(--color-paper-2); border: 1px solid var(--line); }
+  .grid-f { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.75rem; padding: 1rem; background: var(--a-surface); border: 1px solid var(--a-line); border-radius: var(--r-lg); box-shadow: var(--a-shadow); }
   @media (min-width: 64rem) {
     .filters { grid-template-columns: minmax(0, 1fr) auto; align-items: start; }
     .grid-f { grid-column: 1 / -1; grid-template-columns: repeat(6, minmax(0, 1fr)); }

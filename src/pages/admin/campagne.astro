@@ -113,15 +113,16 @@ if (no) return no;
 </AdminLayout>
 
 <style>
-  .models { border-top: 1px solid var(--line); }
-  .models li { position: relative; border-bottom: 1px solid var(--line); }
+  .models { background: var(--a-surface); border: 1px solid var(--a-line); border-radius: var(--r-lg); box-shadow: var(--a-shadow); overflow: hidden; }
+  .models li { position: relative; }
+  .models li + li { border-top: 1px solid var(--a-line); }
   .models input { position: absolute; opacity: 0; }
-  .models label { display: grid; gap: 0.1rem; padding: 0.75rem 0.85rem 0.75rem 2.6rem; cursor: pointer; }
-  .models label::before { content: ''; position: absolute; left: 0.75rem; top: 1rem; width: 1.1rem; height: 1.1rem; border: 1.5px solid var(--color-ink); border-radius: 999px; background: var(--color-paper); }
-  .models input:checked + label { background: var(--color-paper-2); }
-  .models input:checked + label::before { border-width: 5px; }
-  .models input:focus-visible + label { outline: 2px solid var(--color-orange); outline-offset: -2px; }
-  .aud { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; padding-top: 0.75rem; }
+  .models label { display: grid; gap: 0.1rem; padding: 0.8rem 1rem 0.8rem 2.9rem; cursor: pointer; transition: background-color 0.15s; }
+  .models label::before { content: ''; position: absolute; left: 1rem; top: 1.05rem; width: 1.15rem; height: 1.15rem; border: 1.5px solid var(--a-line-strong); border-radius: 999px; background: var(--a-surface); transition: border-width 0.2s var(--ease-out-quart), border-color 0.2s; }
+  .models input:checked + label { background: color-mix(in oklab, var(--color-orange) 7%, var(--a-surface)); }
+  .models input:checked + label::before { border-width: 5.5px; border-color: var(--color-orange); }
+  .models input:focus-visible + label { outline: 2px solid var(--color-orange); outline-offset: -3px; border-radius: var(--r-lg); }
+  .aud { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
   .count { margin-top: 1rem; font-stretch: 112%; font-weight: 620; font-size: 1.125rem; }
   .count :global(b) { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
 </style>

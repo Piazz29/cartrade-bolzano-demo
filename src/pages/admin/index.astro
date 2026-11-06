@@ -88,7 +88,17 @@ if (no) return no;
       [String(settimana.length), ''],
     ];
     const dds = document.querySelectorAll<HTMLElement>('[data-kpis] dd');
-    kpi.forEach(([v, s], i) => (dds[i].innerHTML = `${esc(v)}${s ? ` <small>${esc(s)}</small>` : ''}`));
+    // Un numero cambiato (anche il primo arrivo dei dati) sale al suo posto
+    kpi.forEach(([v, s], i) => {
+      const dd = dds[i];
+      const html = `${esc(v)}${s ? ` <small>${esc(s)}</small>` : ''}`;
+      if (dd.dataset.v === html) return;
+      dd.dataset.v = html;
+      dd.innerHTML = html;
+      dd.classList.remove('bump');
+      void dd.offsetWidth;
+      dd.classList.add('bump');
+    });
     $('[data-kpis]').removeAttribute('aria-busy');
 
     // Clienti veri in cima: quelli comparsi dall'ultimo aggiornamento lampeggiano

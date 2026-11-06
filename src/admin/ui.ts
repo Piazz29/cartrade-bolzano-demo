@@ -58,7 +58,17 @@ export function toast(r: Pick<Risultato, 'messaggio' | 'tono'>, ms = 5200) {
   el.className = `toast${r.tono === 'warn' ? ' is-warn' : r.tono === 'err' ? ' is-err' : ''}`;
   el.innerHTML = `${svg(r.tono === 'ok' ? 'check' : 'alert', 18, 'shrink-0 mt-0.5')}<span>${esc(r.messaggio)}</span>`;
   box.append(el);
-  setTimeout(() => el.remove(), ms);
+  // Uscita in dissolvenza; un tocco lo chiude subito
+  let via = false;
+  const chiudi = () => {
+    if (via) return;
+    via = true;
+    el.classList.add('is-out');
+    el.addEventListener('animationend', () => el.remove(), { once: true });
+    setTimeout(() => el.remove(), 400);
+  };
+  el.addEventListener('click', chiudi);
+  setTimeout(chiudi, ms);
 }
 
 /** Bottone in attesa: disattivo, con aria-busy, testo che cambia */

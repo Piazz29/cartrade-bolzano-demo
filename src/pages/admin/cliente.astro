@@ -9,22 +9,25 @@ const no = richiediLogin(Astro);
 if (no) return no;
 ---
 <AdminLayout title="Scheda cliente" current="clienti">
-  <a href="/admin/clienti/" class="t-label link-u inline-flex items-center gap-2 text-muted"><Icon name="arrow" size={16} class="rotate-180" /> Clienti</a>
+  <a href="/admin/clienti/" class="back t-label inline-flex items-center gap-2 text-muted"><Icon name="arrow" size={16} class="rotate-180" /> Clienti</a>
   <div data-scheda class="mt-4" aria-live="polite">
     <div class="skeleton" style="height:4rem"></div>
   </div>
 </AdminLayout>
 
 <style>
+  .back { min-height: 2.5rem; margin-left: -0.25rem; padding-inline: 0.25rem; text-decoration: none; border-radius: var(--r-sm); transition: color 0.15s; }
+  .back:hover { color: var(--a-text); }
   [data-scheda] :global(.actions) { display: grid; gap: 0.6rem; margin-top: 1.25rem; }
   @media (min-width: 40rem) { [data-scheda] :global(.actions) { display: flex; flex-wrap: wrap; align-items: center; } }
   [data-scheda] :global(.wa) { display: grid; gap: 0.5rem; }
   @media (min-width: 40rem) { [data-scheda] :global(.wa) { display: flex; } [data-scheda] :global(.wa select) { width: auto; min-width: 15rem; } }
-  [data-scheda] :global(.done-panel) { margin-top: 0.75rem; padding: 1rem; background: var(--color-paper-2); border: 1px solid var(--line); }
+  [data-scheda] :global(.done-panel) { margin-top: 0.75rem; padding: 1rem; background: var(--a-surface); border: 1px solid var(--a-line); border-radius: var(--r-lg); box-shadow: var(--a-shadow); }
   [data-scheda] :global(.cols) { display: grid; gap: 0 2.5rem; }
   @media (min-width: 64rem) { [data-scheda] :global(.cols) { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); } }
   [data-scheda] :global(.spec dd a) { text-decoration: underline; text-underline-offset: 0.2em; }
-  [data-scheda] :global(.tl li) { display: grid; grid-template-columns: 6.25rem minmax(0, 1fr); gap: 0.75rem; padding-block: 0.75rem; border-bottom: 1px solid var(--line); font-size: 0.9375rem; }
+  [data-scheda] :global(.tl li) { display: grid; grid-template-columns: 6.25rem minmax(0, 1fr); gap: 0.75rem; padding: 0.8rem 1rem; font-size: 0.9375rem; }
+  [data-scheda] :global(.tl li:has(.empty)) { display: block; padding: 0; }
   [data-scheda] :global(.tl time) { color: var(--color-muted); font-size: 0.8125rem; font-variant-numeric: tabular-nums; }
   [data-scheda] :global(.big) { font-stretch: 118%; font-weight: 640; font-size: 1.5rem; letter-spacing: -0.015em; line-height: 1.1; }
 </style>
