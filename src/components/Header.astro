@@ -106,6 +106,9 @@ const t = ui[lang];
     transition: border-color 0.3s, transform 0.4s var(--ease-out-expo);
   }
   .site-header[data-scrolled='true'] { border-bottom-color: var(--line); }
+  /* Scorrendo in giù l'header si ritrae verso l'alto; ricompare appena si risale */
+  .site-header[data-hidden='true'] { transform: translateY(-100%); }
+  @media (prefers-reduced-motion: reduce) { .site-header { transition: border-color 0.3s; } }
   /* Logo · menu · azioni: da desktop il menu sta al centro esatto della pagina */
   .hdr { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
   @media (min-width: 64rem) {
@@ -218,13 +221,38 @@ const t = ui[lang];
   const openBtn = document.querySelector<HTMLButtonElement>('[data-menu-open]');
   const closeBtn = document.querySelector<HTMLButtonElement>('[data-menu-close]');
 
-  // Header sempre visibile: dopo i primi pixel di scroll prende fondo carta e bordo
-  const onScroll = () => {
+  // Dopo i primi pixel di scroll l'header prende fondo carta e bordo.
+  // Scorrendo in giù si ritrae, scorrendo in su ricompare (desktop e mobile).
+  const root = document.documentElement;
+  let lastY = window.scrollY;
+  let ticking = false;
+  const setHidden = (hidden: boolean) => {
+    if (!header || (header.dataset.hidden === 'true') === hidden) return;
+    header.dataset.hidden = String(hidden);
+    root.toggleAttribute('data-header-hidden', hidden);
+  };
+  const update = () => {
+    ticking = false;
     if (!header) return;
-    header.dataset.scrolled = String(window.scrollY > 8);
+    const y = Math.max(0, window.scrollY);
+    header.dataset.scrolled = String(y > 8);
+    const delta = y - lastY;
+    // Vicino alla cima, con il focus da tastiera nell'header o con il menu aperto resta sempre visibile
+    if (y <= header.offsetHeight || header.querySelector(':focus-visible') || (menu && !menu.hidden)) {
+      setHidden(false);
+      lastY = y;
+    } else if (Math.abs(delta) > 6) {
+      // Piccola soglia: niente sfarfallio con trackpad o rimbalzo elastico
+      setHidden(delta > 0);
+      lastY = y;
+    }
+  };
+  const onScroll = () => {
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
   };
   window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
+  header?.addEventListener('focusin', () => { if (header.querySelector(':focus-visible')) setHidden(false); });
+  update();
 
   const setOpen = (open: boolean) => {
     if (!menu || !openBtn) return;

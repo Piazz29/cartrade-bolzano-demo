@@ -63,6 +63,8 @@
     --line-dark: color-mix(in oklab, var(--color-steel) 18%, transparent);
     --section: clamp(4rem, 10vw, 9rem);
     --header-h: 4rem;
+    /* Altezza dell'header ancora visibile: 0 quando si è ritratto scorrendo in giù */
+    --header-top: var(--header-h);
     color-scheme: light;
   }
   @media (min-width: 40rem) {
@@ -71,6 +73,8 @@
   @media (min-width: 80rem) {
     :root { --gutter: 2.5rem; --header-h: 4.5rem; }
   }
+
+  html[data-header-hidden] { --header-top: 0px; }
 
   html {
     -webkit-text-size-adjust: 100%;

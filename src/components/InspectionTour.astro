@@ -599,10 +599,10 @@ const items = [...steps.map((s) => ({ t: s.t, tool: s.tool, x: s.x })), { t: cop
 
   /* ---------- Banco ---------- */
   /* Mobile: il banco resta fermo sotto l'header mentre scorrono i passaggi (fondo pieno, a tutta larghezza) */
-  .rig-col { position: sticky; top: var(--header-h); z-index: 5; margin-inline: calc(var(--gutter) * -1); background: var(--color-night); }
+  .rig-col { position: sticky; top: var(--header-top); z-index: 5; transition: top 0.4s var(--ease-out-expo); margin-inline: calc(var(--gutter) * -1); background: var(--color-night); }
   .is-compact .rig-col { position: relative; top: auto; }
   @media (min-width: 64rem) {
-    .rig-col { top: var(--header-h); margin-inline: 0; background: none; }
+    .rig-col { top: var(--header-top); margin-inline: 0; background: none; }
     /* Desktop, versione estesa: la colonna fissa è alta quanto lo schermo sotto l'header e il banco
        ci sta centrato in verticale. "safe" evita che su schermi bassi il banco esca sopra. */
     .tour:not(.is-compact) .rig-col {
