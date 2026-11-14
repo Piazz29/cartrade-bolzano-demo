@@ -1,0 +1,372 @@
+---
+// Calcolatore scadenza revisione (art. 80 Codice della Strada, autovetture uso privato):
+// prima revisione entro 4 anni dalla prima immatricolazione, poi ogni 2 anni,
+// sempre entro la fine del mese di riferimento.
+// La regola sta in lib/revisione.ts (unica fonte). "Avvisami" porta all'iscrizione ai promemoria
+// (/it/promemoria/, /de/erinnerung/) con mese, anno e tipo già compilati.
+import { site, locales, type Lang } from '../data/site';
+import { routes } from '../i18n/routes';
+import { ui } from '../i18n/ui';
+import Icon from './Icon.astro';
+
+interface Props { lang: Lang; id?: string }
+const { lang, id = 'calc' } = Astro.props;
+const t = ui[lang];
+
+const copy = {
+  it: {
+    mode: 'Parto da',
+    modes: { reg: 'Immatricolazione', rev: 'Ultima revisione' },
+    month: 'Mese',
+    year: 'Anno',
+    choose: 'Scegli',
+    deadline: 'Scadenza entro il',
+    estimate: 'Stima: la prima revisione era entro il {first}. Se da allora le hai sempre fatte puntuali, la prossima è questa. Per il dato esatto inserisci l\'ultima revisione.',
+    switchToRev: 'Inserisci l\'ultima revisione',
+    in: 'tra {n} giorni',
+    inOne: 'domani',
+    today: 'scade oggi',
+    ago: 'scaduta da {n} giorni',
+    ok: 'In regola',
+    soon: 'È il momento di prenotare',
+    expired: 'Scaduta',
+    expiredText: 'Prenota subito: circolare con la revisione scaduta comporta una sanzione. Il giorno della prenotazione puoi venire da noi con l\'auto.',
+    soonText: 'Mancano meno di due mesi. Prenota ora e scegli tu il giorno.',
+    okText: 'Nessuna fretta. Ti avvisiamo noi quando sarà ora.',
+    cycleStart: 'Inizio ciclo',
+    cycleEnd: 'Scadenza',
+    todayMark: 'Oggi',
+    ics: 'Aggiungi al calendario',
+    notify: 'Avvisami prima della scadenza',
+    notifyIntro: 'Ti scriviamo noi via email o WhatsApp, 30 e 7 giorni prima. Ti iscrivi in 30 secondi, con la data già inserita.',
+    submit: 'Attiva il promemoria',
+    note: 'Vale per autovetture ad uso privato. Taxi, NCC e veicoli con più di 8 posti hanno la revisione annuale.',
+    icsTitle: 'Scadenza revisione auto',
+    icsDesc: 'Prenota la revisione da Car Trade Bolzano',
+    noscript: 'Regola: prima revisione entro 4 anni dall\'immatricolazione, poi ogni 2 anni, entro la fine del mese.',
+  },
+  de: {
+    mode: 'Ausgehend von',
+    modes: { reg: 'Erstzulassung', rev: 'Letzte Revision' },
+    month: 'Monat',
+    year: 'Jahr',
+    choose: 'Wählen',
+    deadline: 'Fällig bis',
+    estimate: 'Schätzung: Die erste Revision war bis {first} fällig. Wenn sie seither immer pünktlich war, ist dies der nächste Termin. Für das genaue Datum geben Sie die letzte Revision ein.',
+    switchToRev: 'Letzte Revision eingeben',
+    in: 'in {n} Tagen',
+    inOne: 'morgen',
+    today: 'heute fällig',
+    ago: 'seit {n} Tagen abgelaufen',
+    ok: 'Alles in Ordnung',
+    soon: 'Zeit für einen Termin',
+    expired: 'Abgelaufen',
+    expiredText: 'Bitte sofort buchen: Mit abgelaufener Revision zu fahren wird bestraft. Am Tag des Termins dürfen Sie mit dem Auto zu uns kommen.',
+    soonText: 'Weniger als zwei Monate. Jetzt buchen und den Tag selbst wählen.',
+    okText: 'Kein Grund zur Eile. Wir erinnern Sie rechtzeitig.',
+    cycleStart: 'Beginn',
+    cycleEnd: 'Fällig',
+    todayMark: 'Heute',
+    ics: 'In den Kalender eintragen',
+    notify: 'Vor Ablauf erinnern',
+    notifyIntro: 'Wir schreiben Ihnen per E-Mail oder WhatsApp, 30 und 7 Tage vorher. Anmeldung in 30 Sekunden, das Datum ist schon eingetragen.',
+    submit: 'Erinnerung aktivieren',
+    note: 'Gilt für Pkw im Privatgebrauch. Taxis, Mietwagen mit Fahrer und Fahrzeuge mit mehr als 8 Sitzplätzen müssen jährlich zur Revision.',
+    icsTitle: 'Revision Auto fällig',
+    icsDesc: 'Revision bei Car Trade Bozen buchen',
+    noscript: 'Regel: erste Revision innerhalb von 4 Jahren ab Erstzulassung, danach alle 2 Jahre, jeweils bis Monatsende.',
+  },
+  en: {
+    mode: 'Start from',
+    modes: { reg: 'First registration', rev: 'Last inspection' },
+    month: 'Month',
+    year: 'Year',
+    choose: 'Choose',
+    deadline: 'Due by',
+    estimate: 'Estimate: the first inspection was due by {first}. If you’ve always had it done on time since then, this is the next one. For the exact date, enter your last inspection.',
+    switchToRev: 'Enter your last inspection',
+    in: 'in {n} days',
+    inOne: 'tomorrow',
+    today: 'due today',
+    ago: 'overdue by {n} days',
+    ok: 'All good',
+    soon: 'Time to book',
+    expired: 'Overdue',
+    expiredText: 'Book now: driving with an expired inspection is fined. On the day of your appointment you may drive the car to us.',
+    soonText: 'Less than two months to go. Book now and pick the day yourself.',
+    okText: 'No rush. We’ll remind you when it’s time.',
+    cycleStart: 'Cycle start',
+    cycleEnd: 'Due',
+    todayMark: 'Today',
+    ics: 'Add to calendar',
+    notify: 'Remind me before it’s due',
+    notifyIntro: 'We’ll message you by email or WhatsApp 30 and 7 days before. It takes 30 seconds, with the date already filled in.',
+    submit: 'Set up the reminder',
+    note: 'Applies to private cars. Taxis, hire cars with driver and vehicles with more than 8 seats need an inspection every year.',
+    icsTitle: 'Car inspection due',
+    icsDesc: 'Book your inspection at Car Trade Bolzano',
+    noscript: 'Rule: first inspection within 4 years of first registration, then every 2 years, by the end of the month.',
+  },
+}[lang];
+
+const locale = locales[lang];
+const months = Array.from({ length: 12 }, (_, i) =>
+  new Intl.DateTimeFormat(locale, { month: 'long' }).format(new Date(2026, i, 1)),
+);
+const now = new Date();
+const thisYear = now.getFullYear();
+const years = Array.from({ length: 31 }, (_, i) => thisYear - i);
+// Esempio precompilato: ultima revisione 18 mesi fa, così la demo mostra subito un risultato
+const example = new Date(now.getFullYear(), now.getMonth() - 18, 1);
+---
+<div class="calc" data-calc data-lang={lang} data-copy={JSON.stringify(copy)} data-booking={site.dekra.bookingUrl}>
+  <form class="calc-form" data-calc-form novalidate onsubmit="return false">
+    <fieldset class="field">
+      <legend class="t-label mb-3 text-steel-2">{copy.mode}</legend>
+      <div class="seg w-full">
+        <input type="radio" name={`${id}-mode`} id={`${id}-mode-reg`} value="reg" />
+        <label for={`${id}-mode-reg`}>{copy.modes.reg}</label>
+        <input type="radio" name={`${id}-mode`} id={`${id}-mode-rev`} value="rev" checked />
+        <label for={`${id}-mode-rev`}>{copy.modes.rev}</label>
+      </div>
+    </fieldset>
+    <div class="mt-5 grid grid-cols-[1.4fr_1fr] gap-3">
+      <div class="field">
+        <label for={`${id}-month`} class="text-steel">{copy.month}</label>
+        <select id={`${id}-month`} class="input" data-month>
+          {months.map((m, i) => (
+            <option value={i + 1} selected={i === example.getMonth()}>
+              {m.charAt(0).toUpperCase() + m.slice(1)}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div class="field">
+        <label for={`${id}-year`} class="text-steel">{copy.year}</label>
+        <select id={`${id}-year`} class="input t-num" data-year>
+          {years.map((y) => <option value={y} selected={y === example.getFullYear()}>{y}</option>)}
+        </select>
+      </div>
+    </div>
+    <p class="mt-6 text-sm text-steel-2">{copy.note}</p>
+  </form>
+
+  <div class="calc-result" aria-live="polite" data-result>
+    <div class="flex items-start justify-between gap-4">
+      <p class="t-label text-steel-2" data-deadline-label>{copy.deadline}</p>
+      <p class="status t-label" data-status></p>
+    </div>
+    <p class="big-date t-num mt-3" data-date>— — —</p>
+    <p class="mt-2 text-lg text-steel t-num" data-countdown></p>
+
+    <div class="meter mt-7" aria-hidden="true" data-meter>
+      <div class="ticks" data-ticks></div>
+      <div class="fill" data-fill></div>
+      <div class="today" data-today><span class="t-label">{copy.todayMark}</span></div>
+    </div>
+    <div class="mt-2 flex justify-between t-label text-steel-2 t-num">
+      <span data-start></span>
+      <span data-end></span>
+    </div>
+
+    <p class="mt-6 max-w-[52ch] text-steel" data-advice></p>
+    <p class="estimate mt-4 max-w-[56ch] text-sm text-steel" data-estimate hidden>
+      <span data-estimate-text></span>
+      <button type="button" class="link-u ml-1 font-semibold text-paper" data-switch-rev>{copy.switchToRev}</button>
+    </p>
+
+    <div class="mt-7 flex flex-wrap gap-3">
+      <a href={site.dekra.bookingUrl} class="btn btn-primary" target="_blank" rel="noopener">
+        {t.cta.book}<span class="sr-only"> ({t.externalBooking})</span>
+        <Icon name="arrow-up-right" size={18} class="btn-arrow" />
+      </a>
+      <button type="button" class="btn btn-ghost" data-ics>
+        <Icon name="download" size={18} /> {copy.ics}
+      </button>
+    </div>
+
+    <!-- Promemoria: stesso flusso dell'iscrizione pubblica, con la data già scelta qui -->
+    <div class="notify mt-8 border-t border-[var(--line-dark)] pt-6">
+      <p class="flex items-center gap-3 font-semibold text-paper"><Icon name="bell" size={20} class="text-orange" /> {copy.notify}</p>
+      <p class="mt-2 max-w-[52ch] text-sm text-steel">{copy.notifyIntro}</p>
+      <a href={routes.promemoria[lang]} class="btn btn-ghost mt-5" data-notify-link data-base={routes.promemoria[lang]}>
+        {copy.submit} <Icon name="arrow" size={18} class="btn-arrow" />
+      </a>
+    </div>
+  </div>
+  <noscript><p class="mt-4 text-steel">{copy.noscript}</p></noscript>
+</div>
+
+<style>
+@layer components {
+  .calc { display: grid; gap: 2rem; }
+  @media (min-width: 48rem) {
+    .calc { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); column-gap: 3rem; align-items: start; }
+    .calc > p, .calc > noscript { grid-column: 1 / -1; }
+  }
+  .calc-result {
+    padding: 1.5rem;
+    border: 1px solid var(--line-dark);
+    background: color-mix(in oklab, var(--color-night) 70%, black);
+  }
+  @media (min-width: 64rem) { .calc-result { padding: 2.25rem; } }
+
+  .big-date {
+    font-stretch: 125%;
+    font-weight: 650;
+    font-size: clamp(2.6rem, 8vw, 4.6rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    color: var(--color-paper);
+    text-transform: uppercase;
+  }
+  .status { padding: 0.35rem 0.5rem; border-radius: 2px; white-space: nowrap; }
+  .status:empty { display: none; }
+  [data-state='ok'] .status { background: color-mix(in oklab, #2fb36d 22%, transparent); color: #9fe3bd; }
+  [data-state='soon'] .status { background: var(--color-orange); color: var(--color-ink); }
+  [data-state='expired'] .status { background: #ff8a7a; color: var(--color-ink); }
+
+  .meter { position: relative; height: 2.25rem; }
+  .ticks { position: absolute; inset: 0; display: flex; justify-content: space-between; align-items: flex-end; }
+  .ticks :global(i) { width: 1px; height: 40%; background: color-mix(in oklab, var(--color-steel) 35%, transparent); }
+  .ticks :global(i.y) { height: 100%; background: color-mix(in oklab, var(--color-steel) 70%, transparent); }
+  .fill {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: 100%;
+    background: var(--color-steel);
+    transform-origin: left;
+    transform: scaleX(0);
+    transition: transform 1s var(--ease-out-expo);
+  }
+  [data-state='soon'] .fill, [data-state='expired'] .fill { background: var(--color-orange); }
+  .today {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 160%;
+    width: 2px;
+    background: var(--color-orange);
+    transition: left 1s var(--ease-out-expo);
+  }
+  .today span {
+    position: absolute;
+    top: -1.1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--color-orange);
+    white-space: nowrap;
+  }
+
+  .estimate button { color: var(--color-paper); }
+}
+</style>
+
+<script>
+  import { calcolaScadenza, DAY, giorniA } from '../lib/revisione';
+  type Copy = Record<string, any>;
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  function setup(root: HTMLElement) {
+    const copy: Copy = JSON.parse(root.dataset.copy!);
+    const lang = root.dataset.lang!;
+    const locale = ({ it: 'it-IT', de: 'de-DE', en: 'en-GB' } as Record<string, string>)[lang] ?? 'it-IT';
+    const fmtLong = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' });
+    const fmtShort = new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric' });
+    const fmtNum = new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+    const $ = <T extends Element>(s: string) => root.querySelector<T>(s)!;
+    const month = $<HTMLSelectElement>('[data-month]');
+    const year = $<HTMLSelectElement>('[data-year]');
+    const modes = root.querySelectorAll<HTMLInputElement>('input[name$="-mode"]');
+    const ticks = $<HTMLElement>('[data-ticks]');
+    let deadline: Date | null = null;
+
+    const mode = () => [...modes].find((m) => m.checked)?.value ?? 'rev';
+
+    const notifyLink = $<HTMLAnchorElement>('[data-notify-link]');
+    // Il parametro ?demo= (QR della locandina) segue la persona fino all'iscrizione
+    const demo = new URLSearchParams(location.search).get('demo');
+
+    function render() {
+      const y = Number(year.value);
+      const m = Number(month.value);
+      const isReg = mode() === 'reg';
+      const s = calcolaScadenza(isReg ? 'reg' : 'rev', m, y);
+      const d = s.date;
+      const estimated = s.estimated;
+      const first = s.first;
+      const today = new Date(new Date().toDateString());
+      deadline = d;
+      const cycleStart = s.cycleStart;
+      const days = giorniA(d);
+      const state = days < 0 ? 'expired' : days <= 60 ? 'soon' : 'ok';
+      root.dataset.state = state;
+      const q = new URLSearchParams({ tipo: isReg ? 'reg' : 'rev', mese: String(m), anno: String(y) });
+      if (demo) q.set('demo', demo);
+      notifyLink.href = `${notifyLink.dataset.base}?${q}`;
+
+      $('[data-date]').textContent = fmtLong.format(d).replace(/\./g, '');
+      $('[data-countdown]').textContent =
+        days < 0 ? copy.ago.replace('{n}', String(-days)) : days === 0 ? copy.today : days === 1 ? copy.inOne : copy.in.replace('{n}', days.toLocaleString(locale));
+      $('[data-status]').textContent = copy[state];
+      $('[data-advice]').textContent = copy[`${state}Text`];
+      $('[data-start]').textContent = fmtShort.format(cycleStart);
+      $('[data-end]').textContent = fmtShort.format(d);
+
+      const est = $<HTMLElement>('[data-estimate]');
+      est.hidden = !estimated;
+      if (estimated) $('[data-estimate-text]').textContent = copy.estimate.replace('{first}', fmtNum.format(first));
+
+      // Misuratore: una tacca per mese, tacca lunga a ogni anno
+      const monthsInCycle = (d.getFullYear() - cycleStart.getFullYear()) * 12 + d.getMonth() - cycleStart.getMonth() + 1;
+      ticks.innerHTML = Array.from({ length: monthsInCycle + 1 }, (_, i) => `<i class="${i % 12 === 0 ? 'y' : ''}"></i>`).join('');
+      const total = d.getTime() - cycleStart.getTime();
+      const p = Math.max(0, Math.min(1, (today.getTime() - cycleStart.getTime()) / total));
+      $<HTMLElement>('[data-fill]').style.transform = `scaleX(${p})`;
+      $<HTMLElement>('[data-today]').style.left = `calc(${p * 100}% - 1px)`;
+    }
+
+    [month, year, ...modes].forEach((el) => el.addEventListener('change', render));
+    $('[data-switch-rev]').addEventListener('click', () => {
+      const rev = [...modes].find((m) => m.value === 'rev')!;
+      rev.checked = true;
+      render();
+      rev.focus();
+    });
+
+    // File .ics con promemoria 30 giorni prima
+    $('[data-ics]').addEventListener('click', () => {
+      if (!deadline) return;
+      const d = deadline;
+      const next = new Date(d.getTime() + DAY);
+      const ymd = (x: Date) => `${x.getFullYear()}${pad(x.getMonth() + 1)}${pad(x.getDate())}`;
+      const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+      const ics = [
+        'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Car Trade Bolzano//Revisione//IT', 'CALSCALE:GREGORIAN',
+        'BEGIN:VEVENT',
+        `UID:revisione-${ymd(d)}@cartradebolzano.it`,
+        `DTSTAMP:${stamp}`,
+        `DTSTART;VALUE=DATE:${ymd(d)}`,
+        `DTEND;VALUE=DATE:${ymd(next)}`,
+        `SUMMARY:${copy.icsTitle}`,
+        `DESCRIPTION:${copy.icsDesc}: ${root.dataset.booking}`,
+        'BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${copy.icsTitle}`, 'TRIGGER:-P30D', 'END:VALARM',
+        'END:VEVENT', 'END:VCALENDAR',
+      ].join('\r\n');
+      const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
+      const a = Object.assign(document.createElement('a'), { href: url, download: `revisione-${ymd(d)}.ics` });
+      document.body.append(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+
+    render();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-calc]').forEach(setup);
+</script>

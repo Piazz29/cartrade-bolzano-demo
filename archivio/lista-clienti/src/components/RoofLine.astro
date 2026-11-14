@@ -1,0 +1,31 @@
+---
+// La linea del tetto del logo, ridisegnata come tratto: navy fino al colmo, poi la coda arancio.
+// È la firma visiva del sito (hero, divisori). Con data-draw si disegna quando entra in vista.
+interface Props { class?: string; draw?: boolean; tone?: 'ink' | 'paper'; weight?: number }
+const { class: cls, draw = true, tone = 'ink', weight = 2 } = Astro.props;
+const stroke = tone === 'ink' ? 'var(--color-ink)' : 'var(--color-paper)';
+---
+<svg
+  class={cls}
+  viewBox="0 0 1200 120"
+  preserveAspectRatio="none"
+  fill="none"
+  aria-hidden="true"
+  focusable="false"
+  data-draw={draw ? '' : undefined}
+>
+  <path
+    d="M2 110 L292 86 C420 40 612 8 806 8"
+    stroke={stroke}
+    stroke-width={weight}
+    stroke-linecap="round"
+    vector-effect="non-scaling-stroke"
+  />
+  <path
+    d="M806 8 C962 8 1082 46 1196 98"
+    stroke="var(--color-orange)"
+    stroke-width={weight}
+    stroke-linecap="round"
+    vector-effect="non-scaling-stroke"
+  />
+</svg>

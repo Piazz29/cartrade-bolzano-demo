@@ -1,0 +1,140 @@
+---
+// Selettore lingua.
+// - menu (header): un solo bottone discreto "IT ▾" che apre l'elenco con i nomi per esteso.
+//   <details> nativo: funziona anche senza JavaScript; con JS si chiude cliccando fuori o con Esc.
+// - inline (menu mobile a tutto schermo): le tre lingue per esteso in riga.
+// La scelta viene ricordata (localStorage 'ct-lang'): la radice del sito e l'avviso "pagina disponibile
+// nella tua lingua" la rispettano.
+import type { Lang } from '../data/site';
+import { langs, type Alternates } from '../i18n/routes';
+import { ui } from '../i18n/ui';
+import Icon from './Icon.astro';
+
+interface Props { lang: Lang; alternates: Alternates; variant?: 'menu' | 'inline'; class?: string }
+const { lang, alternates, variant = 'menu', class: cls } = Astro.props;
+const t = ui[lang];
+---
+{variant === 'menu' ? (
+  <details class:list={['lang-menu', cls]} data-lang-menu>
+    <summary class="lang-btn" aria-label={`${t.langLabel}: ${ui[lang].langNames[lang]}`}>
+      <Icon name="globe" size={17} class="lang-globe" />
+      <span class="lang-code" aria-hidden="true">{lang.toUpperCase()}</span>
+      <Icon name="chevron" size={14} class="lang-chev" />
+    </summary>
+    <ul class="lang-pop" role="list">
+      {langs.map((l) => (
+        <li>
+          <a href={alternates[l]} hreflang={l} lang={l} aria-current={l === lang ? 'true' : undefined} data-lang-link={l}>
+            <span>{ui[l].langNames[l]}</span>
+            {l === lang ? <Icon name="check" size={16} class="lang-ok" /> : <span class="lang-c" aria-hidden="true">{l.toUpperCase()}</span>}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </details>
+) : (
+  <nav aria-label={t.langLabel} class:list={['lang-inline', cls]}>
+    <ul role="list">
+      {langs.map((l) => (
+        <li>
+          <a href={alternates[l]} hreflang={l} lang={l} aria-current={l === lang ? 'true' : undefined} data-lang-link={l}>{ui[l].langNames[l]}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}
+
+<style>
+@layer components {
+  .lang-menu { position: relative; }
+  .lang-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    padding: 0 0.55rem;
+    border-radius: 2px;
+    list-style: none;
+    cursor: pointer;
+    font-stretch: 115%;
+    font-size: 0.8125rem;
+    font-weight: 640;
+    letter-spacing: 0.06em;
+    user-select: none;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .lang-btn::-webkit-details-marker { display: none; }
+  .lang-btn:hover { background: color-mix(in oklab, currentColor 8%, transparent); }
+  .lang-btn :global(.lang-chev) { opacity: 0.7; transition: transform 0.3s var(--ease-out-expo); }
+  .lang-menu[open] .lang-btn :global(.lang-chev) { transform: rotate(180deg); }
+  @media (max-width: 23.99rem) { .lang-btn :global(.lang-globe) { display: none; } }
+
+  .lang-pop {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.4rem);
+    z-index: 70;
+    min-width: 11.5rem;
+    padding: 0.35rem;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    box-shadow: 0 14px 34px -12px color-mix(in oklab, var(--color-night) 35%, transparent);
+  }
+  .lang-menu[open] .lang-pop { animation: lang-in 0.28s var(--ease-out-expo); }
+  @keyframes lang-in { from { opacity: 0; transform: translateY(-4px); } }
+  .lang-pop a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-height: 2.75rem;
+    padding: 0 0.75rem;
+    border-radius: 1px;
+    font-size: 0.9375rem;
+    font-weight: 480;
+    text-decoration: none;
+    transition: background-color 0.2s;
+  }
+  .lang-pop a:hover { background: var(--color-paper-2); }
+  .lang-pop a[aria-current='true'] { font-weight: 620; }
+  .lang-pop :global(.lang-ok) { color: var(--color-orange-ink); }
+  .lang-c { font-stretch: 112%; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.08em; color: var(--color-muted); }
+
+  .lang-inline ul { display: flex; flex-wrap: wrap; gap: 0.25rem 1.5rem; }
+  .lang-inline a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: 1rem;
+    font-weight: 520;
+    color: var(--color-steel);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+  }
+  .lang-inline a:hover { color: var(--color-paper); }
+  .lang-inline a[aria-current='true'] { color: var(--color-paper); border-bottom-color: var(--color-orange); }
+}
+</style>
+
+<script>
+  // Ricorda la lingua scelta; chiude il menu lingua cliccando fuori o con Esc
+  document.querySelectorAll<HTMLAnchorElement>('[data-lang-link]').forEach((a) => {
+    a.addEventListener('click', () => {
+      try { localStorage.setItem('ct-lang', a.dataset.langLink ?? ''); } catch {}
+    });
+  });
+  const menus = Array.from(document.querySelectorAll<HTMLDetailsElement>('[data-lang-menu]'));
+  document.addEventListener('click', (e) => {
+    menus.forEach((m) => { if (m.open && !m.contains(e.target as Node)) m.open = false; });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    menus.forEach((m) => {
+      if (!m.open) return;
+      m.open = false;
+      m.querySelector<HTMLElement>('summary')?.focus();
+    });
+  });
+</script>

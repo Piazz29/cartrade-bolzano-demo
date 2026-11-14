@@ -9,7 +9,7 @@ const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function formatCount(el: HTMLElement, value: number) {
   const decimals = Number(el.dataset.decimals ?? 0);
-  const locale = document.documentElement.lang === 'de' ? 'de-DE' : 'it-IT';
+  const locale = ({ it: 'it-IT', de: 'de-DE', en: 'en-GB' } as Record<string, string>)[document.documentElement.lang] ?? 'it-IT';
   el.textContent = value.toLocaleString(locale, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }
 

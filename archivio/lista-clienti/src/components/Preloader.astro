@@ -1,0 +1,153 @@
+---
+// Schermata di caricamento con il logo che si compone.
+// - Compare ogni volta che si entra nel sito o si ricarica (non navigando tra le pagine), mai senza JavaScript:
+//   la decisione la prende uno script inline nel <head> (Base.astro), che aggiunge html.is-loading prima del primo rendering.
+// - Con "riduci movimento" (html.calm): stesso contenuto, ma il logo appare in dissolvenza e l'uscita è una dissolvenza.
+// - Avanza con il caricamento reale (font + foto principale), dura almeno ~1,6 s e al massimo ~3,8 s
+//   (più una rete di sicurezza a 4,5 s nel <head>).
+// - Mentre è attiva, le animazioni della pagina sono in pausa: partono quando il sipario si alza.
+import { site, type Lang } from '../data/site';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const lat = `${site.geo.lat.toFixed(4).replace('.', ',')}° N`;
+const lng = `${site.geo.lng.toFixed(4).replace('.', ',')}° E`;
+const services = { it: 'Revisione · Officina · Carrozzeria', de: 'Revision · Werkstatt · Karosserie', en: 'Inspection · Workshop · Bodywork' }[lang];
+---
+<div class="pl" data-preloader aria-hidden="true">
+  <span class="pl-corner tl t-label">{site.name}</span>
+  <span class="pl-corner tr t-label">Bolzano · Bozen</span>
+  <span class="pl-corner bl t-label t-num">{lat} · {lng}</span>
+  <span class="pl-corner br t-label t-num"><span data-pl-count>000</span></span>
+
+  <div class="pl-inner">
+    <div class="pl-logo">
+      <span class="band b-roof"><img src="/brand/logo-inverse.svg" alt="" width="904" height="282" /></span>
+      <span class="band b-word"><img src="/brand/logo-inverse.svg" alt="" width="904" height="282" /></span>
+      <span class="band b-base"><img src="/brand/logo-inverse.svg" alt="" width="904" height="282" /></span>
+    </div>
+    <div class="pl-meter"><span class="pl-bar" data-pl-bar></span></div>
+    <p class="pl-services t-label">{services}</p>
+  </div>
+</div>
+
+<style>
+@layer components {
+  .pl { display: none; }
+  :global(html.is-loading) .pl, .pl.is-leaving {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: grid;
+    place-items: center;
+    background: var(--color-night);
+    color: var(--color-paper);
+  }
+  /* bordo arancio che guida il sipario in uscita */
+  .pl::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: var(--color-orange);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  /* In uscita non deve più intercettare i tocchi (nella versione calma resta sopra la pagina mentre svanisce) */
+  .pl.is-leaving { pointer-events: none; }
+  .pl.is-leaving { transform: translateY(-100%); transition: transform 1s cubic-bezier(0.76, 0, 0.24, 1) 0.28s; }
+  .pl.is-leaving::after { transform: scaleX(1); transition: transform 0.4s var(--ease-out-expo); }
+
+  .pl-corner { position: absolute; color: var(--color-steel-2); opacity: 0; animation: pl-fade 0.8s var(--ease-out-quart) 0.2s both; }
+  .tl { left: var(--gutter); top: calc(1.25rem + env(safe-area-inset-top)); }
+  .tr { right: var(--gutter); top: calc(1.25rem + env(safe-area-inset-top)); }
+  .bl { left: var(--gutter); bottom: calc(1.25rem + env(safe-area-inset-bottom)); }
+  .br { right: var(--gutter); bottom: calc(1.25rem + env(safe-area-inset-bottom)); color: var(--color-paper); font-size: 0.875rem; }
+  @keyframes pl-fade { to { opacity: 1; } }
+
+  .pl-inner { width: min(78vw, 30rem); transition: opacity 0.45s var(--ease-out-quart), transform 0.6s var(--ease-out-expo); }
+  .pl.is-leaving .pl-inner { opacity: 0; transform: translateY(-1.5rem) scale(0.98); }
+
+  /* Il logo è diviso in tre fasce che si rivelano in sequenza */
+  .pl-logo { position: relative; aspect-ratio: 904 / 282; }
+  .band { position: absolute; inset: 0; display: block; }
+  .band img { display: block; width: 100%; height: 100%; }
+  .b-roof { clip-path: inset(0 100% 62% 0); animation: pl-roof 1.1s cubic-bezier(0.65, 0, 0.35, 1) 0.15s forwards; }
+  @keyframes pl-roof { to { clip-path: inset(0 0 62% 0); } }
+  .b-word { clip-path: inset(38% 0 20% 0); }
+  .b-word img { transform: translateY(42%); opacity: 0; animation: pl-word 0.9s var(--ease-out-expo) 0.75s forwards; }
+  @keyframes pl-word { to { transform: none; opacity: 1; } }
+  .b-base { clip-path: inset(80% 100% 0 0); animation: pl-base 0.9s var(--ease-out-expo) 1.05s forwards; }
+  @keyframes pl-base { to { clip-path: inset(80% 0 0 0); } }
+
+  .pl-meter { position: relative; height: 1px; margin-top: 2.25rem; background: color-mix(in oklab, var(--color-steel) 22%, transparent); overflow: hidden; }
+  .pl-bar { position: absolute; inset: 0; background: var(--color-orange); transform: scaleX(0); transform-origin: left; transition: transform 0.35s var(--ease-out-quart); }
+  /* Versione calma ("riduci movimento"): niente scorrimenti, solo dissolvenze.
+     Le regole sono !important nel layer components per prevalere sull'azzeramento globale delle animazioni. */
+  :global(html.calm) .pl .band { clip-path: none !important; animation: none !important; }
+  :global(html.calm) .pl .band img { transform: none !important; opacity: 1 !important; animation: none !important; }
+  :global(html.calm) .pl .pl-logo { animation: pl-fade 0.7s ease-out both !important; opacity: 0; }
+  :global(html.calm) .pl .pl-corner, :global(html.calm) .pl .pl-services { animation: pl-fade 0.7s ease-out 0.2s both !important; }
+  :global(html.calm) .pl.is-leaving { transform: none !important; opacity: 0; transition: opacity 0.6s ease-out 0.1s !important; }
+  :global(html.calm) .pl.is-leaving::after { transition: none !important; }
+  :global(html.calm) .pl .pl-bar { transition: transform 0.3s linear !important; }
+
+  .pl-services { margin-top: 1rem; text-align: center; text-wrap: balance; line-height: 1.7; font-size: clamp(0.625rem, 2.6vw, 0.75rem); color: var(--color-steel-2); letter-spacing: 0.14em; opacity: 0; animation: pl-fade 0.8s var(--ease-out-quart) 1.2s both; }
+}
+</style>
+
+<script>
+  const pl = document.querySelector<HTMLElement>('[data-preloader]');
+  const html = document.documentElement;
+
+  if (pl && html.classList.contains('is-loading')) {
+    const bar = pl.querySelector<HTMLElement>('[data-pl-bar]')!;
+    const count = pl.querySelector<HTMLElement>('[data-pl-count]')!;
+    const t0 = performance.now();
+    const MIN = 1650;
+    const MAX = 3800;
+    let target = 0.08;
+    let shown = 0;
+    let finished = false;
+
+    // Cosa aspettiamo davvero: font e foto principale (le altre immagini sono lazy)
+    const hero = document.querySelector<HTMLImageElement>('img[fetchpriority="high"]');
+    const tasks: Promise<unknown>[] = [
+      document.fonts?.ready ?? Promise.resolve(),
+      hero ? (hero.complete ? Promise.resolve() : new Promise((r) => { hero.addEventListener('load', r, { once: true }); hero.addEventListener('error', r, { once: true }); })) : Promise.resolve(),
+      document.readyState === 'complete' ? Promise.resolve() : new Promise((r) => window.addEventListener('load', r, { once: true })),
+    ];
+    tasks.forEach((p) => p.then(() => (target = Math.min(1, target + 0.92 / tasks.length))));
+    const ready = Promise.race([Promise.all(tasks), new Promise((r) => setTimeout(r, MAX))]).then(() => (target = 1));
+
+    // Contatore e barra: inseguono il valore reale, ma non finiscono prima dell'animazione del logo
+    const tick = (now: number) => {
+      const timeCap = Math.min(1, (now - t0) / MIN);
+      const goal = Math.min(target, timeCap);
+      shown += (goal - shown) * 0.12;
+      if (goal === 1 && shown > 0.995) shown = 1;
+      bar.style.transform = `scaleX(${shown})`;
+      count.textContent = String(Math.round(shown * 100)).padStart(3, '0');
+      if (shown < 1) requestAnimationFrame(tick);
+      else finish();
+    };
+    requestAnimationFrame(tick);
+    // Rete di sicurezza: se il telefono rallenta requestAnimationFrame (scheda in background, risparmio energetico)
+    // la schermata si chiude comunque
+    setTimeout(() => { shown = 1; finish(); }, MAX + 600);
+
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      ready.then(() => {
+        pl.classList.add('is-leaving');
+        // Le animazioni della pagina partono mentre il sipario si alza
+        requestAnimationFrame(() => html.classList.remove('is-loading'));
+        setTimeout(() => pl.remove(), 1500);
+      });
+    };
+  } else {
+    pl?.remove();
+  }
+</script>

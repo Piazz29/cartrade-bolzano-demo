@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
-import { site, type Lang } from '../data/site';
-import { routes, type Alternates, type RouteKey } from '../i18n/routes';
+import { site, areaName, type Lang } from '../data/site';
+import { routes, langs, type Alternates, type RouteKey } from '../i18n/routes';
 import { ui } from '../i18n/ui';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -23,45 +23,81 @@ const { lang, title, description, alternates, current, ogImage, jsonLd = [], wha
 const t = ui[lang];
 const siteUrl = Astro.site!.toString().replace(/\/$/, '');
 const canonical = `${siteUrl}${alternates[lang]}`;
-const og = ogImage ?? `${siteUrl}/og/og-${lang}.jpg`;
-const fullTitle = title.includes('Car Trade') ? title : `${title} · Car Trade ${lang === 'de' ? 'Bozen' : 'Bolzano'}`;
-
-// Zona servita: Bolzano e comuni vicini, con i nomi ufficiali nella lingua della pagina
-const AREA: Record<Lang, [string, string][]> = {
-  it: [['City', 'Bolzano'], ['City', 'Laives'], ['City', 'Appiano sulla Strada del Vino'], ['AdministrativeArea', 'Oltradige'], ['AdministrativeArea', 'Bassa Atesina']],
-  de: [['City', 'Bozen'], ['City', 'Leifers'], ['City', 'Eppan an der Weinstraße'], ['AdministrativeArea', 'Überetsch'], ['AdministrativeArea', 'Unterland']],
+// TODO: immagine social dedicata all'inglese (public/og/og-en.jpg); intanto quella italiana
+const ogFile = lang === 'en' ? 'it' : lang;
+const og = ogImage ?? `${siteUrl}/og/og-${ogFile}.jpg`;
+// Titolo breve (Google ne mostra circa 60 caratteri): se la città è già nel titolo, basta "Car Trade"
+const city = site.address.city[lang];
+const fullTitle = title.includes('Car Trade') ? title : title.includes(city) ? `${title} · Car Trade` : `${title} · Car Trade ${city}`;
+const OG_LOCALE: Record<Lang, string> = { it: 'it_IT', de: 'de_DE', en: 'en_GB' };
+// Avviso "questa pagina c'è nella tua lingua": testi scritti nella lingua PROPOSTA, non in quella della pagina
+const HINT: Record<Lang, { text: string; go: string; close: string }> = {
+  it: { text: 'Questa pagina è disponibile in italiano.', go: 'Leggi in italiano', close: 'Chiudi' },
+  de: { text: 'Diese Seite gibt es auch auf Deutsch.', go: 'Auf Deutsch lesen', close: 'Schließen' },
+  en: { text: 'This page is also available in English.', go: 'Read in English', close: 'Close' },
 };
-const OFFERTE: Record<Lang, [string, string][]> = {
+
+// Servizi offerti, ognuno collegato alla sua pagina (schema.org makesOffer)
+const OFFERTE: Record<Lang, [RouteKey, string, string][]> = {
   it: [
-    ['Revisione auto', 'Centro revisioni affiliato DEKRA per autovetture, prenotazione online.'],
-    ['Tagliando', 'Manutenzione programmata secondo le specifiche del costruttore, per tutte le marche.'],
-    ['Meccanica', 'Freni, distribuzione, frizione, diagnosi elettronica.'],
-    ['Carrozzeria', 'Riparazione di ammaccature e graffi, raddrizzatura, verniciatura. Preventivo anche da foto.'],
-    ['Gomme', 'Cambio gomme stagionale: in provincia di Bolzano le invernali servono dal 15 novembre al 15 aprile.'],
-    ['Vendita auto usate e km 0', 'Auto usate selezionate e km 0 con garanzia, controllate in officina.'],
+    ['revisione', 'Revisione auto', 'Centro revisioni affiliato DEKRA per autovetture, prenotazione online.'],
+    ['officina', 'Tagliando', 'Manutenzione programmata secondo le specifiche del costruttore, per tutte le marche.'],
+    ['officina', 'Officina meccanica', 'Freni, distribuzione, frizione, diagnosi elettronica, climatizzazione.'],
+    ['carrozzeria', 'Carrozzeria', 'Riparazione di ammaccature e graffi, raddrizzatura, verniciatura, sinistri. Preventivo anche da foto.'],
+    ['gomme', 'Cambio gomme', 'Cambio gomme stagionale: in provincia di Bolzano le invernali servono dal 15 novembre al 15 aprile.'],
   ],
   de: [
-    ['Fahrzeugrevision', 'DEKRA-Partner für die Revision von Pkw, Online-Buchung.'],
-    ['Inspektion', 'Wartung nach Herstellervorgaben, für alle Marken.'],
-    ['Mechanik', 'Bremsen, Zahnriemen, Kupplung, elektronische Diagnose.'],
-    ['Karosserie', 'Dellen und Kratzer, Richtarbeiten, Lackierung. Angebot auch per Foto.'],
-    ['Reifen', 'Saisonaler Reifenwechsel: In Südtirol gilt die Winterausrüstungspflicht vom 15. November bis 15. April.'],
-    ['Gebrauchtwagen und Tageszulassungen', 'Ausgewählte Gebrauchtwagen und Tageszulassungen mit Garantie, in der Werkstatt geprüft.'],
+    ['revisione', 'Fahrzeugrevision', 'DEKRA-Partner für die Revision von Pkw, Online-Buchung.'],
+    ['officina', 'Inspektion', 'Wartung nach Herstellervorgaben, für alle Marken.'],
+    ['officina', 'Kfz-Werkstatt', 'Bremsen, Zahnriemen, Kupplung, elektronische Diagnose, Klimaanlage.'],
+    ['carrozzeria', 'Karosserie und Lackierung', 'Dellen und Kratzer, Richtarbeiten, Lackierung, Unfallschäden. Angebot auch per Foto.'],
+    ['gomme', 'Reifenwechsel', 'Saisonaler Reifenwechsel: In Südtirol gilt die Winterausrüstungspflicht vom 15. November bis 15. April.'],
+  ],
+  en: [
+    ['revisione', 'Car inspection (revisione)', 'DEKRA-affiliated inspection centre for cars, online booking.'],
+    ['officina', 'Car service', 'Scheduled maintenance to manufacturer specifications, all makes.'],
+    ['officina', 'Mechanical repairs', 'Brakes, timing belt, clutch, electronic diagnostics, air conditioning.'],
+    ['carrozzeria', 'Body shop', 'Dents and scratches, panel straightening, painting, accident repairs. Quotes from photos too.'],
+    ['gomme', 'Tyre change', 'Seasonal tyre change: in South Tyrol winter tyres are required from 15 November to 15 April.'],
   ],
 };
+// Descrizione dell'attività e temi di competenza: aiutano motori di ricerca e assistenti AI a capire chi siamo
+const ABOUT: Record<Lang, { description: string; knowsAbout: string[]; keywords: string }> = {
+  it: {
+    description: 'Centro revisioni auto affiliato DEKRA, officina meccanica, carrozzeria e cambio gomme in un’unica sede nella zona produttiva di Bolzano Sud, Alto Adige.',
+    knowsAbout: ['Revisione auto', 'Tagliando', 'Officina meccanica', 'Diagnosi elettronica', 'Freni', 'Distribuzione', 'Carrozzeria', 'Verniciatura auto', 'Riparazione ammaccature', 'Sinistri auto', 'Cambio gomme', 'Gomme invernali'],
+    keywords: 'revisione auto Bolzano, centro revisioni Bolzano, revisione DEKRA Bolzano, officina Bolzano, meccanico Bolzano, tagliando Bolzano, carrozzeria Bolzano, cambio gomme Bolzano, gomme invernali Bolzano',
+  },
+  de: {
+    description: 'DEKRA-Partner für die Fahrzeugrevision, Kfz-Werkstatt, Karosserie und Reifenwechsel an einem Standort im Gewerbegebiet Bozen Süd, Südtirol.',
+    knowsAbout: ['Fahrzeugrevision', 'Inspektion', 'Kfz-Werkstatt', 'Elektronische Diagnose', 'Bremsen', 'Zahnriemen', 'Karosserie', 'Autolackierung', 'Dellenreparatur', 'Unfallschäden', 'Reifenwechsel', 'Winterreifen'],
+    keywords: 'Revision Bozen, Fahrzeugrevision Bozen, DEKRA Bozen, Autowerkstatt Bozen, Kfz-Werkstatt Bozen, Inspektion Bozen, Karosserie Bozen, Reifenwechsel Bozen, Winterreifen Bozen',
+  },
+  en: {
+    description: 'DEKRA-affiliated car inspection centre, mechanical workshop, body shop and tyre change at one address in the Bolzano South business park, South Tyrol, Italy.',
+    knowsAbout: ['Car inspection', 'Car servicing', 'Car repair', 'Electronic diagnostics', 'Brakes', 'Timing belt', 'Body shop', 'Car painting', 'Dent repair', 'Accident repairs', 'Tyre change', 'Winter tyres'],
+    keywords: 'car inspection Bolzano, MOT Bolzano, DEKRA Bolzano, mechanic Bolzano, car repair Bolzano, car service Bolzano, body shop Bolzano, tyre change Bolzano, winter tyres Bolzano',
+  },
+};
+const areaServed = site.area.map((a) => ({ '@type': a.type, name: areaName(a, lang) }));
 
-// schema.org: officina + concessionario nella stessa sede
+// schema.org: officina, carrozzeria e centro revisioni nella stessa sede
 const business = {
   '@context': 'https://schema.org',
-  '@type': ['AutoRepair', 'AutoDealer'],
+  '@type': ['AutoRepair', 'AutoBodyShop'],
   '@id': `${siteUrl}/#business`,
   name: site.name,
-  alternateName: site.brand,
+  alternateName: [site.brand, site.google.name],
+  description: ABOUT[lang].description,
   url: `${siteUrl}${routes.home[lang]}`,
-  image: `${siteUrl}/og/og-${lang}.jpg`,
+  image: `${siteUrl}/og/og-${ogFile}.jpg`,
   logo: `${siteUrl}/brand/logo.svg`,
   telephone: site.phone.e164,
   ...(site.email ? { email: site.email } : {}),
+  contactPoint: [
+    { '@type': 'ContactPoint', telephone: site.phone.e164, contactType: 'customer service', availableLanguage: ['it', 'de'] },
+    { '@type': 'ContactPoint', telephone: site.landline.e164, contactType: 'customer service', availableLanguage: ['it', 'de'] },
+  ],
   vatID: `IT${site.vat}`,
   address: {
     '@type': 'PostalAddress',
@@ -75,12 +111,16 @@ const business = {
   // Scheda Google per cid e pagina DEKRA del centro. Niente Facebook: è fermo al 2018, con un altro indirizzo.
   hasMap: site.google.mapsCidUrl,
   sameAs: [site.google.mapsCidUrl, site.dekra.profileUrl],
-  areaServed: AREA[lang].map(([type, name]) => ({ '@type': type, name })),
-  makesOffer: OFFERTE[lang].map(([name, description], i) => ({
+  areaServed,
+  knowsAbout: ABOUT[lang].knowsAbout,
+  keywords: ABOUT[lang].keywords,
+  currenciesAccepted: 'EUR',
+  makesOffer: OFFERTE[lang].map(([key, name, description]) => ({
     '@type': 'Offer',
-    itemOffered: { '@type': 'Service', name, description },
+    url: `${siteUrl}${routes[key][lang]}`,
+    itemOffered: { '@type': 'Service', name, description, url: `${siteUrl}${routes[key][lang]}` },
     // La revisione ha la tariffa nazionale fissa; gli altri servizi su preventivo
-    ...(i === 0 ? { price: site.revisionFee.total.toFixed(2), priceCurrency: 'EUR' } : {}),
+    ...(key === 'revisione' ? { price: site.revisionFee.total.toFixed(2), priceCurrency: 'EUR' } : {}),
     areaServed: { '@type': 'City', name: site.address.city[lang] },
   })),
   // TODO: aggiungere il sabato se confermato
@@ -90,10 +130,35 @@ const business = {
     opens: h.open,
     closes: h.close,
   })),
-  knowsLanguage: ['it', 'de'],
+  knowsLanguage: ['it', 'de', 'en'],
   // Nota: niente aggregateRating dalle recensioni Google (non ammesso per i rich result "self-serving").
 };
-const ld = [business, ...jsonLd];
+// Sito e pagina: lingua, data di aggiornamento e collegamento all'attività (utile per i motori AI)
+const website = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': `${siteUrl}/#website`,
+  url: `${siteUrl}/`,
+  name: site.brand,
+  alternateName: 'Car Trade Bozen',
+  inLanguage: ['it', 'de', 'en'],
+  publisher: { '@id': `${siteUrl}/#business` },
+};
+const PAGE_TYPE: Partial<Record<RouteKey, string>> = { azienda: 'AboutPage', contatti: 'ContactPage' };
+const webpage = {
+  '@context': 'https://schema.org',
+  '@type': (current && PAGE_TYPE[current]) || 'WebPage',
+  '@id': `${canonical}#webpage`,
+  url: canonical,
+  name: fullTitle,
+  description,
+  inLanguage: lang,
+  isPartOf: { '@id': `${siteUrl}/#website` },
+  about: { '@id': `${siteUrl}/#business` },
+  primaryImageOfPage: { '@type': 'ImageObject', url: og },
+  dateModified: new Date().toISOString().slice(0, 10),
+};
+const ld = [business, website, webpage, ...jsonLd];
 ---
 <!doctype html>
 <html lang={lang} class="no-js">
@@ -104,11 +169,13 @@ const ld = [business, ...jsonLd];
     <slot name="head" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <link rel="canonical" href={canonical} />
-    <link rel="alternate" hreflang="it" href={`${siteUrl}${alternates.it}`} />
-    <link rel="alternate" hreflang="de" href={`${siteUrl}${alternates.de}`} />
-    <link rel="alternate" hreflang="x-default" href={`${siteUrl}${alternates.it}`} />
+    {langs.map((l) => <link rel="alternate" hreflang={l} href={`${siteUrl}${alternates[l]}`} />)}
+    <link rel="alternate" hreflang="x-default" href={`${siteUrl}${alternates.en}`} />
     <link rel="sitemap" href="/sitemap.xml" />
+    <!-- Presentazione per assistenti AI (https://llmstxt.org) -->
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt" />
 
     <meta name="theme-color" content="#F7F6F3" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -116,19 +183,24 @@ const ld = [business, ...jsonLd];
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Car Trade Bolzano" />
-    <meta property="og:locale" content={lang === 'it' ? 'it_IT' : 'de_DE'} />
-    <meta property="og:locale:alternate" content={lang === 'it' ? 'de_DE' : 'it_IT'} />
+    <meta property="og:locale" content={OG_LOCALE[lang]} />
+    {langs.filter((l) => l !== lang).map((l) => <meta property="og:locale:alternate" content={OG_LOCALE[l]} />)}
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={og} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={fullTitle} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={og} />
 
     <meta name="geo.region" content="IT-BZ" />
-    <meta name="geo.placename" content={lang === 'it' ? 'Bolzano' : 'Bozen'} />
+    <meta name="geo.placename" content={site.address.city[lang]} />
     <meta name="geo.position" content={`${site.geo.lat};${site.geo.lng}`} />
+    <meta name="ICBM" content={`${site.geo.lat}, ${site.geo.lng}`} />
 
     <!-- Font non precaricato: su mobile ruberebbe banda alla foto LCP. font-display: swap + fallback metrico = niente CLS -->
     <link rel="preconnect" href="https://images.unsplash.com" />
@@ -170,6 +242,56 @@ const ld = [business, ...jsonLd];
     <Footer lang={lang} />
     <MobileCtaBar lang={lang} whatsappText={whatsappText} />
 
+    <!-- Lingua del browser diversa da quella della pagina: proposta discreta, mai un reindirizzamento forzato -->
+    <div class="lang-hint on-dark" role="region" aria-label={t.langLabel} data-lang-hint data-current={lang} data-alts={JSON.stringify(alternates)} data-texts={JSON.stringify(HINT)} hidden>
+      <p class="lang-hint-text" data-hint-text></p>
+      <div class="lang-hint-actions">
+        <a href="#" class="btn btn-primary lang-hint-go" data-hint-go></a>
+        <button type="button" class="lang-hint-x" data-hint-x aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+        </button>
+      </div>
+    </div>
+    <script is:inline>
+      (function () {
+        var box = document.querySelector('[data-lang-hint]');
+        if (!box) return;
+        try {
+          if (localStorage.getItem('ct-lang')) return; // l'utente ha già scelto
+          if (sessionStorage.getItem('ct-hint-off')) return;
+        } catch (e) { return; }
+        var current = box.getAttribute('data-current');
+        var alts = JSON.parse(box.getAttribute('data-alts'));
+        var texts = JSON.parse(box.getAttribute('data-texts'));
+        var prefs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
+        var want = null;
+        for (var i = 0; i < prefs.length && !want; i++) {
+          var code = String(prefs[i]).slice(0, 2).toLowerCase();
+          if (alts[code]) want = code;
+        }
+        if (!want) want = 'en'; // altre lingue: l'inglese è la proposta più utile
+        if (want === current) return;
+        var tx = texts[want];
+        box.querySelector('[data-hint-text]').textContent = tx.text;
+        var go = box.querySelector('[data-hint-go]');
+        go.textContent = tx.go;
+        go.setAttribute('href', alts[want]);
+        go.setAttribute('hreflang', want);
+        box.setAttribute('lang', want);
+        var x = box.querySelector('[data-hint-x]');
+        x.setAttribute('aria-label', tx.close);
+        go.addEventListener('click', function () { try { localStorage.setItem('ct-lang', want); } catch (e) {} });
+        x.addEventListener('click', function () {
+          box.hidden = true;
+          try { sessionStorage.setItem('ct-hint-off', '1'); } catch (e) {}
+        });
+        // Dopo la schermata di caricamento
+        var show = function () { box.hidden = false; };
+        var wait = function () { document.documentElement.classList.contains('is-loading') ? setTimeout(wait, 300) : setTimeout(show, 900); };
+        wait();
+      })();
+    </script>
+
     <script>
       import '../scripts/reveal';
       import '../scripts/motion';
@@ -190,6 +312,35 @@ const ld = [business, ...jsonLd];
       }
       .skip-link:focus { transform: none; }
       main:focus { outline: none; }
+
+      .lang-hint {
+        position: fixed;
+        left: 0.75rem;
+        right: 0.75rem;
+        bottom: calc(4.25rem + env(safe-area-inset-bottom) + 0.75rem);
+        z-index: 45;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem 1rem;
+        padding: 0.85rem 0.85rem 0.85rem 1.1rem;
+        background: var(--color-night);
+        color: var(--color-paper);
+        border: 1px solid var(--line-dark);
+        border-left: 3px solid var(--color-orange);
+        border-radius: 2px;
+        box-shadow: 0 18px 40px -16px rgb(0 0 0 / 0.45);
+        animation: hint-in 0.6s var(--ease-out-expo);
+      }
+      .lang-hint[hidden] { display: none; }
+      @media (min-width: 64rem) { .lang-hint { left: auto; right: 1.5rem; bottom: 1.5rem; flex-wrap: nowrap; max-width: 40rem; } }
+      @keyframes hint-in { from { opacity: 0; transform: translateY(12px); } }
+      .lang-hint-text { font-size: 0.9375rem; font-weight: 500; }
+      .lang-hint-actions { display: flex; align-items: center; gap: 0.25rem; margin-left: auto; }
+      .lang-hint-go { min-height: 2.5rem !important; padding-block: 0.5rem !important; font-size: 0.9375rem !important; }
+      .lang-hint-x { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; color: var(--color-steel); border-radius: 2px; }
+      .lang-hint-x:hover { color: var(--color-paper); background: color-mix(in oklab, var(--color-paper) 8%, transparent); }
     }
 </style>
   </body>

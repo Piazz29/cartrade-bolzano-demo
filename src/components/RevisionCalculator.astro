@@ -2,10 +2,9 @@
 // Calcolatore scadenza revisione (art. 80 Codice della Strada, autovetture uso privato):
 // prima revisione entro 4 anni dalla prima immatricolazione, poi ogni 2 anni,
 // sempre entro la fine del mese di riferimento.
-// La regola sta in lib/revisione.ts (unica fonte). "Avvisami" porta all'iscrizione ai promemoria
-// (/it/promemoria/, /de/erinnerung/) con mese, anno e tipo già compilati.
-import { site, type Lang } from '../data/site';
-import { routes } from '../i18n/routes';
+// La regola sta in lib/revisione.ts (unica fonte). "Aggiungi al calendario" scarica un file .ics
+// con un avviso 30 giorni prima: il promemoria resta sul telefono di chi lo usa, nessun dato a noi.
+import { site, locales, type Lang } from '../data/site';
 import { ui } from '../i18n/ui';
 import Icon from './Icon.astro';
 
@@ -32,14 +31,11 @@ const copy = {
     expired: 'Scaduta',
     expiredText: 'Prenota subito: circolare con la revisione scaduta comporta una sanzione. Il giorno della prenotazione puoi venire da noi con l\'auto.',
     soonText: 'Mancano meno di due mesi. Prenota ora e scegli tu il giorno.',
-    okText: 'Nessuna fretta. Ti avvisiamo noi quando sarà ora.',
+    okText: 'Nessuna fretta. Salva la data nel calendario e ci pensa il telefono ad avvisarti.',
     cycleStart: 'Inizio ciclo',
     cycleEnd: 'Scadenza',
     todayMark: 'Oggi',
     ics: 'Aggiungi al calendario',
-    notify: 'Avvisami prima della scadenza',
-    notifyIntro: 'Ti scriviamo noi via email o WhatsApp, 30 e 7 giorni prima. Ti iscrivi in 30 secondi, con la data già inserita.',
-    submit: 'Attiva il promemoria',
     note: 'Vale per autovetture ad uso privato. Taxi, NCC e veicoli con più di 8 posti hanno la revisione annuale.',
     icsTitle: 'Scadenza revisione auto',
     icsDesc: 'Prenota la revisione da Car Trade Bolzano',
@@ -63,22 +59,47 @@ const copy = {
     expired: 'Abgelaufen',
     expiredText: 'Bitte sofort buchen: Mit abgelaufener Revision zu fahren wird bestraft. Am Tag des Termins dürfen Sie mit dem Auto zu uns kommen.',
     soonText: 'Weniger als zwei Monate. Jetzt buchen und den Tag selbst wählen.',
-    okText: 'Kein Grund zur Eile. Wir erinnern Sie rechtzeitig.',
+    okText: 'Kein Grund zur Eile. Speichern Sie den Termin im Kalender, Ihr Handy erinnert Sie.',
     cycleStart: 'Beginn',
     cycleEnd: 'Fällig',
     todayMark: 'Heute',
     ics: 'In den Kalender eintragen',
-    notify: 'Vor Ablauf erinnern',
-    notifyIntro: 'Wir schreiben Ihnen per E-Mail oder WhatsApp, 30 und 7 Tage vorher. Anmeldung in 30 Sekunden, das Datum ist schon eingetragen.',
-    submit: 'Erinnerung aktivieren',
     note: 'Gilt für Pkw im Privatgebrauch. Taxis, Mietwagen mit Fahrer und Fahrzeuge mit mehr als 8 Sitzplätzen müssen jährlich zur Revision.',
     icsTitle: 'Revision Auto fällig',
     icsDesc: 'Revision bei Car Trade Bozen buchen',
     noscript: 'Regel: erste Revision innerhalb von 4 Jahren ab Erstzulassung, danach alle 2 Jahre, jeweils bis Monatsende.',
   },
+  en: {
+    mode: 'Start from',
+    modes: { reg: 'First registration', rev: 'Last inspection' },
+    month: 'Month',
+    year: 'Year',
+    choose: 'Choose',
+    deadline: 'Due by',
+    estimate: 'Estimate: the first inspection was due by {first}. If you’ve always had it done on time since then, this is the next one. For the exact date, enter your last inspection.',
+    switchToRev: 'Enter your last inspection',
+    in: 'in {n} days',
+    inOne: 'tomorrow',
+    today: 'due today',
+    ago: 'overdue by {n} days',
+    ok: 'All good',
+    soon: 'Time to book',
+    expired: 'Overdue',
+    expiredText: 'Book now: driving with an expired inspection is fined. On the day of your appointment you may drive the car to us.',
+    soonText: 'Less than two months to go. Book now and pick the day yourself.',
+    okText: 'No rush. Save the date to your calendar and your phone will remind you.',
+    cycleStart: 'Cycle start',
+    cycleEnd: 'Due',
+    todayMark: 'Today',
+    ics: 'Add to calendar',
+    note: 'Applies to private cars. Taxis, hire cars with driver and vehicles with more than 8 seats need an inspection every year.',
+    icsTitle: 'Car inspection due',
+    icsDesc: 'Book your inspection at Car Trade Bolzano',
+    noscript: 'Rule: first inspection within 4 years of first registration, then every 2 years, by the end of the month.',
+  },
 }[lang];
 
-const locale = lang === 'it' ? 'it-IT' : 'de-DE';
+const locale = locales[lang];
 const months = Array.from({ length: 12 }, (_, i) =>
   new Intl.DateTimeFormat(locale, { month: 'long' }).format(new Date(2026, i, 1)),
 );
@@ -152,15 +173,6 @@ const example = new Date(now.getFullYear(), now.getMonth() - 18, 1);
       <button type="button" class="btn btn-ghost" data-ics>
         <Icon name="download" size={18} /> {copy.ics}
       </button>
-    </div>
-
-    <!-- Promemoria: stesso flusso dell'iscrizione pubblica, con la data già scelta qui -->
-    <div class="notify mt-8 border-t border-[var(--line-dark)] pt-6">
-      <p class="flex items-center gap-3 font-semibold text-paper"><Icon name="bell" size={20} class="text-orange" /> {copy.notify}</p>
-      <p class="mt-2 max-w-[52ch] text-sm text-steel">{copy.notifyIntro}</p>
-      <a href={routes.promemoria[lang]} class="btn btn-ghost mt-5" data-notify-link data-base={routes.promemoria[lang]}>
-        {copy.submit} <Icon name="arrow" size={18} class="btn-arrow" />
-      </a>
     </div>
   </div>
   <noscript><p class="mt-4 text-steel">{copy.noscript}</p></noscript>
@@ -242,7 +254,7 @@ const example = new Date(now.getFullYear(), now.getMonth() - 18, 1);
   function setup(root: HTMLElement) {
     const copy: Copy = JSON.parse(root.dataset.copy!);
     const lang = root.dataset.lang!;
-    const locale = lang === 'de' ? 'de-DE' : 'it-IT';
+    const locale = ({ it: 'it-IT', de: 'de-DE', en: 'en-GB' } as Record<string, string>)[lang] ?? 'it-IT';
     const fmtLong = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' });
     const fmtShort = new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric' });
     const fmtNum = new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -255,10 +267,6 @@ const example = new Date(now.getFullYear(), now.getMonth() - 18, 1);
     let deadline: Date | null = null;
 
     const mode = () => [...modes].find((m) => m.checked)?.value ?? 'rev';
-
-    const notifyLink = $<HTMLAnchorElement>('[data-notify-link]');
-    // Il parametro ?demo= (QR della locandina) segue la persona fino all'iscrizione
-    const demo = new URLSearchParams(location.search).get('demo');
 
     function render() {
       const y = Number(year.value);
@@ -274,9 +282,6 @@ const example = new Date(now.getFullYear(), now.getMonth() - 18, 1);
       const days = giorniA(d);
       const state = days < 0 ? 'expired' : days <= 60 ? 'soon' : 'ok';
       root.dataset.state = state;
-      const q = new URLSearchParams({ tipo: isReg ? 'reg' : 'rev', mese: String(m), anno: String(y) });
-      if (demo) q.set('demo', demo);
-      notifyLink.href = `${notifyLink.dataset.base}?${q}`;
 
       $('[data-date]').textContent = fmtLong.format(d).replace(/\./g, '');
       $('[data-countdown]').textContent =

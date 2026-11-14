@@ -1,0 +1,91 @@
+---
+// Informativa privacy e cookie: TESTO SEGNAPOSTO.
+// TODO: sostituire con il testo del consulente privacy del cliente (GDPR art. 13), in italiano e tedesco.
+// La struttura segue i punti che l'informativa dovrà coprire per la lista clienti (promemoria, offerte, moduli).
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { site, type Lang } from '../data/site';
+import { alternatesFor } from '../i18n/routes';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+
+const copy = {
+  it: {
+    title: 'Informativa privacy e cookie · Car Trade Bolzano',
+    description: 'Come CAR TRADE SRL di Bolzano tratta i dati di chi si iscrive ai promemoria della revisione o chiede un preventivo.',
+    label: 'Privacy',
+    h1: 'Informativa privacy.',
+    lead: 'Testo provvisorio. La versione definitiva sarà redatta dal consulente privacy dell’azienda.',
+    badge: 'Bozza da completare',
+    sections: [
+      ['Titolare del trattamento', `${site.name}, ${site.address.street.it}, ${site.address.postalCode} ${site.address.city.it}. P. IVA ${site.vat}.`],
+      ['Quali dati raccogliamo', 'Nome, cognome, email, cellulare, targa e mese dell’ultima revisione o dell’immatricolazione, interessi, canale e lingua preferiti. Per le richieste di preventivo anche la descrizione e le foto del danno.'],
+      ['Perché li usiamo', 'Per mandarti i promemoria di scadenza di revisione e tagliando, se li hai chiesti. Per le offerte, solo con un consenso separato. Per rispondere alle richieste inviate dai moduli del sito.'],
+      ['Base giuridica', 'Il tuo consenso, che puoi revocare in qualsiasi momento rispondendo STOP a un messaggio o scrivendoci. Per le richieste di preventivo, le misure precontrattuali da te richieste.'],
+      ['Per quanto tempo', 'Fino alla revoca del consenso. Da definire con il consulente il periodo massimo di conservazione dopo l’ultimo contatto.'],
+      ['Chi li tratta per noi', 'Fornitori che ospitano il sito, il database e l’invio dei messaggi (responsabili del trattamento ex art. 28 GDPR). Elenco e sede dei fornitori da completare.'],
+      ['I tuoi diritti', 'Accesso, rettifica, cancellazione, limitazione, portabilità e opposizione, oltre al reclamo al Garante per la protezione dei dati personali.'],
+      ['Cookie', 'Il sito usa solo memoria tecnica del browser per funzionare. La mappa Google, se attivata, imposta cookie di terze parti: in produzione verrà caricata solo dopo il consenso nel banner cookie.'],
+    ],
+  },
+  de: {
+    title: 'Datenschutz und Cookies · Car Trade Bozen',
+    description: 'Wie CAR TRADE SRL in Bozen die Daten von Personen verarbeitet, die sich für die Revisions-Erinnerung anmelden oder ein Angebot anfordern.',
+    label: 'Datenschutz',
+    h1: 'Datenschutzerklärung.',
+    lead: 'Vorläufiger Text. Die endgültige Fassung erstellt der Datenschutzberater des Unternehmens.',
+    badge: 'Entwurf',
+    sections: [
+      ['Verantwortlicher', `${site.name}, ${site.address.street.de}, ${site.address.postalCode} ${site.address.city.de}. MwSt.-Nr. ${site.vat}.`],
+      ['Welche Daten wir erheben', 'Vor- und Nachname, E-Mail, Handynummer, Kennzeichen und Monat der letzten Revision oder der Erstzulassung, Interessen, bevorzugter Kanal und Sprache. Bei Angebotsanfragen auch Beschreibung und Fotos des Schadens.'],
+      ['Wofür wir sie verwenden', 'Für die Erinnerungen an Revision und Inspektion, wenn Sie diese wünschen. Für Angebote nur mit einer eigenen Einwilligung. Zur Beantwortung von Anfragen über die Formulare der Website.'],
+      ['Rechtsgrundlage', 'Ihre Einwilligung, die Sie jederzeit widerrufen können, indem Sie mit STOP antworten oder uns schreiben. Bei Angebotsanfragen vorvertragliche Maßnahmen auf Ihre Anfrage.'],
+      ['Speicherdauer', 'Bis zum Widerruf der Einwilligung. Die Höchstdauer nach dem letzten Kontakt legt der Berater fest.'],
+      ['Auftragsverarbeiter', 'Dienstleister für Hosting, Datenbank und Versand der Nachrichten (Auftragsverarbeiter nach Art. 28 DSGVO). Liste und Sitz der Dienstleister folgen.'],
+      ['Ihre Rechte', 'Auskunft, Berichtigung, Löschung, Einschränkung, Datenübertragbarkeit und Widerspruch sowie Beschwerde bei der Datenschutzbehörde.'],
+      ['Cookies', 'Die Website nutzt nur technisch notwendigen Speicher im Browser. Die Google-Karte setzt, falls aktiviert, Cookies von Dritten: Im Livebetrieb wird sie erst nach Zustimmung im Cookie-Banner geladen.'],
+    ],
+  },
+  en: {
+    title: 'Privacy and cookies · Car Trade Bolzano',
+    description: 'How CAR TRADE SRL in Bolzano processes the data of people who sign up for the inspection reminder or request a quote.',
+    label: 'Privacy',
+    h1: 'Privacy notice.',
+    lead: 'Provisional text. The final version will be drafted by the company’s data protection consultant.',
+    badge: 'Draft',
+    sections: [
+      ['Data controller', `${site.name}, ${site.address.street.en}, ${site.address.postalCode} ${site.address.city.en}, Italy. VAT no. ${site.vat}.`],
+      ['What data we collect', 'Full name, email, mobile number, number plate and the month of your last inspection or first registration, interests, preferred channel and language. For quote requests, also the description and photos of the damage.'],
+      ['What we use it for', 'To send you inspection and service reminders, if you ask for them. For offers, only with separate consent. To reply to requests sent through the website forms.'],
+      ['Legal basis', 'Your consent, which you can withdraw at any time by replying STOP or writing to us. For quote requests, pre-contractual steps taken at your request.'],
+      ['How long we keep it', 'Until you withdraw your consent. The maximum period after the last contact will be set by the consultant.'],
+      ['Processors', 'Providers of hosting, database and message delivery (processors under Art. 28 GDPR). List and location of providers to follow.'],
+      ['Your rights', 'Access, rectification, erasure, restriction, data portability and objection, and the right to lodge a complaint with the Italian Data Protection Authority.'],
+      ['Cookies', 'The website only uses technically necessary storage in your browser. The Google map, if enabled, sets third-party cookies: on the live site it will only load after consent in the cookie banner.'],
+    ],
+  },
+}[lang];
+---
+<Base lang={lang} title={copy.title} description={copy.description} alternates={alternatesFor('privacy')} current="privacy">
+  <PageHero lang={lang} label={copy.label} title={copy.h1} lead={copy.lead} />
+  <section class="wrap pb-[var(--section)] pt-4">
+    <p class="badge t-label">{copy.badge}</p>
+    <dl class="legal mt-8 max-w-[52rem]">
+      {copy.sections.map(([t, d], i) => (
+        <div id={i === copy.sections.length - 1 ? 'cookie' : undefined}>
+          <dt class="t-h3">{t}</dt>
+          <dd class="mt-2 text-muted measure">{d}</dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+</Base>
+
+<style>
+@layer components {
+  .badge { display: inline-block; padding: 0.4rem 0.6rem; border: 1px solid var(--color-orange-ink); color: var(--color-orange-ink); border-radius: 2px; }
+  .legal { border-top: 1px solid var(--line-strong); }
+  .legal > div { padding-block: 1.5rem; border-bottom: 1px solid var(--line); scroll-margin-top: calc(var(--header-h) + 1rem); }
+}
+</style>

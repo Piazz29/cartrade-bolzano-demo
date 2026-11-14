@@ -1,13 +1,9 @@
-// Modulo contatti e preventivo carrozzeria con foto. Destinatario fisso: il titolare (DEMO_OWNER_EMAIL).
+// Modulo contatti e preventivo carrozzeria con foto. Destinatario fisso: il titolare (DESTINATARIO = site.email).
 // Le foto arrivano già ridimensionate dal browser (max 6, in totale sotto il limite di 4,5 MB delle funzioni Vercel).
 import type { APIRoute } from 'astro';
-import { validaRichiesta } from '../../lib/crm/validate';
-import { nuovaRichiesta } from '../../lib/crm/messaggi';
-import { config, dbAttivo } from '../../lib/server/config';
-import { registraEvento } from '../../lib/server/db';
+import { validaRichiesta, nuovaRichiesta, DESTINATARIO } from '../../lib/contatti';
 import { inviaEmail } from '../../lib/server/mail';
 import { ipDi, json, stessaOrigine, troppeRichieste } from '../../lib/server/security';
-import { baseUrlDi } from '../../lib/server/guard';
 
 export const prerender = false;
 
@@ -40,16 +36,11 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     allegati.push({ filename: `foto-${i + 1}.${ext}`, content: Buffer.from(await f.arrayBuffer()) });
   }
 
-  if (!config.ownerEmail) {
-    if (dbAttivo()) await registraEvento({ cliente_id: null, tipo: 'richiesta', canale: 'sistema', esito: 'simulato', dettagli: { variante: v.data.variante, foto: allegati.length } }).catch(() => {});
-    return json({ ok: true, mode: 'simulato', email: 'simulato' });
-  }
+  // Senza Resend: simulato in sviluppo, errore online (il modulo propone di mandare il testo su WhatsApp)
   const r = await inviaEmail({
-    to: config.ownerEmail,
+    to: DESTINATARIO,
     contenuto: nuovaRichiesta(v.data, allegati.length),
-    baseUrl: baseUrlDi(request),
-    tipo: 'richiesta',
-    dettagli: { variante: v.data.variante, tipo: v.data.tipo, foto: allegati.length },
+    baseUrl: new URL(request.url).origin,
     allegati,
     replyTo: v.data.email || undefined,
   });

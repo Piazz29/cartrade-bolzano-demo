@@ -7,16 +7,17 @@ import { site, type Lang } from '../data/site';
 import Icon from './Icon.astro';
 import { routes } from '../i18n/routes';
 
-interface Props { lang: Lang; variant?: 'quote' | 'contact'; id?: string; dark?: boolean; carName?: string }
-const { lang, variant = 'quote', id = 'req', dark = true, carName } = Astro.props;
+// topic: voce preselezionata in "Di cosa hai bisogno?" (es. 'carrozzeria' sulla pagina Carrozzeria)
+interface Props { lang: Lang; variant?: 'quote' | 'contact'; id?: string; dark?: boolean; topic?: string }
+const { lang, variant = 'quote', id = 'req', dark = true, topic } = Astro.props;
 const isQuote = variant === 'quote';
 
 const copy = {
   it: {
     type: 'Di cosa hai bisogno?',
     types: isQuote
-      ? [['officina', 'Officina'], ['carrozzeria', 'Carrozzeria'], ['nonso', 'Non so']]
-      : [['revisione', 'Revisione'], ['officina', 'Officina'], ['auto', 'Auto in vendita'], ['altro', 'Altro']],
+      ? [['officina', 'Officina'], ['carrozzeria', 'Carrozzeria'], ['gomme', 'Gomme'], ['nonso', 'Non so']]
+      : [['revisione', 'Revisione'], ['officina', 'Officina'], ['carrozzeria', 'Carrozzeria'], ['altro', 'Altro']],
     name: 'Nome e cognome',
     phone: 'Telefono',
     email: 'Email',
@@ -58,8 +59,8 @@ const copy = {
   de: {
     type: 'Worum geht es?',
     types: isQuote
-      ? [['officina', 'Werkstatt'], ['carrozzeria', 'Karosserie'], ['nonso', 'Weiß nicht']]
-      : [['revisione', 'Revision'], ['officina', 'Werkstatt'], ['auto', 'Fahrzeuge'], ['altro', 'Sonstiges']],
+      ? [['officina', 'Werkstatt'], ['carrozzeria', 'Karosserie'], ['gomme', 'Reifen'], ['nonso', 'Weiß nicht']]
+      : [['revisione', 'Revision'], ['officina', 'Werkstatt'], ['carrozzeria', 'Karosserie'], ['altro', 'Sonstiges']],
     name: 'Vor- und Nachname',
     phone: 'Telefon',
     email: 'E-Mail',
@@ -97,8 +98,51 @@ const copy = {
     summaryPhotos: 'Fotos angehängt',
     required: 'Pflichtfeld',
   },
+  en: {
+    type: 'What do you need?',
+    types: isQuote
+      ? [['officina', 'Workshop'], ['carrozzeria', 'Bodywork'], ['gomme', 'Tyres'], ['nonso', 'Not sure']]
+      : [['revisione', 'Inspection'], ['officina', 'Workshop'], ['carrozzeria', 'Bodywork'], ['altro', 'Other']],
+    name: 'Full name',
+    phone: 'Phone',
+    email: 'Email',
+    optional: 'optional',
+    car: 'Car (make and model)',
+    carPh: 'e.g. Volkswagen Golf 2018',
+    plate: 'Number plate',
+    msg: isQuote ? 'Describe the problem or the damage' : 'Message',
+    msgPh: isQuote ? 'e.g. noise from the front brakes when braking, or: scratch on the rear right door' : 'Write your request here',
+    photos: 'Photos of the damage',
+    photosHint: 'Up to 6 photos, max 10 MB each. Close up and from a distance, in good light.',
+    drop: 'Take or upload photos',
+    dropDesk: 'or drag them here',
+    remove: 'Remove photo',
+    contactPref: 'How would you like us to get back to you?',
+    prefs: [['phone', 'Phone'], ['whatsapp', 'WhatsApp'], ['email', 'Email']],
+    privacy: 'I have read the privacy notice and agree to my data being processed so you can reply.',
+    submit: isQuote ? 'Send quote request' : 'Send message',
+    sending: 'Sending…',
+    doneTitle: 'Request sent.',
+    doneText: 'We’ll reply within one working day, the way you chose.',
+    errSend: 'Your request didn’t go through. Try again, or send it to us on WhatsApp: the text is ready.',
+    errBusy: 'We’ve received a lot of requests in a short time. Try again in a few minutes or give us a call.',
+    sendWa: 'Send on WhatsApp',
+    preparing: 'Preparing photos…',
+    honeypot: 'Leave this field empty',
+    again: 'New request',
+    errRequired: 'Required field.',
+    errPhone: 'Enter a valid phone number, for example +39 333 123 4567.',
+    errEmail: 'Enter a valid email address.',
+    errPrivacy: 'We need your consent to be able to reply.',
+    errFile: 'Unsupported format or file over 10 MB:',
+    errMax: 'You can upload up to 6 photos.',
+    summaryPhoto: 'photo attached',
+    summaryPhotos: 'photos attached',
+    required: 'required',
+  },
 }[lang];
-const defaultMsg = carName ? (lang === 'it' ? `Vorrei informazioni su: ${carName}.` : `Ich interessiere mich für: ${carName}.`) : '';
+const privacyLink = { it: 'Informativa', de: 'Datenschutz', en: 'Privacy notice' }[lang];
+const newTab = { it: 'si apre in una nuova scheda', de: 'öffnet in neuem Tab', en: 'opens in a new tab' }[lang];
 ---
 <div class:list={['req', dark && 'on-dark']} data-req data-copy={JSON.stringify(copy)} data-wa={site.whatsapp.number}>
   <form class="grid gap-7" novalidate data-req-form aria-describedby={`${id}-req-note`}>
@@ -110,7 +154,7 @@ const defaultMsg = carName ? (lang === 'it' ? `Vorrei informazioni su: ${carName
       <div class="flex flex-wrap gap-2">
         {copy.types.map(([v, l], i) => (
           <span class="chip">
-            <input type="radio" name="type" id={`${id}-type-${v}`} value={v} checked={i === 0} />
+            <input type="radio" name="type" id={`${id}-type-${v}`} value={v} checked={topic ? v === topic : i === 0} />
             <label for={`${id}-type-${v}`}>{l}</label>
           </span>
         ))}
@@ -147,7 +191,7 @@ const defaultMsg = carName ? (lang === 'it' ? `Vorrei informazioni su: ${carName
       )}
       <div class="field sm:col-span-2">
         <label for={`${id}-msg`}>{copy.msg} <span aria-hidden="true">*</span></label>
-        <textarea id={`${id}-msg`} name="message" class="input" rows="5" placeholder={copy.msgPh} required aria-describedby={`${id}-msg-err`}>{defaultMsg}</textarea>
+        <textarea id={`${id}-msg`} name="message" class="input" rows="5" placeholder={copy.msgPh} required aria-describedby={`${id}-msg-err`}></textarea>
         <p id={`${id}-msg-err`} class="field-error" hidden></p>
       </div>
     </div>
@@ -183,7 +227,7 @@ const defaultMsg = carName ? (lang === 'it' ? `Vorrei informazioni su: ${carName
       <label class="flex items-start gap-3 text-sm">
         <input type="checkbox" name="privacy" class="mt-0.5 size-5 shrink-0 accent-[var(--color-orange)]" aria-describedby={`${id}-privacy-err`} />
         {/* TODO: informativa privacy definitiva (oggi pagina segnaposto) */}
-        <span class="text-steel">{copy.privacy} <a href={routes.privacy[lang]} class="link-u font-semibold" target="_blank" rel="noopener">{lang === 'it' ? 'Informativa' : 'Datenschutz'}<span class="sr-only"> ({lang === 'it' ? 'si apre in una nuova scheda' : 'öffnet in neuem Tab'})</span></a></span>
+        <span class="text-steel">{copy.privacy} <a href={routes.privacy[lang]} class="link-u font-semibold" target="_blank" rel="noopener">{privacyLink}<span class="sr-only"> ({newTab})</span></a></span>
       </label>
       <p id={`${id}-privacy-err`} class="field-error mt-2" hidden></p>
     </div>

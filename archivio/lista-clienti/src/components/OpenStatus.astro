@@ -1,0 +1,81 @@
+---
+// Indicatore "Aperto ora / Chiuso ora" calcolato nel fuso Europe/Rome, lato client.
+import { site, type Lang } from '../data/site';
+import { ui } from '../i18n/ui';
+interface Props { lang: Lang; class?: string }
+const { lang, class: cls } = Astro.props;
+const t = ui[lang].hours;
+---
+<span
+  class:list={['open-status inline-flex items-center gap-2', cls]}
+  data-open-status
+  data-hours={JSON.stringify(site.hours)}
+  data-i18n={JSON.stringify({ open: t.statusOpen, later: t.statusLater, day: t.statusDay, tomorrow: t.tomorrow, days: t.days })}
+  hidden
+>
+  <span class="dot" aria-hidden="true"></span>
+  <span data-open-text></span>
+</span>
+
+<style>
+@layer components {
+  .open-status { font-size: 0.875rem; font-weight: 520; }
+  .dot { width: 0.5rem; height: 0.5rem; border-radius: 999px; background: var(--color-steel-2); flex: none; }
+  .open-status[data-state='open'] .dot { background: #2fb36d; box-shadow: 0 0 0 4px color-mix(in oklab, #2fb36d 22%, transparent); }
+}
+</style>
+
+<script>
+  type Slot = { days: number[]; open: string; close: string };
+  const toMin = (s: string) => {
+    const [h, m] = s.split(':').map(Number);
+    return h * 60 + m;
+  };
+  function romeNow() {
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/Rome',
+      weekday: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    }).formatToParts(new Date());
+    const get = (t: string) => parts.find((p) => p.type === t)?.value ?? '';
+    const day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(get('weekday'));
+    return { day, min: Number(get('hour')) * 60 + Number(get('minute')) };
+  }
+  // "08:30" → "8:30"
+  const fill = (tpl: string, time: string, day = '') => tpl.replace('{t}', time.replace(/^0/, '')).replace('{d}', day);
+  function update(el: HTMLElement) {
+    const hours: Slot[] = JSON.parse(el.dataset.hours!);
+    const t = JSON.parse(el.dataset.i18n!);
+    const { day, min } = romeNow();
+    const today = hours.filter((s) => s.days.includes(day)).sort((a, b) => toMin(a.open) - toMin(b.open));
+    const current = today.find((s) => min >= toMin(s.open) && min < toMin(s.close));
+    const text = el.querySelector('[data-open-text]')!;
+    if (current) {
+      el.dataset.state = 'open';
+      text.textContent = fill(t.open, current.close);
+    } else {
+      el.dataset.state = 'closed';
+      const laterToday = today.find((s) => toMin(s.open) > min);
+      let label = '';
+      if (laterToday) label = fill(t.later, laterToday.open);
+      else {
+        for (let i = 1; i <= 7; i++) {
+          const d = (day + i) % 7;
+          const next = hours.filter((s) => s.days.includes(d)).sort((a, b) => toMin(a.open) - toMin(b.open))[0];
+          if (next) {
+            label = fill(t.day, next.open, i === 1 ? t.tomorrow : t.days[d]);
+            break;
+          }
+        }
+      }
+      text.textContent = label;
+    }
+    el.hidden = false;
+  }
+  document.querySelectorAll<HTMLElement>('[data-open-status]').forEach((el) => {
+    update(el);
+    setInterval(() => update(el), 60_000);
+  });
+</script>

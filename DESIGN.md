@@ -59,17 +59,15 @@ Lenis solo su desktop con puntatore fine. Con `prefers-reduced-motion` niente sp
 
 ## Componenti chiave
 - **Barra CTA mobile** fissa in basso: Chiama · WhatsApp · Prenota (arancio). Sotto i 1024px.
-- **Selettore lingua** IT/DE sempre visibile nell'header, anche su mobile, come interruttore a due segmenti.
-- **Calcolatore scadenza revisione**: mese/anno, risultato grande in stile cruscotto, conto alla rovescia, file .ics, "Avvisami" (email/WhatsApp, demo).
-- **Scheda auto**: foto 4:3, marca piccola, modello largo, riga specifiche (anno · km · alimentazione · cambio) e prezzo tabulare.
-- **Promemoria revisione** (`/it/promemoria/`): modulo in quattro blocchi numerati come una scheda tecnica (01 dati, 02 auto, 03 canale, 04 consensi), anteprima della scadenza mentre si compila, conferma con la data grande in stile cruscotto e la cronologia dei messaggi.
+- **Header**: logo · menu (4 voci) · azioni. Da desktop griglia `1fr auto 1fr`: il menu sta al centro esatto della pagina.
+- **Selettore lingua** IT/DE/EN: nell'header un bottone discreto (globo + codice + freccia) che apre l'elenco con i nomi per esteso e la spunta sulla lingua attiva (`<details>` nativo, funziona anche senza JS; si chiude cliccando fuori o con Esc). Nel menu mobile le tre lingue per esteso in riga. La scelta viene ricordata (`localStorage ct-lang`).
+- **Lingua del browser**: la radice `/` porta alla lingua scelta in passato, altrimenti alla prima lingua del browser tra IT/DE/EN, per le altre lingue all'inglese (x-default). Sulle pagine nessun reindirizzamento forzato: se il browser preferisce un'altra lingua disponibile compare un avviso discreto in basso ("Questa pagina è disponibile in italiano"), scritto nella lingua proposta e chiudibile.
+- **Calcolatore scadenza revisione**: mese/anno, risultato grande in stile cruscotto, conto alla rovescia, file .ics per il calendario del telefono (avviso un mese prima). Nessuna iscrizione: il sito non ha database.
+- **Banco di collaudo** (`InspectionTour.astro`, Home sezione 02 e pagina Revisione sezione 02): come si svolge la revisione nelle 9 aree della scheda DEKRA + esito (fonte: revisione.dekra.it/prove-e-risultati). Disegno tecnico SVG dell'auto in vista laterale (muso a sinistra come la linea del tetto), griglia da foglio tecnico, linee nascoste tratteggiate. Scorrendo, il passaggio che attraversa il 55% dello schermo accende in arancio la sua zona sull'auto, sposta la linea di scansione e aggiorna il display (controllo 01/09, strumento, barra a 10 segmenti); i punti già fatti mostrano la spunta. Su desktop il banco è fisso a sinistra e i passaggi non attivi si attenuano; su mobile il banco resta fermo sotto l'header a tutta larghezza. I punti sul disegno sono bottoni che portano al passaggio. Senza JavaScript resta l'elenco completo.
+  Due varianti: **full** (pagina Revisione) come sopra; **compact** (Home, una schermata sola): stesso banco, pannello di dettaglio sotto il disegno (pannelli sovrapposti, altezza del più lungo: niente salti né CLS), indice dei 10 passi a destra su desktop, frecce Precedente/Successivo su mobile. Si sfoglia solo a mano (frecce, indice, punti): niente scorrimento automatico. Senza JS le voci dell'indice portano ai passi della versione estesa.
+- **Ritmo dei fondi in Home**: hero notte → servizi carta → revisione (compatta) notte → fiducia carta-2 → scadenza notte → dove/FAQ carta. Mai due blocchi notte attaccati.
 
-## Area admin (registro "prodotto")
-Scena d'uso: il titolare al bancone o in officina, telefono in una mano, tra un cliente e l'altro; a volte al computer in ufficio. Quindi **prima il telefono**: barra in basso con quattro sezioni + "Altro", azioni grandi; da 1024 px barra laterale.
-- Stessi token del sito (carta, navy, arancio, Archivo) ma **scala fissa** (titoli 1,625–2 rem, niente clamp), poco movimento (solo stati: caricamento, conferma, comparsa di un cliente nuovo), nessuna animazione d'ingresso.
-- Numeri in **strisce con righe sottili** (come la fascia dati della Home), mai card con icone. Elenchi a righe, non a schede.
-- Etichette di stato piccole e maiuscole: **Nuovo** (arancio pieno, clienti veri), **Esempio** (grigio), scadenze (arancio chiaro entro 30 giorni, rosso se scaduta). Tutte sopra 4,5:1.
-- Conferme distruttive in due passi sul bottone stesso ("Prepara l'invio" → "Conferma l'invio"), niente finestre modali.
-- Esiti delle azioni in un avviso in basso (`role=status`), il fuoco torna sul bottone usato.
-- Email: tabelle e stili in linea, larghezza 600 px, filetto navy + arancio come la linea del tetto, bottone arancio con testo navy, piede navy con indirizzo e orari.
+## Email dei moduli
+Email al titolare per le richieste di contatto e preventivo: tabelle e stili in linea, larghezza 600 px, filetto navy + arancio come la linea del tetto, bottone arancio con testo navy, piede navy con indirizzo e orari.
 
+La versione con lista clienti e area admin (registro "prodotto", pensata per il titolare al bancone) è archiviata in `archivio/lista-clienti/`, con il suo DESIGN.md.

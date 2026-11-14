@@ -22,11 +22,16 @@ const year = new Date().getFullYear();
       </div>
 
       <div class="col-span-4 sm:col-span-2 lg:col-span-3">
-        <h2 class="t-label text-steel-2">{lang === 'it' ? 'Contatti' : 'Kontakt'}</h2>
+        <h2 class="t-label text-steel-2">{({ it: 'Contatti', de: 'Kontakt', en: 'Contact' })[lang]}</h2>
         <ul class="mt-5 grid gap-3">
           <li>
             <a href={site.phone.href} class="inline-flex items-center gap-2 text-lg font-semibold t-num hover:text-orange">
               <Icon name="phone" size={18} /> {site.phone.display}
+            </a>
+          </li>
+          <li>
+            <a href={site.landline.href} class="inline-flex items-center gap-2 t-num hover:text-orange">
+              <Icon name="phone" size={18} /> {site.landline.display}
             </a>
           </li>
           <li>
@@ -60,12 +65,11 @@ const year = new Date().getFullYear();
     <RoofLine tone="paper" class="mt-16 h-10 w-full opacity-90 lg:h-16" weight={1.5} />
 
     <div class="mt-8 flex flex-col gap-6 border-t border-[var(--line-dark)] pt-8 lg:flex-row lg:items-center lg:justify-between">
-      <nav aria-label={lang === 'it' ? 'Pagine del sito' : 'Seiten'}>
+      <nav aria-label={({ it: 'Pagine del sito', de: 'Seiten', en: 'Site pages' })[lang]}>
         <ul class="flex flex-wrap gap-x-6 gap-y-2 text-sm">
           {navOrder.map((key) => (
             <li><a href={routes[key][lang]} class="link-u">{t.nav[key]}</a></li>
           ))}
-          <li><a href={routes.promemoria[lang]} class="link-u">{t.nav.promemoria}</a></li>
           {/* TODO: testi privacy e cookie del consulente del cliente (oggi pagina segnaposto) */}
           <li><a href={routes.privacy[lang]} class="link-u text-steel">{t.footer.legal}</a></li>
           <li><a href={`${routes.privacy[lang]}#cookie`} class="link-u text-steel">{t.footer.cookies}</a></li>

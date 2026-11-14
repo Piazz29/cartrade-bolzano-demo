@@ -1,0 +1,88 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import Icon from '../../components/Icon.astro';
+import { richiediLogin } from '../../lib/server/pagina';
+import { site } from '../../data/site';
+
+export const prerender = false;
+const no = richiediLogin(Astro);
+if (no) return no;
+---
+<AdminLayout title="Recensioni" current="recensioni">
+  <div class="a-head">
+    <div>
+      <h1 class="a-h1">Recensioni Google</h1>
+      <p class="a-sub">Dopo ogni lavoro, “Lavoro completato” sulla scheda del cliente manda il link per scrivere la recensione. Oggi su Google: {String(site.google.rating).replace('.', ',')} su 5, {site.google.reviewCountLabel} recensioni.</p>
+    </div>
+    <a href={site.google.reviewsUrl} class="btn btn-ghost btn-sm" target="_blank" rel="noopener"><Icon name="arrow-up-right" size={18} /> Apri su Google</a>
+  </div>
+
+  <dl class="kpis" data-kpis>
+    <div><dt>Richieste inviate</dt><dd>–</dd></div>
+    <div><dt>Recensioni ottenute</dt><dd>–</dd></div>
+    <div><dt>Risposta</dt><dd>–</dd></div>
+  </dl>
+
+  <section class="a-sec" aria-labelledby="t-link">
+    <div class="a-sec-head"><h2 id="t-link" class="a-h2">Link “Scrivi una recensione”</h2></div>
+    <p class="mt-2 text-sm text-muted">Costruito dal Place ID della scheda Google. Si può anche stampare come QR sul bancone.</p>
+    <div class="mt-3 flex flex-wrap items-center gap-3">
+      <code class="link-box" data-link>{site.google.writeReviewUrl}</code>
+      <button type="button" class="btn btn-ghost btn-sm" data-copy>Copia</button>
+    </div>
+  </section>
+
+  <section class="a-sec" aria-labelledby="t-list">
+    <div class="a-sec-head"><h2 id="t-list" class="a-h2">Richieste</h2></div>
+    <ul class="rows" data-list></ul>
+  </section>
+</AdminLayout>
+
+<style>
+  .link-box { display: block; max-width: 100%; padding: 0.55rem 0.75rem; overflow-wrap: anywhere; font-size: 0.8125rem; background: var(--a-surface); border: 1px solid var(--a-line); border-radius: var(--r-md); }
+</style>
+
+<script>
+  import { carica, recensioneOttenuta, trova, type Dati } from '../../admin/store';
+  import { data, esc, scheletro, toast, vuoto, origineTag } from '../../admin/ui';
+  import { nomeCompleto } from '../../lib/crm/types';
+
+  const list = document.querySelector<HTMLElement>('[data-list]')!;
+  document.querySelector('[data-copy]')!.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(document.querySelector('[data-link]')!.textContent!.trim());
+      toast({ messaggio: 'Link copiato.', tono: 'ok' });
+    } catch {
+      toast({ messaggio: 'Copia non riuscita: seleziona il link a mano.', tono: 'warn' });
+    }
+  });
+
+  function render(d: Dati) {
+    const req = d.eventi.filter((e) => e.tipo === 'recensione_richiesta' && e.cliente_id);
+    const ok = new Set(d.eventi.filter((e) => e.tipo === 'recensione_ottenuta').map((e) => e.cliente_id));
+    const perCliente = new Map<string, string>();
+    req.forEach((e) => !perCliente.has(e.cliente_id!) && perCliente.set(e.cliente_id!, e.creato_il));
+    const n = perCliente.size;
+    const got = [...perCliente.keys()].filter((id) => ok.has(id)).length;
+    const dds = document.querySelectorAll<HTMLElement>('[data-kpis] dd');
+    dds[0].textContent = String(n);
+    dds[1].textContent = String(got);
+    dds[2].innerHTML = n ? `${Math.round((got / n) * 100)}<small>%</small>` : '–';
+    const items = [...perCliente.entries()].map(([id, quando]) => ({ c: trova(id), quando })).filter((x) => x.c);
+    list.innerHTML = items.length
+      ? items.map(({ c, quando }) => `<li class="row${!c!.esempio ? ' is-new' : ''}">
+          <span><a class="row-name link-u" href="/admin/cliente/?id=${encodeURIComponent(c!.id)}">${esc(nomeCompleto(c!))}</a><span class="row-meta">${origineTag(c!)} richiesta il ${esc(data(quando))}</span></span>
+          <span class="row-side">${ok.has(c!.id) ? '<span class="tag tag-ok">Ottenuta</span>' : `<button type="button" class="btn btn-ghost btn-sm" data-ok="${esc(c!.id)}">Segna ottenuta</button>`}</span></li>`).join('')
+      : `<li>${vuoto('Nessuna richiesta ancora.', ' Apri un cliente e premi “Lavoro completato”.')}</li>`;
+    list.querySelectorAll<HTMLButtonElement>('[data-ok]').forEach((b) =>
+      b.addEventListener('click', async () => {
+        const c = trova(b.dataset.ok!);
+        if (!c) return;
+        toast(await recensioneOttenuta(c));
+        render(await carica());
+      }),
+    );
+  }
+  list.innerHTML = scheletro(4);
+  carica().then(render);
+</script>

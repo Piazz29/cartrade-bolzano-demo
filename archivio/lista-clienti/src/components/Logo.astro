@@ -1,0 +1,14 @@
+---
+// Logo vettorializzato dal file originale (public/brand/logo-originale.png): colori esatti #0E2340 e #E8710A.
+interface Props { inverse?: boolean; class?: string; alt?: string; lazy?: boolean }
+const { inverse = false, class: cls, alt = 'Car Trade Bolzano', lazy = inverse } = Astro.props;
+---
+<img
+  src={inverse ? '/brand/logo-inverse.svg' : '/brand/logo.svg'}
+  alt={alt}
+  width="904"
+  height="282"
+  class={cls}
+  decoding="async"
+  loading={lazy ? 'lazy' : undefined}
+/>

@@ -3,30 +3,21 @@ import { defineConfig, envField } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import vercel from '@astrojs/vercel';
 
-// Variabili del server (lista clienti, email, admin). Tutte facoltative: se mancano,
-// la demo passa da sola alla modalità simulata. Documentate in .env.example.
+// Variabili del server: solo l'inoltro per email dei moduli contatti e preventivo (nessun database).
+// Tutte facoltative: se mancano, il modulo conferma l'invio in modalità simulata. Documentate in .env.example.
 const secret = () => envField.string({ context: 'server', access: 'secret', optional: true });
 
 // TODO: confermare il dominio definitivo prima della messa online
 export default defineConfig({
   site: 'https://cartradebolzano.it',
   trailingSlash: 'ignore',
-  // Il sito pubblico resta prerenderizzato. Solo /api/* e /admin/* sono on-demand (export const prerender = false).
+  // Il sito resta prerenderizzato. Solo /api/richiesta è on-demand (export const prerender = false).
   adapter: vercel(),
-  // Niente i18n di Astro: le rotte IT/DE sono gestite a mano (src/i18n/routes.ts, slug localizzati).
-  // Il suo middleware manderebbe in 404 le pagine on-demand senza prefisso di lingua (/admin/).
+  // Niente i18n di Astro: le rotte IT/DE/EN sono gestite a mano (src/i18n/routes.ts, slug localizzati).
   env: {
     schema: {
-      SUPABASE_URL: secret(),
-      SUPABASE_SERVICE_ROLE_KEY: secret(),
       RESEND_API_KEY: secret(),
       EMAIL_FROM: secret(),
-      DEMO_OWNER_EMAIL: secret(),
-      DEMO_KEY: secret(),
-      ADMIN_DEMO_PASSWORD: secret(),
-      WHATSAPP_TOKEN: secret(),
-      WHATSAPP_PHONE_ID: secret(),
-      WHATSAPP_TEMPLATE: secret(),
     },
   },
   devToolbar: { enabled: false },

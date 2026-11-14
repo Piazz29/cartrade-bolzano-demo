@@ -1,0 +1,70 @@
+[
+  {
+    "slug": "volkswagen",
+    "title": "Volkswagen"
+  },
+  {
+    "slug": "audi",
+    "title": "Audi"
+  },
+  {
+    "slug": "bmw",
+    "title": "BMW"
+  },
+  {
+    "slug": "skoda",
+    "title": "ŠKODA"
+  },
+  {
+    "slug": "fiat",
+    "title": "Fiat"
+  },
+  {
+    "slug": "jeep",
+    "title": "Jeep"
+  },
+  {
+    "slug": "toyota",
+    "title": "Toyota"
+  },
+  {
+    "slug": "suzuki",
+    "title": "Suzuki"
+  },
+  {
+    "slug": "volvo",
+    "title": "Volvo"
+  },
+  {
+    "slug": "ford",
+    "title": "Ford"
+  },
+  {
+    "slug": "renault",
+    "title": "Renault"
+  },
+  {
+    "slug": "peugeot",
+    "title": "Peugeot"
+  },
+  {
+    "slug": "opel",
+    "title": "Opel"
+  },
+  {
+    "slug": "hyundai",
+    "title": "Hyundai"
+  },
+  {
+    "slug": "kia",
+    "title": "Kia"
+  },
+  {
+    "slug": "dacia",
+    "title": "Dacia"
+  },
+  {
+    "slug": "mini",
+    "title": "Mini"
+  }
+]

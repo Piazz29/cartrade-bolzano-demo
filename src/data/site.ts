@@ -9,18 +9,42 @@ export const site = {
   brand: 'Car Trade Bolzano',
   vat: '02974520211',
   address: {
-    street: { it: 'Via Werner von Siemens 4/F', de: 'Werner-von-Siemens-Straße 4/F' },
+    street: { it: 'Via Werner von Siemens 4/F', de: 'Werner-von-Siemens-Straße 4/F', en: 'Via Werner von Siemens 4/F' },
     postalCode: '39100',
-    city: { it: 'Bolzano', de: 'Bozen' },
+    city: { it: 'Bolzano', de: 'Bozen', en: 'Bolzano' },
     region: 'BZ',
     country: 'IT',
   },
   // Coordinate dalla scheda DEKRA
   geo: { lat: 46.482868, lng: 11.332216 },
+  // Zona servita (schema.org areaServed, testi "come raggiungerci", llms.txt): Bolzano e comuni vicini,
+  // con i nomi ufficiali bilingui. In inglese si usa il nome italiano, come sui cartelli stradali.
+  area: [
+    { it: 'Bolzano', de: 'Bozen', type: 'City' },
+    { it: 'Laives', de: 'Leifers', type: 'City' },
+    { it: 'Bronzolo', de: 'Branzoll', type: 'City' },
+    { it: 'Vadena', de: 'Pfatten', type: 'City' },
+    { it: 'Appiano sulla Strada del Vino', de: 'Eppan an der Weinstraße', type: 'City' },
+    { it: 'Caldaro sulla Strada del Vino', de: 'Kaltern an der Weinstraße', type: 'City' },
+    { it: 'Terlano', de: 'Terlan', type: 'City' },
+    { it: 'San Genesio Atesino', de: 'Jenesien', type: 'City' },
+    { it: 'Renon', de: 'Ritten', type: 'City' },
+    { it: 'Cornedo all’Isarco', de: 'Karneid', type: 'City' },
+    { it: 'Oltradige', de: 'Überetsch', type: 'AdministrativeArea' },
+    { it: 'Bassa Atesina', de: 'Unterland', type: 'AdministrativeArea' },
+    { it: 'Alto Adige', de: 'Südtirol', type: 'State' },
+  ],
+  // Cellulare (anche WhatsApp)
   phone: {
     display: '324 696 5239',
     href: 'tel:+393246965239',
     e164: '+393246965239',
+  },
+  // Telefono fisso della sede (Bolzano, prefisso 0471)
+  landline: {
+    display: '0471 192 3248',
+    href: 'tel:+3904711923248',
+    e164: '+3904711923248',
   },
   // TODO: verificare che il numero sia attivo su WhatsApp (sul sito attuale non è indicato)
   whatsapp: {
@@ -28,29 +52,30 @@ export const site = {
     href: (text?: string) =>
       `https://wa.me/393246965239${text ? `?text=${encodeURIComponent(text)}` : ''}`,
   },
-  // TODO: email non presente su nessuna fonte. Chiedere al cliente e inserirla qui:
-  // comparirà automaticamente in footer, contatti e schema.org.
-  email: null as string | null,
+  // Email del titolare (Flavio): compare in footer, Contatti, informativa privacy e schema.org
+  email: 'flavio@cartradebz.it',
   dekra: {
     bookingUrl: 'https://prenotazioni.dekra.it/prenota?id=6765',
     profileUrl: 'https://revisione.dekra.it/centri-revisione/car-trade-srl',
     vehicles: ['auto'],
   },
   // Scheda Google Business "Centro Revisioni Dekra - Car Trade Srl" (Place ID ricavato e verificato dall'embed di Google Maps).
-  // Voto e numero sono il valore di ottobre 2026: con la chiave API vengono aggiornati in pagina dai dati live.
+  // Voto e numero sono fissi (niente API): aggiornarli a mano qui quando cambiano sulla scheda.
+  // reviewCountLabel ("62+") è quello che si vede sul sito; reviewCount resta il numero puro.
   google: {
     name: 'Centro Revisioni Dekra - Car Trade Srl',
     placeId: GOOGLE_PLACE_ID,
     cid: GOOGLE_CID,
     rating: 4.5,
-    reviewCount: 61,
+    reviewCount: 62,
+    reviewCountLabel: '62+',
     url: `https://www.google.com/maps/place/?q=place_id:${GOOGLE_PLACE_ID}`,
     reviewsUrl: `https://www.google.com/maps/place/?q=place_id:${GOOGLE_PLACE_ID}`,
-    // Link "scrivi una recensione" costruito dal Place ID (usato dal sito e dalla richiesta recensione dell'admin)
+    // Link "scrivi una recensione" costruito dal Place ID (pulsante "Lascia una recensione")
     writeReviewUrl: `https://search.google.com/local/writereview?placeid=${GOOGLE_PLACE_ID}`,
     // Scheda Google per cid: usata in schema.org (hasMap, sameAs) e in llms.txt
     mapsCidUrl: `https://maps.google.com/?cid=${GOOGLE_CID}`,
-    // Chiave browser della Google Maps Platform (vedi .env.example). Senza chiave: mappa pubblica + link alle recensioni.
+    // Chiave browser facoltativa, solo per la mappa ufficiale (vedi .env.example). Senza chiave: mappa Google pubblica.
     apiKey: (import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY as string | undefined) || '',
   },
   mapsUrl:
@@ -77,10 +102,13 @@ export const site = {
   },
 } as const;
 
-export type Lang = 'it' | 'de';
+export type Lang = 'it' | 'de' | 'en';
+
+/** Locale per date e numeri. Inglese britannico: giorno prima del mese, come in Europa. */
+export const locales: Record<Lang, string> = { it: 'it-IT', de: 'de-DE', en: 'en-GB' };
 
 export const formatPrice = (n: number, lang: Lang, decimals = 0) =>
-  new Intl.NumberFormat(lang === 'it' ? 'it-IT' : 'de-DE', {
+  new Intl.NumberFormat(locales[lang], {
     style: 'currency',
     currency: 'EUR',
     minimumFractionDigits: decimals,
@@ -88,7 +116,14 @@ export const formatPrice = (n: number, lang: Lang, decimals = 0) =>
   }).format(n);
 
 export const formatNumber = (n: number, lang: Lang, decimals = 0) =>
-  new Intl.NumberFormat(lang === 'it' ? 'it-IT' : 'de-DE', {
+  new Intl.NumberFormat(locales[lang], {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   }).format(n);
+
+/** Nome di un luogo della zona servita nella lingua della pagina (in inglese: "South Tyrol" per la provincia). */
+export const areaName = (a: (typeof site.area)[number], lang: Lang) =>
+  lang === 'de' ? a.de : lang === 'en' && a.type === 'State' ? 'South Tyrol' : a.it;
+
+/** Solo i comuni (senza le zone e la provincia), per le frasi "comodo da …". */
+export const areaTowns = (lang: Lang) => site.area.filter((a) => a.type === 'City').map((a) => areaName(a, lang));

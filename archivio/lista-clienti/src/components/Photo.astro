@@ -1,0 +1,77 @@
+---
+// Foto responsiva. Due modi:
+//  - foto="hero" (posizione della mappa src/data/foto.ts): usa il file in src/assets/foto/ se esiste,
+//    ottimizzato da astro:assets (AVIF/WebP, larghezze giuste); altrimenti il segnaposto Unsplash;
+//  - id="…" (foto Unsplash diretta, es. le auto DEMO della content collection).
+import { Picture } from 'astro:assets';
+import { unsplash, unsplashSrcset } from '../lib/img';
+import { fotoLocale, fotoUnsplash } from '../lib/foto';
+import type { FotoKey } from '../data/foto';
+interface Props {
+  foto?: FotoKey;
+  id?: string;
+  alt: string;
+  sizes: string;
+  ratio?: [number, number];
+  widths?: number[];
+  priority?: boolean;
+  position?: string;
+  class?: string;
+  imgClass?: string;
+  /** se true, le proporzioni del riquadro le decide la classe (es. aspect-[4/3] lg:aspect-[4/5]) */
+  fluid?: boolean;
+}
+const {
+  foto,
+  id: idProp,
+  alt,
+  sizes,
+  ratio = [4, 3],
+  widths = [480, 768, 1080, 1440, 1920],
+  priority = false,
+  position = 'center',
+  class: cls,
+  imgClass,
+  fluid = false,
+} = Astro.props;
+
+const [rw, rh] = ratio;
+const locale = foto ? fotoLocale(foto) : null;
+const remoto = foto ? fotoUnsplash(foto) : idProp ? { id: idProp, crop: position === 'center' ? '' : position } : null;
+const id = remoto?.id ?? '';
+const crop = remoto?.crop ?? '';
+const src = (w: number) => unsplash(id, w, ratio, crop);
+const base = widths[Math.min(2, widths.length - 1)];
+// Con la foto locale non si chiede mai una larghezza maggiore dell'originale
+const localWidths = locale ? [...new Set(widths.map((w) => Math.min(w, locale.width)))] : [];
+---
+<div class:list={['photo', cls]} style={fluid ? undefined : `aspect-ratio:${rw}/${rh}`}>
+  {locale ? (
+    <Picture
+      src={locale}
+      alt={alt}
+      formats={['avif', 'webp']}
+      fallbackFormat="webp"
+      widths={localWidths}
+      sizes={sizes}
+      loading={priority ? 'eager' : 'lazy'}
+      decoding={priority ? 'sync' : 'async'}
+      fetchpriority={priority ? 'high' : 'auto'}
+      class={imgClass}
+      style={position !== 'center' ? `object-position:${position}` : undefined}
+    />
+  ) : id ? (
+    <img
+      src={src(base)}
+      srcset={unsplashSrcset(id, widths, ratio, crop)}
+      sizes={sizes}
+      alt={alt}
+      width={base}
+      height={Math.round((base * rh) / rw)}
+      loading={priority ? 'eager' : 'lazy'}
+      decoding={priority ? 'sync' : 'async'}
+      fetchpriority={priority ? 'high' : 'auto'}
+      class={imgClass}
+    />
+  ) : null}
+</div>

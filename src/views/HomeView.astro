@@ -1,15 +1,15 @@
 ---
-import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Photo from '../components/Photo.astro';
 import RoofLine from '../components/RoofLine.astro';
 import Icon from '../components/Icon.astro';
 import SectionHead from '../components/SectionHead.astro';
 import OpenStatus from '../components/OpenStatus.astro';
-import CarCard from '../components/CarCard.astro';
 import GoogleReviews from '../components/GoogleReviews.astro';
+import GoogleLogo from '../components/GoogleLogo.astro';
 import Marquee from '../components/Marquee.astro';
 import RevisionCalculator from '../components/RevisionCalculator.astro';
+import InspectionTour from '../components/InspectionTour.astro';
 import MapBlock from '../components/MapBlock.astro';
 import Faq from '../components/Faq.astro';
 import HoursTable from '../components/HoursTable.astro';
@@ -25,24 +25,20 @@ interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = ui[lang];
 
-const allCars = await getCollection('cars');
-const featured = allCars.filter((c) => c.data.featured).slice(0, 4);
-
 const copy = {
   it: {
-    title: 'Revisione auto, officina, carrozzeria e auto usate a Bolzano',
-    description:
-      'Centro revisioni affiliato DEKRA, officina meccanica, carrozzeria e auto usate e km 0 in Via Werner von Siemens 4/F a Bolzano. Prenota la revisione online.',
+    title: 'Revisione auto, officina, carrozzeria e gomme a Bolzano',
+    description: `Centro revisioni DEKRA a Bolzano Sud (${formatPrice(site.revisionFee.total, 'it', 2)}, prenotazione online), officina meccanica, carrozzeria e cambio gomme in un’unica sede: Via Werner von Siemens 4/F.`,
     eyebrow: 'Bolzano Sud · Via Werner von Siemens 4/F',
     h1: ['Un solo indirizzo.', 'Tutto per la tua auto.'],
-    kicker: 'Revisione, officina e carrozzeria a Bolzano',
+    kicker: 'Revisione, officina, carrozzeria e gomme a Bolzano',
     lead: 'Revisione DEKRA, meccanica e carrozzeria sotto lo stesso tetto a Bolzano Sud. Se la revisione trova un difetto, lo ripariamo qui.',
     svcNav: 'I nostri servizi',
     svc: [
       ['Revisione', routes.revisione.it],
-      ['Officina', `${routes.officina.it}#officina`],
-      ['Carrozzeria', `${routes.officina.it}#carrozzeria`],
-      ['Auto e km\u00a00', routes.showroom.it],
+      ['Officina', routes.officina.it],
+      ['Carrozzeria', routes.carrozzeria.it],
+      ['Gomme', routes.gomme.it],
     ],
     heroAlt: 'Officina luminosa con un’auto sul ponte sollevatore e un meccanico al lavoro sul motore',
     strip: {
@@ -56,7 +52,7 @@ const copy = {
       whereNote: 'Bolzano Sud',
     },
     servicesLabel: 'Quattro servizi, una sede',
-    servicesTitle: 'Dal controllo obbligatorio alla prossima auto.',
+    servicesTitle: 'Dal controllo obbligatorio alla riparazione.',
     services: [
       {
         key: 'revisione',
@@ -72,7 +68,7 @@ const copy = {
         title: 'Officina',
         text: 'Tagliandi, freni, distribuzione, diagnosi elettronica. Prima ti diciamo cosa serve e quanto costa, poi mettiamo le mani sull’auto.',
         facts: ['Tagliandi', 'Freni', 'Diagnosi'],
-        href: `${routes.officina.it}#officina`,
+        href: routes.officina.it,
         foto: 'officina-ponti',
         alt: 'Officina ordinata con diverse auto in lavorazione',
       },
@@ -81,18 +77,18 @@ const copy = {
         title: 'Carrozzeria',
         text: 'Graffi, ammaccature, danni alla scocca. Mandaci una foto del danno e ricevi un preventivo senza venire in sede.',
         facts: ['Preventivo da foto', 'Raddrizzatura', 'Verniciatura'],
-        href: `${routes.officina.it}#carrozzeria`,
+        href: routes.carrozzeria.it,
         foto: 'carrozzeria',
         alt: 'Carrozziere che lucida la fiancata di un’auto grigia',
       },
       {
-        key: 'auto',
-        title: 'Auto usate e km\u00a00',
-        text: 'Poche auto, scelte una per una e controllate nella nostra officina prima della vendita.',
-        facts: ['Usato con garanzia', 'Km 0', 'Permute'],
-        href: routes.showroom.it,
-        foto: 'piazzale-auto',
-        alt: 'SUV bianco parcheggiato su un piazzale con foglie autunnali',
+        key: 'gomme',
+        title: 'Gomme',
+        text: 'Cambio gomme estive e invernali. In Alto Adige le invernali servono dal 15 novembre al 15 aprile: prenota prima della coda.',
+        facts: ['Cambio stagionale', 'Controllo battistrada'],
+        href: routes.gomme.it,
+        foto: 'officina-gomme',
+        alt: 'Mani con guanti che montano una ruota',
       },
     ],
     flowTitle: 'Se la revisione non passa, non ricominci da capo.',
@@ -112,13 +108,9 @@ const copy = {
       // TODO: confermare con il cliente la politica sui preventivi
       { t: 'Prezzo chiaro prima di iniziare', d: 'Sai cosa facciamo e quanto costa prima che l’auto entri in officina.' },
     ],
-    carsLabel: 'Auto in vendita',
-    carsAll: 'Tutte le auto',
-    carsTitle: 'Poche auto, scelte bene.',
-    carsText: 'Usato controllato e km 0 con garanzia. Ogni auto ha la sua scheda completa, con prezzo in chiaro.',
     calcLabel: 'Scadenza revisione',
     calcTitle: 'Quando scade la tua revisione?',
-    calcText: 'Indica il mese e l’anno: calcoliamo la scadenza secondo il Codice della Strada. Se vuoi, ti avvisiamo noi 30 e 7 giorni prima.',
+    calcText: 'Indica il mese e l’anno: calcoliamo la scadenza secondo il Codice della Strada. Poi salvala nel calendario del telefono, con un avviso un mese prima.',
     whereLabel: 'Dove siamo',
     whereTitle: 'Zona produttiva Bolzano Sud.',
     // TODO: se c'è parcheggio clienti, dirlo qui (dato da confermare)
@@ -128,25 +120,25 @@ const copy = {
       { q: 'Quanto costa la revisione a Bolzano e come si prenota?', a: `${formatPrice(site.revisionFee.total, 'it', 2)} tutto compreso: è la tariffa nazionale, uguale in tutti i centri autorizzati. Si prenota online sul portale DEKRA, scegliendo giorno e ora.` },
       { q: 'Se l’auto non passa la revisione, dove la riparo?', a: 'Qui. Officina e carrozzeria sono nella stessa sede del centro revisioni: ti diciamo cosa serve e quanto costa, ripariamo e ripresenti l’auto a pochi metri di distanza.' },
       { q: 'Fate tagliandi e riparazioni su tutte le marche?', a: 'Sì. Tagliandi secondo le specifiche del costruttore, freni, distribuzione, diagnosi elettronica e carrozzeria per auto di ogni marca.' },
-      { q: 'Posso avere un preventivo di carrozzeria senza venire in sede?', a: 'Sì. Dal modulo della pagina Officina e carrozzeria carichi fino a 6 foto del danno dal telefono e ti ricontattiamo con una stima.' },
-      { q: 'Mi ricordate voi quando scade la revisione?', a: 'Sì, gratis. Ti iscrivi in 30 secondi alla pagina Promemoria revisione: ti scriviamo via email o WhatsApp 30 e 7 giorni prima della scadenza.' },
+      { q: 'Posso avere un preventivo di carrozzeria senza venire in sede?', a: 'Sì. Dal modulo della pagina Carrozzeria carichi fino a 6 foto del danno dal telefono e ti ricontattiamo con una stima.' },
+      { q: 'Fate il cambio gomme a Bolzano?', a: 'Sì, cambio gomme estive e invernali nella stessa sede di officina e revisione. In provincia di Bolzano le gomme invernali (o le catene a bordo) servono dal 15 novembre al 15 aprile: conviene prenotare a fine ottobre.' },
+      { q: 'Come faccio a non dimenticare la scadenza?', a: 'Usa il calcolatore qui sopra: inserisci mese e anno dell’ultima revisione e con «Aggiungi al calendario» salvi la scadenza sul telefono, con un avviso un mese prima.' },
       { q: 'Dove siete e quando siete aperti?', a: `In ${site.address.street.it}, zona produttiva di Bolzano Sud. Dal lunedì al venerdì, 8:30–12:30 e 14:00–18:00.` },
     ],
   },
   de: {
-    title: 'Revision, Werkstatt, Karosserie und Gebrauchtwagen in Bozen',
-    description:
-      'DEKRA-Partner für die Fahrzeugrevision, Kfz-Werkstatt, Karosserie, Gebrauchtwagen und Tageszulassungen in der Werner-von-Siemens-Straße 4/F in Bozen. Revision online buchen.',
+    title: 'Revision, Werkstatt, Karosserie und Reifen in Bozen',
+    description: `DEKRA-Prüfstelle für die Revision in Bozen Süd (${formatPrice(site.revisionFee.total, 'de', 2)}, Online-Buchung), Kfz-Werkstatt, Karosserie und Reifenwechsel an einem Standort: Werner-von-Siemens-Straße 4/F.`,
     eyebrow: 'Bozen Süd · Werner-von-Siemens-Straße 4/F',
     h1: ['Eine Adresse.', 'Alles für Ihr Auto.'],
-    kicker: 'Revision, Werkstatt und Karosserie in Bozen',
+    kicker: 'Revision, Werkstatt, Karosserie und Reifen in Bozen',
     lead: 'Revision, Mechanik und Karosserie unter einem Dach in Bozen Süd. Findet die Revision einen Mangel, beheben wir ihn gleich hier.',
     svcNav: 'Unsere Leistungen',
     svc: [
       ['Revision', routes.revisione.de],
-      ['Werkstatt', `${routes.officina.de}#werkstatt`],
-      ['Karosserie', `${routes.officina.de}#karosserie`],
-      ['Fahrzeuge', routes.showroom.de],
+      ['Werkstatt', routes.officina.de],
+      ['Karosserie', routes.carrozzeria.de],
+      ['Reifen', routes.gomme.de],
     ],
     heroAlt: 'Helle Werkstatt mit einem Auto auf der Hebebühne und einem Mechaniker am Motor',
     strip: {
@@ -160,7 +152,7 @@ const copy = {
       whereNote: 'Bozen Süd',
     },
     servicesLabel: 'Vier Leistungen, ein Standort',
-    servicesTitle: 'Von der Pflichtprüfung bis zum nächsten Auto.',
+    servicesTitle: 'Von der Pflichtprüfung bis zur Reparatur.',
     services: [
       {
         key: 'revisione',
@@ -176,7 +168,7 @@ const copy = {
         title: 'Werkstatt',
         text: 'Inspektion, Bremsen, Zahnriemen, elektronische Diagnose. Erst sagen wir Ihnen, was nötig ist und was es kostet, dann geht es los.',
         facts: ['Inspektion', 'Bremsen', 'Diagnose'],
-        href: `${routes.officina.de}#werkstatt`,
+        href: routes.officina.de,
         foto: 'officina-ponti',
         alt: 'Aufgeräumte Werkstatt mit mehreren Fahrzeugen in Arbeit',
       },
@@ -185,18 +177,18 @@ const copy = {
         title: 'Karosserie',
         text: 'Kratzer, Dellen, Schäden an der Karosserie. Schicken Sie uns ein Foto und erhalten Sie ein Angebot, ohne vorbeizukommen.',
         facts: ['Angebot per Foto', 'Richtarbeiten', 'Lackierung'],
-        href: `${routes.officina.de}#karosserie`,
+        href: routes.carrozzeria.de,
         foto: 'carrozzeria',
         alt: 'Karosseriebauer poliert die Seite eines grauen Autos',
       },
       {
-        key: 'auto',
-        title: 'Gebrauchtwagen',
-        text: 'Wenige Fahrzeuge, einzeln ausgewählt und vor dem Verkauf in unserer Werkstatt geprüft.',
-        facts: ['Mit Garantie', 'Tageszulassungen', 'Inzahlungnahme'],
-        href: routes.showroom.de,
-        foto: 'piazzale-auto',
-        alt: 'Weißer SUV auf einem Platz mit Herbstlaub',
+        key: 'gomme',
+        title: 'Reifen',
+        text: 'Sommer- und Winterreifen wechseln. In Südtirol gilt die Winterreifenpflicht vom 15. November bis 15. April: vor dem Ansturm buchen.',
+        facts: ['Saisonwechsel', 'Profilkontrolle'],
+        href: routes.gomme.de,
+        foto: 'officina-gomme',
+        alt: 'Hände mit Handschuhen montieren ein Rad',
       },
     ],
     flowTitle: 'Nicht bestanden? Dann fangen Sie nicht von vorne an.',
@@ -215,13 +207,9 @@ const copy = {
       { t: 'Eigene Werkstatt und Karosserie', d: 'Ein Ansprechpartner von der Diagnose bis zur Übergabe. Ohne Umwege.' },
       { t: 'Klarer Preis vor Arbeitsbeginn', d: 'Sie wissen, was wir machen und was es kostet, bevor das Auto in die Werkstatt fährt.' },
     ],
-    carsLabel: 'Fahrzeuge',
-    carsAll: 'Alle Fahrzeuge',
-    carsTitle: 'Wenige Autos, gut ausgewählt.',
-    carsText: 'Geprüfte Gebrauchtwagen und Tageszulassungen mit Garantie. Jedes Fahrzeug mit vollständigem Datenblatt und klarem Preis.',
     calcLabel: 'Fälligkeit Revision',
     calcTitle: 'Wann ist Ihre Revision fällig?',
-    calcText: 'Monat und Jahr angeben: Wir berechnen den Termin nach der Straßenverkehrsordnung. Auf Wunsch erinnern wir Sie 30 und 7 Tage vorher.',
+    calcText: 'Monat und Jahr angeben: Wir berechnen den Termin nach der Straßenverkehrsordnung. Danach speichern Sie ihn im Handykalender, mit Erinnerung einen Monat vorher.',
     whereLabel: 'Anfahrt',
     whereTitle: 'Gewerbegebiet Bozen Süd.',
     whereText: 'Abseits vom Stadtverkehr, wenige Minuten vom Zentrum. Ein kurzer Anruf vorab erspart Ihnen Wartezeit.',
@@ -230,9 +218,108 @@ const copy = {
       { q: 'Was kostet die Revision in Bozen und wie bucht man?', a: `${formatPrice(site.revisionFee.total, 'de', 2)} inklusive allem: der staatliche Tarif, in allen zugelassenen Prüfstellen gleich. Gebucht wird online im DEKRA-Portal, mit Wunschtag und Uhrzeit.` },
       { q: 'Das Auto hat die Revision nicht bestanden: Wo lasse ich es reparieren?', a: 'Gleich hier. Werkstatt und Karosserie sind am selben Standort wie die Prüfstelle: Wir sagen Ihnen, was nötig ist und was es kostet, reparieren und Sie stellen das Auto ein paar Meter weiter erneut vor.' },
       { q: 'Machen Sie Inspektion und Reparaturen für alle Marken?', a: 'Ja. Inspektion nach Herstellervorgaben, Bremsen, Zahnriemen, elektronische Diagnose und Karosserie für Fahrzeuge aller Marken.' },
-      { q: 'Bekomme ich ein Karosserie-Angebot, ohne vorbeizukommen?', a: 'Ja. Über das Formular auf der Seite Werkstatt & Karosserie laden Sie bis zu 6 Fotos vom Schaden hoch, wir melden uns mit einer Schätzung.' },
-      { q: 'Erinnern Sie mich an die Revision?', a: 'Ja, kostenlos. Melden Sie sich in 30 Sekunden auf der Seite Revisions-Erinnerung an: Wir schreiben Ihnen per E-Mail oder WhatsApp 30 und 7 Tage vor Ablauf.' },
+      { q: 'Bekomme ich ein Karosserie-Angebot, ohne vorbeizukommen?', a: 'Ja. Über das Formular auf der Seite Karosserie laden Sie bis zu 6 Fotos vom Schaden hoch, wir melden uns mit einer Schätzung.' },
+      { q: 'Machen Sie Reifenwechsel in Bozen?', a: 'Ja, Sommer- und Winterreifen am selben Standort wie Werkstatt und Revision. In der Provinz Bozen sind Winterreifen (oder Ketten an Bord) vom 15. November bis 15. April Pflicht: am besten Ende Oktober buchen.' },
+      { q: 'Wie vergesse ich den Termin nicht?', a: 'Mit dem Rechner oben: Monat und Jahr der letzten Revision eingeben und mit „In den Kalender eintragen“ den Termin im Handy speichern, mit Erinnerung einen Monat vorher.' },
       { q: 'Wo sind Sie und wann haben Sie geöffnet?', a: `In der ${site.address.street.de}, Gewerbegebiet Bozen Süd. Montag bis Freitag, 8:30–12:30 und 14:00–18:00 Uhr.` },
+    ],
+  },
+  en: {
+    title: 'Car inspection, repairs, body shop and tyres in Bolzano',
+    description: `DEKRA-affiliated car inspection centre in Bolzano South (${formatPrice(site.revisionFee.total, 'en', 2)}, book online), mechanic, body shop and tyre change at one address: Via Werner von Siemens 4/F.`,
+    eyebrow: 'Bolzano South · Via Werner von Siemens 4/F',
+    h1: ['One address.', 'Everything for your car.'],
+    kicker: 'Car inspection, repairs, body shop and tyres in Bolzano',
+    lead: 'DEKRA vehicle inspection, mechanics and bodywork under one roof in Bolzano South. If the inspection finds a fault, we fix it right here.',
+    svcNav: 'Our services',
+    svc: [
+      ['Inspection', routes.revisione.en],
+      ['Workshop', routes.officina.en],
+      ['Body shop', routes.carrozzeria.en],
+      ['Tyres', routes.gomme.en],
+    ],
+    heroAlt: 'Bright workshop with a car on the lift and a mechanic working on the engine',
+    strip: {
+      hours: 'Hours Mon – Fri',
+      google: 'Google',
+      reviews: 'reviews',
+      fee: 'Car inspection',
+      feeNote: 'national fee',
+      where: 'Where',
+      whereVal: 'Via W. von Siemens 4/F',
+      whereNote: 'Bolzano South',
+    },
+    servicesLabel: 'Four services, one location',
+    servicesTitle: 'From the mandatory check to the repair.',
+    services: [
+      {
+        key: 'revisione',
+        title: 'Inspection',
+        text: 'DEKRA-affiliated inspection centre for cars. Book online, wait on site, leave with the result in your registration document.',
+        facts: ['€79.02 national fee', 'Online booking'],
+        href: routes.revisione.en,
+        foto: 'revisione-linea',
+        alt: 'Silver saloon on the lift with the bonnet open',
+      },
+      {
+        key: 'officina',
+        title: 'Workshop',
+        text: 'Servicing, brakes, timing belts, electronic diagnostics. First we tell you what’s needed and what it costs, then we get to work.',
+        facts: ['Servicing', 'Brakes', 'Diagnostics'],
+        href: routes.officina.en,
+        foto: 'officina-ponti',
+        alt: 'Tidy workshop with several cars being worked on',
+      },
+      {
+        key: 'carrozzeria',
+        title: 'Bodywork',
+        text: 'Scratches, dents, body damage. Send us a photo of the damage and get a quote without coming in.',
+        facts: ['Quote from photos', 'Panel straightening', 'Painting'],
+        href: routes.carrozzeria.en,
+        foto: 'carrozzeria',
+        alt: 'Body shop technician polishing the side of a grey car',
+      },
+      {
+        key: 'gomme',
+        title: 'Tyres',
+        text: 'Summer and winter tyre change. In South Tyrol winter tyres are required from 15 November to 15 April: book before the rush.',
+        facts: ['Seasonal change', 'Tread check'],
+        href: routes.gomme.en,
+        foto: 'officina-gomme',
+        alt: 'Gloved hands fitting a wheel',
+      },
+    ],
+    flowTitle: 'If it fails, you don’t start from scratch.',
+    flowText: 'The advantage of having everything in one place shows exactly when something goes wrong.',
+    flow: [
+      { t: 'Inspection', d: 'The check finds a fault: a light, the brakes, the emissions.' },
+      { t: 'Diagnosis', d: 'The workshop tells you straight away what’s needed and what it costs.' },
+      { t: 'Repair', d: 'We fix it here. No tow truck, no other garage.' },
+      { t: 'Re-inspection', d: 'You present the car again within a month, a few metres away.' },
+    ],
+    trustLabel: 'Trust',
+    trustTitle: 'customers have said so on Google.',
+    trustOf: 'out of 5',
+    reasons: [
+      { t: 'DEKRA-affiliated inspection centre', d: 'Checks carried out to DEKRA procedures and the rules of the Ministry of Transport.' },
+      { t: 'In-house workshop and body shop', d: 'One point of contact from diagnosis to handover. No passing you around.' },
+      { t: 'A clear price before we start', d: 'You know what we’ll do and what it costs before the car goes into the workshop.' },
+    ],
+    calcLabel: 'Inspection due date',
+    calcTitle: 'When is your inspection due?',
+    calcText: 'Enter the month and year: we work out the due date under the Italian Highway Code. Then save it to your phone’s calendar, with an alert a month before.',
+    whereLabel: 'Find us',
+    whereTitle: 'Bolzano South business park.',
+    whereText: 'Away from the city-centre traffic, a few minutes from town. A quick call before you come saves you waiting.',
+    faqLabel: 'Frequently asked questions',
+    faq: [
+      { q: 'How much does a car inspection cost in Bolzano and how do I book?', a: `${formatPrice(site.revisionFee.total, 'en', 2)} all inclusive: it’s the national fee, the same at every authorised centre. You book online on the DEKRA portal, choosing the day and time.` },
+      { q: 'If my car fails the inspection, where can I get it repaired?', a: 'Right here. The workshop and body shop are at the same address as the inspection centre: we tell you what’s needed and what it costs, fix it, and you present the car again a few metres away.' },
+      { q: 'Do you service and repair all makes?', a: 'Yes. Servicing to manufacturer specifications, brakes, timing belts, electronic diagnostics and bodywork for cars of every make.' },
+      { q: 'Can I get a bodywork quote without coming in?', a: 'Yes. Using the form on the Body shop page you can upload up to 6 photos of the damage from your phone, and we’ll get back to you with an estimate.' },
+      { q: 'Do you change tyres in Bolzano?', a: 'Yes, summer and winter tyre changes at the same address as the workshop and inspection centre. In the province of Bolzano winter tyres (or chains on board) are required from 15 November to 15 April: book at the end of October.' },
+      { q: 'How do I make sure I don’t forget the due date?', a: 'Use the calculator above: enter the month and year of your last inspection and tap “Add to calendar” to save the date on your phone, with an alert a month before.' },
+      { q: 'Where are you and when are you open?', a: `At ${site.address.street.en}, in the Bolzano South business park. Monday to Friday, 8:30–12:30 and 14:00–18:00.` },
     ],
   },
 }[lang];
@@ -325,7 +412,7 @@ const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 5
             </h1>
             <div class="hero-sig hero-fade" style="animation-delay:640ms" aria-hidden="true">
               <span class="sig-line"></span>
-              <span class="t-label sig-place">{lang === 'it' ? 'Bolzano · Bozen' : 'Bozen · Bolzano'}</span>
+              <span class="t-label sig-place">{lang === 'de' ? 'Bozen · Bolzano' : 'Bolzano · Bozen'}</span>
             </div>
             <nav class="hero-svc hero-fade" style="animation-delay:720ms" aria-label={copy.svcNav}>
               <ol>
@@ -349,9 +436,6 @@ const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 5
                 {t.cta.book}<span class="sr-only"> ({t.externalBooking})</span>
                 <Icon name="arrow-up-right" size={18} class="btn-arrow" />
               </a>
-              <a href={routes.showroom[lang]} class="btn btn-ghost">
-                {t.cta.cars} <Icon name="arrow" size={18} class="btn-arrow" />
-              </a>
             </div>
           </div>
         </div>
@@ -367,8 +451,8 @@ const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 5
         </div>
         <div>
           <dt class="t-label">{copy.strip.google}</dt>
-          <dd class="strip-val"><span data-g-rating>{formatNumber(site.google.rating, lang, 1)}</span> / 5</dd>
-          <dd class="strip-note"><span data-g-count>{site.google.reviewCount}</span> {copy.strip.reviews}</dd>
+          <dd class="strip-val">{formatNumber(site.google.rating, lang, 1)} / 5</dd>
+          <dd class="strip-note">{site.google.reviewCountLabel} {copy.strip.reviews}</dd>
         </div>
         <div>
           <dt class="t-label">{copy.strip.fee}</dt>
@@ -447,15 +531,22 @@ const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 5
     </div>
   </section>
 
+  <!-- LA REVISIONE PASSO PER PASSO (banco di collaudo) -->
+  <InspectionTour lang={lang} num="02" headingId="tour" variant="compact" />
+
   <!-- FIDUCIA -->
-  <section class="on-dark section-y bg-night text-paper" aria-labelledby="trust-title">
+  <section class="trust section-y bg-paper-2" aria-labelledby="trust-title">
     <div class="wrap">
-      <SectionHead num="02" label={copy.trustLabel} dark />
+      <SectionHead num="03" label={copy.trustLabel} />
       <div class="grid-12 mt-10 gap-y-14 lg:mt-16">
         <div class="col-span-4 lg:col-span-6">
-          <p class="rating" aria-hidden="true">
-            <span class="rating-num t-num" data-count={site.google.rating} data-decimals="1" data-g-rating>{formatNumber(site.google.rating, lang, 1)}</span>
-            <span class="rating-of t-label text-steel">{copy.trustOf}</span>
+          <p class="trust-src" aria-hidden="true">
+            <GoogleLogo size={44} />
+            <span class="t-label text-muted">Google</span>
+          </p>
+          <p class="rating mt-6" aria-hidden="true">
+            <span class="rating-num t-num" data-count={site.google.rating} data-decimals="1">{formatNumber(site.google.rating, lang, 1)}</span>
+            <span class="rating-of t-label text-muted">{copy.trustOf}</span>
           </p>
           <div class="stars mt-4" aria-hidden="true">
             {[0, 1, 2, 3, 4].map((i) => (
@@ -466,48 +557,24 @@ const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 5
           </div>
           <h2 id="trust-title" class="t-h2 mt-8 max-w-[18ch]">
             <span class="sr-only">{formatNumber(site.google.rating, lang, 1)} {copy.trustOf}. </span>
-            <span class="t-num text-orange" data-g-count>{site.google.reviewCount}</span> {copy.trustTitle}
+            <span class="t-num text-orange-ink">{site.google.reviewCountLabel}</span> {copy.trustTitle}
           </h2>
         </div>
         <ol class="col-span-4 lg:col-span-6" data-stagger="90">
           {copy.reasons.map((r, i) => (
             <li class="reason" data-reveal>
-              <span class="t-label t-num text-orange">{String(i + 1).padStart(2, '0')}</span>
+              <span class="t-label t-num text-orange-ink">{String(i + 1).padStart(2, '0')}</span>
               <div>
                 <h3 class="t-h3">{r.t}</h3>
-                <p class="mt-2 text-steel">{r.d}</p>
+                <p class="mt-2 text-muted">{r.d}</p>
               </div>
             </li>
           ))}
         </ol>
       </div>
       <div class="mt-16 lg:mt-24">
-        <GoogleReviews lang={lang} />
+        <GoogleReviews lang={lang} dark={false} />
       </div>
-    </div>
-  </section>
-
-  <!-- AUTO -->
-  <section class="section-y" aria-labelledby="cars-title">
-    <div class="wrap">
-      <SectionHead num="03" label={copy.carsLabel} href={routes.showroom[lang]} linkText={`${copy.carsAll} (${allCars.length})`} />
-      <div class="mt-8 grid-12 gap-y-4 lg:mt-12">
-        <h2 id="cars-title" class="t-h2 col-span-4 lg:col-span-6" data-reveal>{copy.carsTitle}</h2>
-        <p class="col-span-4 max-w-[46ch] text-muted lg:col-span-5 lg:col-start-8 lg:self-end" data-reveal>{copy.carsText}</p>
-      </div>
-    </div>
-    <!-- La fila compare tutta insieme: su mobile scorre in orizzontale e le schede fuori vista non "entrerebbero" mai -->
-    <div class="cars-rail wrap mt-10 lg:mt-14" data-reveal>
-      {featured.map((car) => (
-        <div>
-          <CarCard car={car} lang={lang} />
-        </div>
-      ))}
-    </div>
-    <div class="wrap mt-10">
-      <a href={routes.showroom[lang]} class="btn btn-ghost w-full sm:w-auto">
-        {copy.carsAll} ({allCars.length}) <Icon name="arrow" size={18} class="btn-arrow" />
-      </a>
     </div>
   </section>
 
@@ -562,9 +629,9 @@ const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 5
       <div class="col-span-4 lg:col-span-4">
         <SectionHead num="06" label={copy.faqLabel} />
         <h2 id="faq-title" class="sr-only">{copy.faqLabel}</h2>
-        <a href={routes.promemoria[lang]} class="reminder-link mt-8">
-          <Icon name="bell" size={20} class="text-orange-ink" />
-          <span>{lang === 'it' ? 'Ti ricordiamo noi la revisione' : 'Wir erinnern Sie an die Revision'}</span>
+        <a href={routes.contatti[lang]} class="reminder-link mt-8">
+          <Icon name="phone" size={20} class="text-orange-ink" />
+          <span>{({ it: 'Un’altra domanda? Contattaci', de: 'Noch eine Frage? Kontakt', en: 'Another question? Get in touch' })[lang]}</span>
           <Icon name="arrow" size={18} class="btn-arrow" />
         </a>
       </div>
@@ -664,7 +731,7 @@ const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 5
   /* Servizi come indice numerato sotto il titolo */
   .hero-svc { margin-top: clamp(1.25rem, 2.4vw, 2rem); width: min(100%, 52rem); }
   .hero-svc ol { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 1.25rem; }
-  @media (min-width: 48rem) { .hero-svc ol { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  @media (min-width: 48rem) { .hero-svc ol { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   .hero-svc a {
     position: relative;
     display: flex;
@@ -796,36 +863,20 @@ const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 5
   }
 
   /* Fiducia */
+  .trust-src { display: flex; align-items: center; gap: 0.75rem; }
   .rating { display: flex; align-items: flex-end; gap: 0.9rem; }
   .rating-num { font-stretch: 125%; font-weight: 600; font-size: clamp(6rem, 22vw, 12.5rem); line-height: 0.8; letter-spacing: -0.05em; }
   .rating-of { padding-bottom: 0.6rem; }
   .stars { display: flex; gap: 0.3rem; }
-  .star { position: relative; color: color-mix(in oklab, var(--color-steel) 25%, transparent); }
+  .star { position: relative; color: color-mix(in oklab, var(--color-ink) 16%, transparent); }
   .star::after { content: ''; position: absolute; inset: 0; background: var(--color-orange); clip-path: inset(0 calc(100% - var(--fill)) 0 0); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m12 3.8 2.5 5.2 5.6.7-4.1 3.9 1 5.6L12 16.5l-5 2.7 1-5.6-4.1-3.9 5.6-.7L12 3.8Z'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m12 3.8 2.5 5.2 5.6.7-4.1 3.9 1 5.6L12 16.5l-5 2.7 1-5.6-4.1-3.9 5.6-.7L12 3.8Z'/%3E%3C/svg%3E") center / contain no-repeat; }
-  .reason { display: grid; grid-template-columns: 2.5rem 1fr; gap: 0.5rem; padding-block: 1.5rem; border-top: 1px solid var(--line-dark); }
-  .reason:last-child { border-bottom: 1px solid var(--line-dark); }
+  .reason { display: grid; grid-template-columns: 2.5rem 1fr; gap: 0.5rem; padding-block: 1.5rem; border-top: 1px solid var(--line-strong); }
+  .reason:last-child { border-bottom: 1px solid var(--line-strong); }
 
   .reminder-link { display: inline-flex; align-items: center; gap: 0.75rem; min-height: 2.75rem; font-weight: 600; text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 0.25em; }
   .reminder-link:hover { text-decoration-color: currentColor; }
   .reminder-link:hover :global(.btn-arrow) { transform: translateX(4px); }
 
-  /* Rail auto: scorrimento orizzontale su mobile, griglia su desktop */
-  .cars-rail {
-    position: relative;
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: 82%;
-    gap: var(--gutter);
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-padding-inline: var(--gutter);
-    padding-bottom: 0.5rem;
-    scrollbar-width: none;
-  }
-  .cars-rail::-webkit-scrollbar { display: none; }
-  .cars-rail > div { scroll-snap-align: start; }
-  @media (min-width: 40rem) { .cars-rail { grid-auto-columns: 45%; } }
-  @media (min-width: 64rem) { .cars-rail { grid-auto-flow: row; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: visible; } }
 }
 </style>
 

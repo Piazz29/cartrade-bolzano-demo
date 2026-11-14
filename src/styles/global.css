@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+/* La versione archiviata con lista clienti e admin non fa parte del sito */
+@source not "../../archivio";
 
 /* Archivo variabile (peso 100-900, larghezza 62-125%), un solo file latin self-hosted. */
 @font-face {

@@ -1,0 +1,57 @@
+---
+// Fascia loghi: marche auto monocromatiche che scorrono, senza testo né controlli.
+// Loghi da Simple Icons (CC0), raccolti in uno sprite esterno (public/brands/sprite.svg, in cache dopo il primo caricamento).
+// Rigenerare lo sprite: npm run brands (elenco marchi in scripts/build-brand-sprite.mjs).
+// I loghi sono marchi dei rispettivi proprietari: indicano le marche su cui si lavora, non una concessione ufficiale.
+// TODO: confermare con il cliente l'elenco delle marche e che vada bene mostrarne i loghi.
+// Scorre in CSS; con "riduci movimento" molto più lenta. Decorativa: l'elenco delle marche resta leggibile agli screen reader.
+import type { Lang } from '../data/site';
+import brands from '../data/brands.json';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const label = { it: 'Marche su cui lavoriamo', de: 'Marken, mit denen wir arbeiten', en: 'Makes we work on' }[lang];
+// Correzione ottica: i loghi larghi e bassi vengono ingranditi per pesare come quelli tondi
+const optical: Record<string, number> = { audi: 1.55, ford: 1.5, kia: 1.55, dacia: 1.5, mini: 1.5, jeep: 1.35, opel: 1.25, hyundai: 1.2, toyota: 1.12, volvo: 1.05 };
+---
+<section class="brands" aria-label={label}>
+  <div class="mq" aria-hidden="true">
+    <div class="mq-track">
+      {[0, 1].map(() => (
+        <ul class="mq-group">
+          {brands.map((b) => (
+            <li class="logo" style={`--s:${optical[b.slug] ?? 1}`}>
+              <svg viewBox="0 0 24 24" focusable="false"><use href={`/brands/sprite.svg#${b.slug}`} /></svg>
+            </li>
+          ))}
+        </ul>
+      ))}
+    </div>
+  </div>
+  <p class="sr-only">{label}: {brands.map((b) => b.title).join(', ')}.</p>
+</section>
+
+<style>
+@layer components {
+  .brands {
+    --logo-h: clamp(3rem, 5.2vw, 4.5rem);
+    --logo-gap: clamp(3rem, 6.5vw, 6rem);
+    border-block: 1px solid var(--line);
+    background: var(--color-paper);
+  }
+  .mq {
+    overflow: hidden;
+    padding-block: clamp(2rem, 4vw, 3.25rem);
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+  }
+  .mq-track { display: flex; width: max-content; animation: mq 60s linear infinite; will-change: transform; }
+  .mq-group { display: flex; align-items: center; gap: var(--logo-gap); padding-right: var(--logo-gap); }
+  .logo { display: flex; align-items: center; justify-content: center; flex: none; width: calc(var(--logo-h) * var(--s)); height: var(--logo-h); }
+  .logo svg { flex: none; width: calc(var(--logo-h) * var(--s)); height: calc(var(--logo-h) * var(--s)); fill: color-mix(in oklab, var(--color-ink) 62%, transparent); overflow: visible; }
+  @keyframes mq { to { transform: translateX(-50%); } }
+  /* "Riduci movimento": scorre comunque, molto più lento (le regole vincono sull'azzeramento globale) */
+  @media (prefers-reduced-motion: reduce) {
+    .mq-track { animation-duration: 160s !important; animation-iteration-count: infinite !important; }
+  }
+}
+</style>

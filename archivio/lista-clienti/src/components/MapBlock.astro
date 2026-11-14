@@ -1,0 +1,71 @@
+---
+// Mappa Google Maps incorporata, con la scheda dell'attività ("Centro Revisioni Dekra - Car Trade Srl").
+// - Con PUBLIC_GOOGLE_MAPS_API_KEY: Maps Embed API ufficiale (gratuita), centrata sul Place ID.
+// - Senza chiave: embed pubblico di Google Maps (verificato: trova la stessa scheda, 4,5 ★ / 61).
+// L'iframe si carica in lazy: non pesa sull'apertura della pagina.
+// TODO: in produzione l'iframe di Google imposta cookie di terze parti: collegarlo al banner cookie
+//       (mostrare la mappa solo dopo il consenso "funzionali/terze parti").
+import { site, type Lang } from '../data/site';
+import { ui } from '../i18n/ui';
+import Icon from './Icon.astro';
+interface Props { lang: Lang; class?: string }
+const { lang, class: cls } = Astro.props;
+const t = ui[lang];
+const copy = {
+  it: { title: 'Mappa Google: Car Trade, Via Werner von Siemens 4/F, Bolzano', open: 'Apri in Google Maps', zone: 'Zona produttiva Bolzano Sud' },
+  de: { title: 'Google-Karte: Car Trade, Werner-von-Siemens-Straße 4/F, Bozen', open: 'In Google Maps öffnen', zone: 'Gewerbegebiet Bozen Süd' },
+  en: { title: 'Google map: Car Trade, Via Werner von Siemens 4/F, Bolzano', open: 'Open in Google Maps', zone: 'Bolzano South business park' },
+}[lang];
+
+const query = encodeURIComponent('CAR TRADE SRL, Via Werner von Siemens 4/F, 39100 Bolzano');
+const embed = site.google.apiKey
+  ? `https://www.google.com/maps/embed/v1/place?key=${site.google.apiKey}&q=place_id:${site.google.placeId}&zoom=16&language=${lang}&region=IT`
+  : `https://www.google.com/maps?q=${query}&z=16&hl=${lang}&output=embed`;
+---
+<figure class:list={['map', cls]}>
+  <div class="frame">
+    <iframe
+      src={embed}
+      title={copy.title}
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"
+      allowfullscreen
+    ></iframe>
+  </div>
+  <figcaption class="bar">
+    <span class="flex items-start gap-2">
+      <Icon name="pin" size={18} class="mt-0.5 shrink-0 text-orange-ink" />
+      <span>
+        <span class="block font-semibold">{site.address.street[lang]}</span>
+        <span class="block text-sm text-muted">{site.address.postalCode} {site.address.city[lang]} · {copy.zone}</span>
+      </span>
+    </span>
+    <span class="flex flex-wrap gap-2">
+      <a href={site.mapsUrl} class="btn btn-ink !min-h-[2.75rem] !py-2 !text-[0.9375rem]" target="_blank" rel="noopener">
+        {t.cta.directions} <Icon name="arrow-up-right" size={16} />
+        <span class="sr-only">({t.newTab})</span>
+      </a>
+      <a href={site.google.url} class="btn btn-ghost !min-h-[2.75rem] !py-2 !text-[0.9375rem]" target="_blank" rel="noopener">
+        {copy.open}<span class="sr-only"> ({t.newTab})</span>
+      </a>
+    </span>
+  </figcaption>
+</figure>
+
+<style>
+@layer components {
+  .map { margin: 0; border: 1px solid var(--line); background: var(--color-paper); }
+  .frame { position: relative; aspect-ratio: 4 / 5; background: var(--color-paper-3); }
+  @media (min-width: 40rem) { .frame { aspect-ratio: 16 / 11; } }
+  .frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.1rem;
+    border-top: 1px solid var(--line);
+  }
+}
+</style>

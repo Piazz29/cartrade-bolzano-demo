@@ -1,7 +1,7 @@
 // Scadenza della revisione (art. 80 Codice della Strada, autovetture uso privato):
 // prima revisione entro 4 anni dalla prima immatricolazione, poi ogni 2 anni,
 // sempre entro la fine del mese di riferimento.
-// Unica fonte della regola: la usano il calcolatore, l'iscrizione ai promemoria, le email e l'admin.
+// Unica fonte della regola: la usa il calcolatore della scadenza.
 
 export type RifTipo = 'rev' | 'reg'; // ultima revisione | prima immatricolazione
 

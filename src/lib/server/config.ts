@@ -1,45 +1,21 @@
 // Configurazione del server, letta dalle variabili d'ambiente (vedi .env.example).
 // Solo per codice lato server: le chiavi non finiscono mai nel browser.
-import {
-  ADMIN_DEMO_PASSWORD,
-  DEMO_KEY,
-  DEMO_OWNER_EMAIL,
-  EMAIL_FROM,
-  RESEND_API_KEY,
-  SUPABASE_SERVICE_ROLE_KEY,
-  SUPABASE_URL,
-  WHATSAPP_PHONE_ID,
-  WHATSAPP_TEMPLATE,
-  WHATSAPP_TOKEN,
-} from 'astro:env/server';
-import type { StatoServizi } from '../crm/types';
+// Il sito non ha database: l'unico servizio esterno è Resend, per inoltrare al titolare
+// le richieste dei moduli contatti e preventivo. Il destinatario è fisso (lib/contatti.ts → site.email).
+import { EMAIL_FROM, RESEND_API_KEY } from 'astro:env/server';
+
+/** Indirizzo del mittente: quello di EMAIL_FROM (dominio verificato su Resend), sempre con il nome "Sito web" */
+const indirizzoMittente = (() => {
+  const v = EMAIL_FROM?.trim() || '';
+  return v.match(/<([^>]+)>/)?.[1] || (v.includes('@') ? v : 'demo@auralpdigital.com');
+})();
 
 export const config = {
-  supabaseUrl: SUPABASE_URL?.trim() || '',
-  supabaseKey: SUPABASE_SERVICE_ROLE_KEY?.trim() || '',
   resendKey: RESEND_API_KEY?.trim() || '',
-  emailFrom: EMAIL_FROM?.trim() || 'Car Trade Bolzano · demo <demo@auralpdigital.com>',
-  ownerEmail: DEMO_OWNER_EMAIL?.trim() || '',
-  demoKey: DEMO_KEY?.trim() || '',
-  adminPassword: ADMIN_DEMO_PASSWORD?.trim() || (import.meta.env.DEV ? 'demo' : ''),
-  whatsapp: {
-    token: WHATSAPP_TOKEN?.trim() || '',
-    phoneId: WHATSAPP_PHONE_ID?.trim() || '',
-    template: WHATSAPP_TEMPLATE?.trim() || '',
-  },
+  emailFrom: `Sito web Car Trade Bolzano <${indirizzoMittente}>`,
 };
 
-/** Limiti anti-spam sugli invii email reali */
-export const LIMITI = { emailGiorno: 30, emailPerDestinatario: 5 };
+/** Tetto anti-abuso sulle email inoltrate al titolare (per istanza del server, in memoria) */
+export const LIMITI = { emailGiorno: 60 };
 
-export const dbAttivo = () => Boolean(config.supabaseUrl && config.supabaseKey);
-/** Le email reali partono solo con Resend E Supabase: senza database non si possono contare gli invii (limiti) */
-export const emailAttiva = () => Boolean(config.resendKey && dbAttivo());
-export const whatsappApiAttiva = () => Boolean(config.whatsapp.token && config.whatsapp.phoneId && config.whatsapp.template);
-
-export const statoServizi = (): StatoServizi => ({
-  db: dbAttivo(),
-  email: emailAttiva(),
-  whatsappApi: whatsappApiAttiva(),
-  demoKey: Boolean(config.demoKey),
-});
+export const emailAttiva = () => Boolean(config.resendKey);

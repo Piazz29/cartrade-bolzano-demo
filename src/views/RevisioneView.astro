@@ -5,8 +5,9 @@ import Photo from '../components/Photo.astro';
 import Icon from '../components/Icon.astro';
 import SectionHead from '../components/SectionHead.astro';
 import RevisionCalculator from '../components/RevisionCalculator.astro';
+import InspectionTour from '../components/InspectionTour.astro';
 import Faq from '../components/Faq.astro';
-import { site, formatPrice, type Lang } from '../data/site';
+import { site, formatPrice, areaName, type Lang } from '../data/site';
 import { routes, alternatesFor } from '../i18n/routes';
 import { ui } from '../i18n/ui';
 
@@ -32,9 +33,9 @@ const copy = {
     howTitle: 'Quattro passaggi, una mattina.',
     steps: [
       { t: 'Prenoti online', d: 'Scegli giorno e ora sul portale DEKRA. Ricevi la conferma via email.', meta: '2 minuti' },
-      // TODO: confermare la durata media del controllo
       { t: 'Arrivi con il libretto', d: 'Porta la carta di circolazione o il Documento Unico. Non serve il proprietario: può venire chiunque.', meta: 'In sede' },
-      { t: 'Il controllo', d: 'Freni, sterzo, sospensioni, luci, pneumatici, emissioni, telaio, cinture e vetri. Tutto con strumenti tarati e certificati.', meta: '~ 30–40 min' },
+      // Durata indicata da DEKRA (revisione.dekra.it). TODO: confermare con il cliente i tempi reali in sede
+      { t: 'Il controllo', d: 'Nove aree, dai freni alle emissioni, con strumenti tarati e certificati. Qui sotto le vedi una per una.', meta: '~ 20–30 min' },
       { t: 'L’esito', d: 'Il risultato viene registrato nell’archivio della Motorizzazione e riportato sul documento dell’auto.', meta: 'Subito' },
     ],
     bringLabel: 'Prima di venire',
@@ -65,18 +66,19 @@ const copy = {
     outHere: 'Il revisore ti spiega il difetto, l’officina ti fa il preventivo e, se lo accetti, ripara. Poi ripresenti l’auto a pochi metri di distanza. Niente carro attrezzi, niente seconda officina da trovare.',
     // TODO: confermare con il cliente le condizioni per la nuova revisione dopo esito "ripetere"
     outHereNote: 'La nuova revisione si paga secondo tariffa nazionale.',
-    outCta: 'Officina e carrozzeria',
+    outCta: 'L’officina',
     calcLabel: 'Scadenza',
     calcTitle: 'Quando scade la tua?',
     faqLabel: 'Domande frequenti',
     faq: [
       { q: 'Quanto costa la revisione auto?', a: `${formatPrice(fee.total, 'it', 2)}, tutto compreso. È la tariffa nazionale fissata dal Ministero: tariffa ${formatPrice(54.95, 'it', 2)}, IVA, diritti della Motorizzazione e bollettino.` },
       { q: 'Ogni quanto si fa la revisione?', a: 'La prima entro 4 anni dalla prima immatricolazione, poi ogni 2 anni. La scadenza è sempre la fine del mese: se l’ultima revisione è del 10 marzo 2025, hai tempo fino al 31 marzo 2027.' },
+      { q: 'Dove fare la revisione auto a Bolzano?', a: `In ${site.address.street.it}, zona produttiva di Bolzano Sud: centro revisioni affiliato DEKRA, aperto dal lunedì al venerdì, 8:30–12:30 e 14:00–18:00. Si prenota online sul portale DEKRA scegliendo giorno e ora.` },
       { q: 'Quali veicoli revisionate?', a: 'Il centro è abilitato per le autovetture. Per altri veicoli chiamaci e ti indichiamo come fare.' },
       { q: 'Posso portare l’auto di qualcun altro?', a: 'Sì. Non serve il proprietario né una delega: basta il documento originale dell’auto.' },
       { q: 'La revisione è scaduta: posso venire con l’auto?', a: 'Sì, il giorno della prenotazione puoi raggiungere il centro con l’auto. Prenota il prima possibile: circolare con la revisione scaduta comporta una sanzione.' },
       { q: 'Se l’auto non passa, cosa succede?', a: 'Con esito “ripetere” puoi circolare per riparare e devi ripresentarla entro un mese. Da noi l’officina è interna: ripariamo e ripresenti l’auto senza spostarla.' },
-      { q: 'Mi ricordate voi quando scade?', a: 'Sì, gratis. Ti iscrivi in 30 secondi alla pagina Promemoria revisione con targa e mese dell’ultima revisione: ti scriviamo via email o WhatsApp 30 e 7 giorni prima.' },
+      { q: 'Come faccio a non dimenticare la scadenza?', a: 'Usa il calcolatore in questa pagina: inserisci mese e anno dell’ultima revisione e con «Aggiungi al calendario» salvi la scadenza sul telefono, con un avviso un mese prima.' },
     ],
   },
   de: {
@@ -96,7 +98,7 @@ const copy = {
     steps: [
       { t: 'Online buchen', d: 'Tag und Uhrzeit im DEKRA-Portal wählen. Die Bestätigung kommt per E-Mail.', meta: '2 Minuten' },
       { t: 'Mit Fahrzeugschein kommen', d: 'Bringen Sie den Fahrzeugschein oder das Einheitsdokument mit. Der Halter muss nicht selbst kommen.', meta: 'Vor Ort' },
-      { t: 'Die Prüfung', d: 'Bremsen, Lenkung, Fahrwerk, Licht, Reifen, Abgase, Rahmen, Gurte und Scheiben. Mit geeichten, zertifizierten Geräten.', meta: '~ 30–40 Min.' },
+      { t: 'Die Prüfung', d: 'Neun Bereiche, von den Bremsen bis zu den Abgasen, mit geeichten, zertifizierten Geräten. Unten sehen Sie jeden einzeln.', meta: '~ 20–30 Min.' },
       { t: 'Das Ergebnis', d: 'Das Ergebnis wird im Register des Motorisierungsamts gespeichert und im Fahrzeugdokument eingetragen.', meta: 'Sofort' },
     ],
     bringLabel: 'Vor dem Termin',
@@ -125,18 +127,82 @@ const copy = {
     outHereTitle: 'Bei uns muss das Auto nirgendwohin.',
     outHere: 'Der Prüfer erklärt den Mangel, die Werkstatt macht ein Angebot und repariert, wenn Sie zustimmen. Danach stellen Sie das Auto ein paar Meter weiter erneut vor. Kein Abschleppwagen, keine zweite Werkstatt.',
     outHereNote: 'Die erneute Revision wird nach staatlichem Tarif berechnet.',
-    outCta: 'Werkstatt & Karosserie',
+    outCta: 'Zur Werkstatt',
     calcLabel: 'Fälligkeit',
     calcTitle: 'Wann ist Ihre fällig?',
     faqLabel: 'Häufige Fragen',
     faq: [
       { q: 'Was kostet die Revision?', a: `${formatPrice(fee.total, 'de', 2)} inklusive allem. Das ist der staatliche Tarif: Prüfgebühr ${formatPrice(54.95, 'de', 2)}, MwSt., Gebühren des Motorisierungsamts und Posteinzahlung.` },
       { q: 'Wie oft muss das Auto zur Revision?', a: 'Die erste innerhalb von 4 Jahren ab Erstzulassung, danach alle 2 Jahre. Fällig ist sie immer zum Monatsende: War die letzte Revision am 10. März 2025, haben Sie bis 31. März 2027 Zeit.' },
+      { q: 'Wo kann ich in Bozen die Revision machen?', a: `In der ${site.address.street.de}, Gewerbegebiet Bozen Süd: DEKRA-Partner für die Revision, geöffnet Montag bis Freitag, 8:30–12:30 und 14:00–18:00 Uhr. Gebucht wird online im DEKRA-Portal.` },
+      { q: 'Ist die Revision dasselbe wie TÜV oder Pickerl?', a: 'Ja, die Revision ist die italienische Pflichtprüfung, vergleichbar mit der Hauptuntersuchung (HU, „TÜV“) in Deutschland und dem „Pickerl“ in Österreich. Sie gilt für Fahrzeuge mit italienischem Kennzeichen; Autos mit ausländischem Kennzeichen werden im Zulassungsland geprüft.' },
       { q: 'Welche Fahrzeuge prüfen Sie?', a: 'Die Prüfstelle ist für Pkw zugelassen. Für andere Fahrzeuge rufen Sie uns an, wir sagen Ihnen, wie es geht.' },
       { q: 'Kann ich das Auto einer anderen Person bringen?', a: 'Ja. Weder der Halter noch eine Vollmacht sind nötig, nur das Originaldokument des Fahrzeugs.' },
       { q: 'Die Revision ist abgelaufen: Darf ich mit dem Auto kommen?', a: 'Ja, am Tag des Termins dürfen Sie mit dem Auto zur Prüfstelle fahren. Buchen Sie möglichst bald: Fahren mit abgelaufener Revision wird bestraft.' },
       { q: 'Was passiert, wenn das Auto nicht besteht?', a: 'Bei „Wiederholen“ dürfen Sie zur Reparatur fahren und müssen innerhalb eines Monats erneut vorstellen. Bei uns ist die Werkstatt im Haus: Wir reparieren, Sie stellen das Auto erneut vor, ohne es zu bewegen.' },
-      { q: 'Erinnern Sie mich an den Termin?', a: 'Ja, kostenlos. Melden Sie sich in 30 Sekunden auf der Seite Revisions-Erinnerung mit Kennzeichen und Monat der letzten Revision an: Wir schreiben Ihnen per E-Mail oder WhatsApp 30 und 7 Tage vorher.' },
+      { q: 'Wie vergesse ich den Termin nicht?', a: 'Mit dem Rechner auf dieser Seite: Monat und Jahr der letzten Revision eingeben und mit „In den Kalender eintragen“ den Termin im Handy speichern, mit Erinnerung einen Monat vorher.' },
+    ],
+  },
+  en: {
+    title: 'Car inspection in Bolzano · DEKRA-affiliated centre',
+    description: `Car inspection (revisione) in Bolzano, Via Werner von Siemens 4/F. DEKRA-affiliated centre, national fee ${formatPrice(fee.total, 'en', 2)}, online booking. If it fails, the workshop is on site.`,
+    label: 'Inspection',
+    h1: 'Car inspection in Bolzano, no running around.',
+    lead: 'Book the day that suits you online, wait on site and leave with the result. If the check finds a fault, the workshop is in the same place.',
+    calc: 'Work out the due date',
+    feeLabel: 'National fee',
+    feeSub: 'The same price at every authorised centre in Italy, set by the Ministry.',
+    feeParts: { base: 'Inspection fee', vat: 'VAT 22%', dtt: 'Motor registry fees', postal: 'Postal payment slip' },
+    feeTotal: 'Total',
+    photoAlt: 'Silver car on the lift with the bonnet open, ready for the inspection',
+    howLabel: 'How it works',
+    howTitle: 'Four steps, one morning.',
+    steps: [
+      { t: 'Book online', d: 'Choose the day and time on the DEKRA portal. You’ll get a confirmation by email.', meta: '2 minutes' },
+      { t: 'Bring the registration document', d: 'Bring the registration certificate (carta di circolazione) or the Documento Unico. The owner doesn’t need to come: anyone can bring the car.', meta: 'On site' },
+      { t: 'The check', d: 'Nine areas, from brakes to emissions, with calibrated, certified equipment. You can see each one below.', meta: '~ 20–30 min' },
+      { t: 'The result', d: 'The result is recorded in the motor vehicle registry and noted in the car’s document.', meta: 'Straight away' },
+    ],
+    bringLabel: 'Before you come',
+    bringTitle: 'What to bring and what to check.',
+    bringHead: 'What to bring',
+    bring: [
+      'Original registration certificate or Documento Unico',
+      'A way to pay: card, debit card or cash',
+    ],
+    checkHead: 'What to check at home',
+    check: [
+      'All lights work, including number plate and brake lights',
+      'Tyres with at least 1.6 mm of tread, no cuts',
+      'No warning lights on the dashboard',
+      'No cracks in the windscreen in the driver’s field of view',
+      'Horn, wipers and seat belts in working order',
+    ],
+    checkNote: 'Not sure? Drop by the workshop a few days before: a quick check costs less than having to repeat the inspection.',
+    outLabel: 'If it fails',
+    outTitle: 'Three possible results. For two of them, the workshop steps in.',
+    outcomes: [
+      { k: 'ok', t: 'Passed', d: 'The car is fine. Next inspection in two years, by the end of the same month.' },
+      { k: 'rep', t: 'Repeat', d: 'Faults to fix. You may drive to get them repaired and must present the car again within a month.' },
+      { k: 'sus', t: 'Suspended', d: 'Serious safety faults. The car can’t be driven until it passes a new inspection.' },
+    ],
+    outHereTitle: 'With us, your car doesn’t have to go anywhere.',
+    outHere: 'The inspector explains the fault, the workshop gives you a quote and, if you accept it, does the repair. Then you present the car again a few metres away. No tow truck, no second garage to find.',
+    outHereNote: 'The new inspection is charged at the national fee.',
+    outCta: 'The workshop',
+    calcLabel: 'Due date',
+    calcTitle: 'When is yours due?',
+    faqLabel: 'Frequently asked questions',
+    faq: [
+      { q: 'How much does a car inspection cost?', a: `${formatPrice(fee.total, 'en', 2)}, all inclusive. It’s the national fee set by the Ministry: inspection fee ${formatPrice(54.95, 'en', 2)}, VAT, motor registry fees and the postal payment slip.` },
+      { q: 'How often does a car need an inspection?', a: 'The first within 4 years of first registration, then every 2 years. It’s always due by the end of the month: if your last inspection was on 10 March 2025, you have until 31 March 2027.' },
+      { q: 'Where can I get my car inspected in Bolzano?', a: `At ${site.address.street.en}, Bolzano South business park: a DEKRA-affiliated inspection centre, open Monday to Friday, 8:30–12:30 and 14:00–18:00. You book online on the DEKRA portal.` },
+      { q: 'Is the Italian revisione the same as an MOT?', a: 'Yes: the revisione is Italy’s compulsory roadworthiness test, the equivalent of the UK MOT or the German TÜV. It applies to cars registered in Italy; foreign-registered cars are tested in their country of registration.' },
+      { q: 'Which vehicles do you inspect?', a: 'The centre is approved for cars. For other vehicles, give us a call and we’ll tell you what to do.' },
+      { q: 'Can I bring someone else’s car?', a: 'Yes. Neither the owner nor a letter of authorisation is needed, just the car’s original document.' },
+      { q: 'My inspection has expired: can I still drive the car to you?', a: 'Yes, on the day of your appointment you may drive the car to the centre. Book as soon as possible: driving with an expired inspection is fined.' },
+      { q: 'What happens if the car fails?', a: 'With a “repeat” result you may drive to get it repaired and must present it again within a month. Our workshop is in-house: we fix it and you present the car again without moving it.' },
+      { q: 'How do I make sure I don’t forget the due date?', a: 'Use the calculator on this page: enter the month and year of your last inspection and tap “Add to calendar” to save the date on your phone, with an alert a month before.' },
     ],
   },
 }[lang];
@@ -146,13 +212,28 @@ const faqLd = {
   '@type': 'FAQPage',
   mainEntity: copy.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
 };
+const siteUrl = Astro.site!.toString().replace(/\/$/, '');
+const pageUrl = `${siteUrl}${routes.revisione[lang]}`;
 const serviceLd = {
   '@context': 'https://schema.org',
   '@type': 'Service',
-  serviceType: lang === 'it' ? 'Revisione auto' : 'Fahrzeugrevision',
-  provider: { '@id': `${Astro.site!.toString().replace(/\/$/, '')}/#business` },
-  areaServed: lang === 'it' ? 'Bolzano' : 'Bozen',
-  offers: { '@type': 'Offer', price: fee.total.toFixed(2), priceCurrency: 'EUR' },
+  '@id': `${pageUrl}#service`,
+  name: copy.title,
+  serviceType: { it: 'Revisione auto', de: 'Fahrzeugrevision', en: 'Vehicle inspection' }[lang],
+  description: copy.description,
+  url: pageUrl,
+  inLanguage: lang,
+  provider: { '@id': `${siteUrl}/#business` },
+  areaServed: site.area.map((a) => ({ '@type': a.type, name: areaName(a, lang) })),
+  // Tariffa nazionale fissa, uguale in tutti i centri autorizzati
+  offers: {
+    '@type': 'Offer',
+    price: fee.total.toFixed(2),
+    priceCurrency: 'EUR',
+    url: site.dekra.bookingUrl,
+    availability: 'https://schema.org/InStock',
+  },
+  availableChannel: { '@type': 'ServiceChannel', serviceUrl: site.dekra.bookingUrl, servicePhone: { '@type': 'ContactPoint', telephone: site.phone.e164 } },
 };
 ---
 <Base lang={lang} title={copy.title} description={copy.description} alternates={alternatesFor('revisione')} current="revisione" jsonLd={[serviceLd, faqLd]}>
@@ -217,10 +298,13 @@ const serviceLd = {
     </div>
   </section>
 
-  <!-- 02 Cosa portare -->
+  <!-- 02 Il controllo, area per area (banco di collaudo) -->
+  <InspectionTour lang={lang} num="02" headingId="tour-title" variant="full" />
+
+  <!-- 03 Cosa portare -->
   <section class="section-y bg-paper-2" aria-labelledby="bring-title">
     <div class="wrap">
-      <SectionHead num="02" label={copy.bringLabel} />
+      <SectionHead num="03" label={copy.bringLabel} />
       <h2 id="bring-title" class="t-h2 mt-8 max-w-[18ch] lg:mt-12" data-reveal>{copy.bringTitle}</h2>
       <div class="grid-12 mt-10 gap-y-12 lg:mt-14">
         <div class="col-span-4 lg:col-span-5">
@@ -243,10 +327,10 @@ const serviceLd = {
     </div>
   </section>
 
-  <!-- 03 Esiti -->
-  <section class="on-dark section-y bg-night text-paper" aria-labelledby="out-title">
+  <!-- 04 Esiti -->
+  <section class="on-dark section-y bg-night text-paper" aria-labelledby="out-title" id="esiti">
     <div class="wrap">
-      <SectionHead num="03" label={copy.outLabel} dark />
+      <SectionHead num="04" label={copy.outLabel} dark />
       <h2 id="out-title" class="t-h2 mt-8 max-w-[20ch] lg:mt-12" data-reveal>{copy.outTitle}</h2>
       <ol class="outcomes mt-10 lg:mt-14" data-stagger="100">
         {copy.outcomes.map((o) => (
@@ -268,10 +352,10 @@ const serviceLd = {
     </div>
   </section>
 
-  <!-- 04 Calcolatore -->
+  <!-- 05 Calcolatore -->
   <section class="section-y" aria-labelledby="calc-title" id="scadenza">
     <div class="wrap">
-      <SectionHead num="04" label={copy.calcLabel} />
+      <SectionHead num="05" label={copy.calcLabel} />
       <h2 id="calc-title" class="t-h2 mt-8 lg:mt-12" data-reveal>{copy.calcTitle}</h2>
       <div class="on-dark mt-10 bg-night p-4 text-paper sm:p-8 lg:mt-14 lg:p-12">
         <RevisionCalculator lang={lang} id="rev-calc" />
@@ -279,11 +363,11 @@ const serviceLd = {
     </div>
   </section>
 
-  <!-- 05 FAQ -->
+  <!-- 06 FAQ -->
   <section class="section-y pt-0" aria-labelledby="faq-title">
     <div class="wrap grid-12 gap-y-10">
       <div class="col-span-4 lg:col-span-4">
-        <SectionHead num="05" label={copy.faqLabel} />
+        <SectionHead num="06" label={copy.faqLabel} />
         <h2 id="faq-title" class="sr-only">{copy.faqLabel}</h2>
       </div>
       <div class="col-span-4 lg:col-span-8">

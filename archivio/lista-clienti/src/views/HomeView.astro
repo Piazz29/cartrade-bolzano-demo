@@ -1,0 +1,888 @@
+---
+import Base from '../layouts/Base.astro';
+import Photo from '../components/Photo.astro';
+import RoofLine from '../components/RoofLine.astro';
+import Icon from '../components/Icon.astro';
+import SectionHead from '../components/SectionHead.astro';
+import OpenStatus from '../components/OpenStatus.astro';
+import GoogleReviews from '../components/GoogleReviews.astro';
+import GoogleLogo from '../components/GoogleLogo.astro';
+import Marquee from '../components/Marquee.astro';
+import RevisionCalculator from '../components/RevisionCalculator.astro';
+import InspectionTour from '../components/InspectionTour.astro';
+import MapBlock from '../components/MapBlock.astro';
+import Faq from '../components/Faq.astro';
+import HoursTable from '../components/HoursTable.astro';
+import { site, formatNumber, formatPrice, type Lang } from '../data/site';
+import { routes, alternatesFor } from '../i18n/routes';
+import { ui } from '../i18n/ui';
+import { unsplash, unsplashSrcset } from '../lib/img';
+import { Picture, getImage } from 'astro:assets';
+import { fotoLocale, fotoUnsplash } from '../lib/foto';
+import type { FotoKey } from '../data/foto';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = ui[lang];
+
+const copy = {
+  it: {
+    title: 'Revisione auto, officina e carrozzeria a Bolzano',
+    description:
+      'Centro revisioni affiliato DEKRA, officina meccanica e carrozzeria in Via Werner von Siemens 4/F a Bolzano. Prenota la revisione online.',
+    eyebrow: 'Bolzano Sud · Via Werner von Siemens 4/F',
+    h1: ['Un solo indirizzo.', 'Tutto per la tua auto.'],
+    kicker: 'Revisione, officina e carrozzeria a Bolzano',
+    lead: 'Revisione DEKRA, meccanica e carrozzeria sotto lo stesso tetto a Bolzano Sud. Se la revisione trova un difetto, lo ripariamo qui.',
+    svcNav: 'I nostri servizi',
+    svc: [
+      ['Revisione', routes.revisione.it],
+      ['Officina', `${routes.officina.it}#officina`],
+      ['Carrozzeria', `${routes.officina.it}#carrozzeria`],
+    ],
+    heroAlt: 'Officina luminosa con un’auto sul ponte sollevatore e un meccanico al lavoro sul motore',
+    strip: {
+      hours: 'Orari lun – ven',
+      google: 'Google',
+      reviews: 'recensioni',
+      fee: 'Revisione auto',
+      feeNote: 'tariffa nazionale',
+      where: 'Dove',
+      whereVal: 'Via W. von Siemens 4/F',
+      whereNote: 'Bolzano Sud',
+    },
+    servicesLabel: 'Tre servizi, una sede',
+    servicesTitle: 'Dal controllo obbligatorio alla riparazione.',
+    services: [
+      {
+        key: 'revisione',
+        title: 'Revisione',
+        text: 'Centro revisioni affiliato DEKRA per autovetture. Prenoti online, aspetti in sede, esci con l’esito sul libretto.',
+        facts: ['79,02 € tariffa nazionale', 'Prenotazione online'],
+        href: routes.revisione.it,
+        foto: 'revisione-linea',
+        alt: 'Berlina argento sul ponte sollevatore con il cofano aperto',
+      },
+      {
+        key: 'officina',
+        title: 'Officina',
+        text: 'Tagliandi, freni, distribuzione, diagnosi elettronica. Prima ti diciamo cosa serve e quanto costa, poi mettiamo le mani sull’auto.',
+        facts: ['Tagliandi', 'Freni', 'Diagnosi'],
+        href: `${routes.officina.it}#officina`,
+        foto: 'officina-ponti',
+        alt: 'Officina ordinata con diverse auto in lavorazione',
+      },
+      {
+        key: 'carrozzeria',
+        title: 'Carrozzeria',
+        text: 'Graffi, ammaccature, danni alla scocca. Mandaci una foto del danno e ricevi un preventivo senza venire in sede.',
+        facts: ['Preventivo da foto', 'Raddrizzatura', 'Verniciatura'],
+        href: `${routes.officina.it}#carrozzeria`,
+        foto: 'carrozzeria',
+        alt: 'Carrozziere che lucida la fiancata di un’auto grigia',
+      },
+    ],
+    flowTitle: 'Se la revisione non passa, non ricominci da capo.',
+    flowText: 'Il vantaggio di avere tutto nella stessa sede si vede proprio quando qualcosa va storto.',
+    flow: [
+      { t: 'Revisione', d: 'Il controllo trova un difetto: una luce, i freni, le emissioni.' },
+      { t: 'Diagnosi', d: 'L’officina ti dice subito cosa serve e quanto costa.' },
+      { t: 'Riparazione', d: 'Ripariamo qui. Niente carro attrezzi, niente altra officina.' },
+      { t: 'Nuova verifica', d: 'Ripresenti l’auto entro un mese, a pochi metri di distanza.' },
+    ],
+    trustLabel: 'Fiducia',
+    trustTitle: 'clienti lo hanno scritto su Google.',
+    trustOf: 'su 5',
+    reasons: [
+      { t: 'Centro revisioni affiliato DEKRA', d: 'Controlli eseguiti con le procedure DEKRA, secondo le norme del Ministero dei Trasporti.' },
+      { t: 'Officina e carrozzeria interne', d: 'Un solo interlocutore dalla diagnosi alla consegna. Nessun passaggio di mano.' },
+      // TODO: confermare con il cliente la politica sui preventivi
+      { t: 'Prezzo chiaro prima di iniziare', d: 'Sai cosa facciamo e quanto costa prima che l’auto entri in officina.' },
+    ],
+    calcLabel: 'Scadenza revisione',
+    calcTitle: 'Quando scade la tua revisione?',
+    calcText: 'Indica il mese e l’anno: calcoliamo la scadenza secondo il Codice della Strada. Se vuoi, ti avvisiamo noi 30 e 7 giorni prima.',
+    whereLabel: 'Dove siamo',
+    whereTitle: 'Zona produttiva Bolzano Sud.',
+    // TODO: se c'è parcheggio clienti, dirlo qui (dato da confermare)
+    whereText: 'Fuori dal traffico del centro, a pochi minuti dalla città. Prima di venire, una telefonata ti evita l’attesa.',
+    faqLabel: 'Domande frequenti',
+    faq: [
+      { q: 'Quanto costa la revisione a Bolzano e come si prenota?', a: `${formatPrice(site.revisionFee.total, 'it', 2)} tutto compreso: è la tariffa nazionale, uguale in tutti i centri autorizzati. Si prenota online sul portale DEKRA, scegliendo giorno e ora.` },
+      { q: 'Se l’auto non passa la revisione, dove la riparo?', a: 'Qui. Officina e carrozzeria sono nella stessa sede del centro revisioni: ti diciamo cosa serve e quanto costa, ripariamo e ripresenti l’auto a pochi metri di distanza.' },
+      { q: 'Fate tagliandi e riparazioni su tutte le marche?', a: 'Sì. Tagliandi secondo le specifiche del costruttore, freni, distribuzione, diagnosi elettronica e carrozzeria per auto di ogni marca.' },
+      { q: 'Posso avere un preventivo di carrozzeria senza venire in sede?', a: 'Sì. Dal modulo della pagina Officina e carrozzeria carichi fino a 6 foto del danno dal telefono e ti ricontattiamo con una stima.' },
+      { q: 'Mi ricordate voi quando scade la revisione?', a: 'Sì, gratis. Ti iscrivi in 30 secondi alla pagina Promemoria revisione: ti scriviamo via email o WhatsApp 30 e 7 giorni prima della scadenza.' },
+      { q: 'Dove siete e quando siete aperti?', a: `In ${site.address.street.it}, zona produttiva di Bolzano Sud. Dal lunedì al venerdì, 8:30–12:30 e 14:00–18:00.` },
+    ],
+  },
+  de: {
+    title: 'Revision, Werkstatt und Karosserie in Bozen',
+    description:
+      'DEKRA-Partner für die Fahrzeugrevision, Kfz-Werkstatt und Karosserie in der Werner-von-Siemens-Straße 4/F in Bozen. Revision online buchen.',
+    eyebrow: 'Bozen Süd · Werner-von-Siemens-Straße 4/F',
+    h1: ['Eine Adresse.', 'Alles für Ihr Auto.'],
+    kicker: 'Revision, Werkstatt und Karosserie in Bozen',
+    lead: 'Revision, Mechanik und Karosserie unter einem Dach in Bozen Süd. Findet die Revision einen Mangel, beheben wir ihn gleich hier.',
+    svcNav: 'Unsere Leistungen',
+    svc: [
+      ['Revision', routes.revisione.de],
+      ['Werkstatt', `${routes.officina.de}#werkstatt`],
+      ['Karosserie', `${routes.officina.de}#karosserie`],
+    ],
+    heroAlt: 'Helle Werkstatt mit einem Auto auf der Hebebühne und einem Mechaniker am Motor',
+    strip: {
+      hours: 'Öffnungszeiten Mo – Fr',
+      google: 'Google',
+      reviews: 'Bewertungen',
+      fee: 'Revision Pkw',
+      feeNote: 'staatlicher Tarif',
+      where: 'Standort',
+      whereVal: 'W.-von-Siemens-Str. 4/F',
+      whereNote: 'Bozen Süd',
+    },
+    servicesLabel: 'Drei Leistungen, ein Standort',
+    servicesTitle: 'Von der Pflichtprüfung bis zur Reparatur.',
+    services: [
+      {
+        key: 'revisione',
+        title: 'Revision',
+        text: 'DEKRA-Partner für die Revision von Pkw. Online buchen, vor Ort warten, mit dem Ergebnis im Fahrzeugschein wieder abfahren.',
+        facts: ['79,02 € staatlicher Tarif', 'Online-Buchung'],
+        href: routes.revisione.de,
+        foto: 'revisione-linea',
+        alt: 'Silberne Limousine mit geöffneter Motorhaube auf der Hebebühne',
+      },
+      {
+        key: 'officina',
+        title: 'Werkstatt',
+        text: 'Inspektion, Bremsen, Zahnriemen, elektronische Diagnose. Erst sagen wir Ihnen, was nötig ist und was es kostet, dann geht es los.',
+        facts: ['Inspektion', 'Bremsen', 'Diagnose'],
+        href: `${routes.officina.de}#werkstatt`,
+        foto: 'officina-ponti',
+        alt: 'Aufgeräumte Werkstatt mit mehreren Fahrzeugen in Arbeit',
+      },
+      {
+        key: 'carrozzeria',
+        title: 'Karosserie',
+        text: 'Kratzer, Dellen, Schäden an der Karosserie. Schicken Sie uns ein Foto und erhalten Sie ein Angebot, ohne vorbeizukommen.',
+        facts: ['Angebot per Foto', 'Richtarbeiten', 'Lackierung'],
+        href: `${routes.officina.de}#karosserie`,
+        foto: 'carrozzeria',
+        alt: 'Karosseriebauer poliert die Seite eines grauen Autos',
+      },
+    ],
+    flowTitle: 'Nicht bestanden? Dann fangen Sie nicht von vorne an.',
+    flowText: 'Der Vorteil eines einzigen Standorts zeigt sich genau dann, wenn etwas nicht passt.',
+    flow: [
+      { t: 'Revision', d: 'Die Prüfung findet einen Mangel: Licht, Bremsen, Abgaswerte.' },
+      { t: 'Diagnose', d: 'Die Werkstatt sagt Ihnen sofort, was nötig ist und was es kostet.' },
+      { t: 'Reparatur', d: 'Wir reparieren hier. Kein Abschleppwagen, keine andere Werkstatt.' },
+      { t: 'Nachprüfung', d: 'Sie stellen das Auto innerhalb eines Monats erneut vor, ein paar Meter weiter.' },
+    ],
+    trustLabel: 'Vertrauen',
+    trustTitle: 'Kunden haben es auf Google geschrieben.',
+    trustOf: 'von 5',
+    reasons: [
+      { t: 'DEKRA-Partner für die Revision', d: 'Prüfungen nach den Verfahren von DEKRA und den Vorgaben des Verkehrsministeriums.' },
+      { t: 'Eigene Werkstatt und Karosserie', d: 'Ein Ansprechpartner von der Diagnose bis zur Übergabe. Ohne Umwege.' },
+      { t: 'Klarer Preis vor Arbeitsbeginn', d: 'Sie wissen, was wir machen und was es kostet, bevor das Auto in die Werkstatt fährt.' },
+    ],
+    calcLabel: 'Fälligkeit Revision',
+    calcTitle: 'Wann ist Ihre Revision fällig?',
+    calcText: 'Monat und Jahr angeben: Wir berechnen den Termin nach der Straßenverkehrsordnung. Auf Wunsch erinnern wir Sie 30 und 7 Tage vorher.',
+    whereLabel: 'Anfahrt',
+    whereTitle: 'Gewerbegebiet Bozen Süd.',
+    whereText: 'Abseits vom Stadtverkehr, wenige Minuten vom Zentrum. Ein kurzer Anruf vorab erspart Ihnen Wartezeit.',
+    faqLabel: 'Häufige Fragen',
+    faq: [
+      { q: 'Was kostet die Revision in Bozen und wie bucht man?', a: `${formatPrice(site.revisionFee.total, 'de', 2)} inklusive allem: der staatliche Tarif, in allen zugelassenen Prüfstellen gleich. Gebucht wird online im DEKRA-Portal, mit Wunschtag und Uhrzeit.` },
+      { q: 'Das Auto hat die Revision nicht bestanden: Wo lasse ich es reparieren?', a: 'Gleich hier. Werkstatt und Karosserie sind am selben Standort wie die Prüfstelle: Wir sagen Ihnen, was nötig ist und was es kostet, reparieren und Sie stellen das Auto ein paar Meter weiter erneut vor.' },
+      { q: 'Machen Sie Inspektion und Reparaturen für alle Marken?', a: 'Ja. Inspektion nach Herstellervorgaben, Bremsen, Zahnriemen, elektronische Diagnose und Karosserie für Fahrzeuge aller Marken.' },
+      { q: 'Bekomme ich ein Karosserie-Angebot, ohne vorbeizukommen?', a: 'Ja. Über das Formular auf der Seite Werkstatt & Karosserie laden Sie bis zu 6 Fotos vom Schaden hoch, wir melden uns mit einer Schätzung.' },
+      { q: 'Erinnern Sie mich an die Revision?', a: 'Ja, kostenlos. Melden Sie sich in 30 Sekunden auf der Seite Revisions-Erinnerung an: Wir schreiben Ihnen per E-Mail oder WhatsApp 30 und 7 Tage vor Ablauf.' },
+      { q: 'Wo sind Sie und wann haben Sie geöffnet?', a: `In der ${site.address.street.de}, Gewerbegebiet Bozen Süd. Montag bis Freitag, 8:30–12:30 und 14:00–18:00 Uhr.` },
+    ],
+  },
+  en: {
+    title: 'Vehicle inspection, workshop and bodywork in Bolzano',
+    description:
+      'DEKRA-affiliated vehicle inspection centre, mechanical workshop and body shop at Via Werner von Siemens 4/F, Bolzano. Book your inspection online.',
+    eyebrow: 'Bolzano South · Via Werner von Siemens 4/F',
+    h1: ['One address.', 'Everything for your car.'],
+    kicker: 'Inspection, workshop and bodywork in Bolzano',
+    lead: 'DEKRA vehicle inspection, mechanics and bodywork under one roof in Bolzano South. If the inspection finds a fault, we fix it right here.',
+    svcNav: 'Our services',
+    svc: [
+      ['Inspection', routes.revisione.en],
+      ['Workshop', `${routes.officina.en}#workshop`],
+      ['Bodywork', `${routes.officina.en}#bodywork`],
+    ],
+    heroAlt: 'Bright workshop with a car on the lift and a mechanic working on the engine',
+    strip: {
+      hours: 'Hours Mon – Fri',
+      google: 'Google',
+      reviews: 'reviews',
+      fee: 'Car inspection',
+      feeNote: 'national fee',
+      where: 'Where',
+      whereVal: 'Via W. von Siemens 4/F',
+      whereNote: 'Bolzano South',
+    },
+    servicesLabel: 'Three services, one location',
+    servicesTitle: 'From the mandatory check to the repair.',
+    services: [
+      {
+        key: 'revisione',
+        title: 'Inspection',
+        text: 'DEKRA-affiliated inspection centre for cars. Book online, wait on site, leave with the result in your registration document.',
+        facts: ['€79.02 national fee', 'Online booking'],
+        href: routes.revisione.en,
+        foto: 'revisione-linea',
+        alt: 'Silver saloon on the lift with the bonnet open',
+      },
+      {
+        key: 'officina',
+        title: 'Workshop',
+        text: 'Servicing, brakes, timing belts, electronic diagnostics. First we tell you what’s needed and what it costs, then we get to work.',
+        facts: ['Servicing', 'Brakes', 'Diagnostics'],
+        href: `${routes.officina.en}#workshop`,
+        foto: 'officina-ponti',
+        alt: 'Tidy workshop with several cars being worked on',
+      },
+      {
+        key: 'carrozzeria',
+        title: 'Bodywork',
+        text: 'Scratches, dents, body damage. Send us a photo of the damage and get a quote without coming in.',
+        facts: ['Quote from photos', 'Panel straightening', 'Painting'],
+        href: `${routes.officina.en}#bodywork`,
+        foto: 'carrozzeria',
+        alt: 'Body shop technician polishing the side of a grey car',
+      },
+    ],
+    flowTitle: 'If it fails, you don’t start from scratch.',
+    flowText: 'The advantage of having everything in one place shows exactly when something goes wrong.',
+    flow: [
+      { t: 'Inspection', d: 'The check finds a fault: a light, the brakes, the emissions.' },
+      { t: 'Diagnosis', d: 'The workshop tells you straight away what’s needed and what it costs.' },
+      { t: 'Repair', d: 'We fix it here. No tow truck, no other garage.' },
+      { t: 'Re-inspection', d: 'You present the car again within a month, a few metres away.' },
+    ],
+    trustLabel: 'Trust',
+    trustTitle: 'customers have said so on Google.',
+    trustOf: 'out of 5',
+    reasons: [
+      { t: 'DEKRA-affiliated inspection centre', d: 'Checks carried out to DEKRA procedures and the rules of the Ministry of Transport.' },
+      { t: 'In-house workshop and body shop', d: 'One point of contact from diagnosis to handover. No passing you around.' },
+      { t: 'A clear price before we start', d: 'You know what we’ll do and what it costs before the car goes into the workshop.' },
+    ],
+    calcLabel: 'Inspection due date',
+    calcTitle: 'When is your inspection due?',
+    calcText: 'Enter the month and year: we work out the due date under the Italian Highway Code. If you like, we’ll remind you 30 and 7 days before.',
+    whereLabel: 'Find us',
+    whereTitle: 'Bolzano South business park.',
+    whereText: 'Away from the city-centre traffic, a few minutes from town. A quick call before you come saves you waiting.',
+    faqLabel: 'Frequently asked questions',
+    faq: [
+      { q: 'How much does a car inspection cost in Bolzano and how do I book?', a: `${formatPrice(site.revisionFee.total, 'en', 2)} all inclusive: it’s the national fee, the same at every authorised centre. You book online on the DEKRA portal, choosing the day and time.` },
+      { q: 'If my car fails the inspection, where can I get it repaired?', a: 'Right here. The workshop and body shop are at the same address as the inspection centre: we tell you what’s needed and what it costs, fix it, and you present the car again a few metres away.' },
+      { q: 'Do you service and repair all makes?', a: 'Yes. Servicing to manufacturer specifications, brakes, timing belts, electronic diagnostics and bodywork for cars of every make.' },
+      { q: 'Can I get a bodywork quote without coming in?', a: 'Yes. Using the form on the Workshop & bodywork page you can upload up to 6 photos of the damage from your phone, and we’ll get back to you with an estimate.' },
+      { q: 'Can you remind me when my inspection is due?', a: 'Yes, free of charge. Sign up in 30 seconds on the Inspection reminder page: we’ll message you by email or WhatsApp 30 and 7 days before the due date.' },
+      { q: 'Where are you and when are you open?', a: `At ${site.address.street.en}, in the Bolzano South business park. Monday to Friday, 8:30–12:30 and 14:00–18:00.` },
+    ],
+  },
+}[lang];
+
+// Anteprima che segue il cursore sull'indice servizi: foto locale (src/assets/foto/) o segnaposto Unsplash
+const previewSrc = async (key: FotoKey) => {
+  const loc = fotoLocale(key);
+  if (loc) return (await getImage({ src: loc, width: Math.min(560, loc.width), format: 'webp' })).src;
+  const u = fotoUnsplash(key);
+  return u ? unsplash(u.id, 560, [4, 3], u.crop, 70) : '';
+};
+const previews = await Promise.all(copy.services.map((s) => previewSrc(s.foto as FotoKey)));
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: copy.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+// Titolo in due frasi; ogni parola sale da una maschera, i punti finali sono arancio (come l'accento del logo)
+const lines = copy.h1.map((l) => l.split(' '));
+let wordIndex = 0;
+// Foto a tutto schermo. Con la foto vera (src/assets/foto/hero.*) la ottimizza astro:assets;
+// col segnaposto Unsplash: verticale (3:4, centrata su auto e meccanico) per il mobile, panoramica da tablet in su
+const heroLocal = fotoLocale('hero');
+const heroRemote = fotoUnsplash('hero')!;
+const heroId = heroRemote.id;
+const fp = heroRemote.crop;
+const heroLocalWidths = heroLocal ? [640, 828, 1080, 1440, 1920, 2400].filter((w) => w <= heroLocal.width) : [];
+// Qualità più bassa: la foto è virata e velata di blu, la compressione non si vede
+const heroPortrait = unsplashSrcset(heroId, [480, 640, 828, 1080], [3, 4], fp, 48);
+const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 52);
+---
+<Base lang={lang} title={copy.title} description={copy.description} alternates={alternatesFor('home')} current="home" overlayHeader jsonLd={[faqLd]}>
+  {!heroLocal && <link slot="head" rel="preload" as="image" media="(max-width: 47.99rem)" imagesrcset={heroPortrait} imagesizes="100vw" fetchpriority="high" />}
+  {!heroLocal && <link slot="head" rel="preload" as="image" media="(min-width: 48rem)" imagesrcset={heroWide} imagesizes="100vw" fetchpriority="high" />}
+  <!-- HERO: foto a tutto schermo, composizione che ricalca il logo (linea del tetto sopra, filetto arancio + BOLZANO sotto) -->
+  <section class="hero on-dark">
+    <div class="hero-stage">
+      <div class="hero-media" aria-hidden="false">
+        <div data-parallax="12" class="absolute inset-0">
+          {heroLocal ? (
+            <Picture src={heroLocal} alt={copy.heroAlt} formats={['avif', 'webp']} fallbackFormat="webp" widths={heroLocalWidths} sizes="100vw" loading="eager" fetchpriority="high" class="hero-img" />
+          ) : (
+          <picture>
+            <source media="(min-width: 48rem)" srcset={heroWide} sizes="100vw" />
+            <img
+              src={unsplash(heroId, 828, [3, 4], fp, 48)}
+              srcset={heroPortrait}
+              sizes="100vw"
+              alt={copy.heroAlt}
+              width="828"
+              height="1104"
+              fetchpriority="high"
+              decoding="async"
+              class="hero-img"
+            />
+          </picture>
+          )}
+        </div>
+        <span class="hero-tint" aria-hidden="true"></span>
+        <span class="hero-scrim" aria-hidden="true"></span>
+      </div>
+
+      <div class="hero-content wrap">
+        <div class="hero-top hero-fade" style="animation-delay:200ms">
+          <OpenStatus lang={lang} class="chip max-sm:!hidden" />
+          <span class="chip"><Icon name="check" size={16} class="text-orange" /> {t.dekra}</span>
+        </div>
+
+        <div class="hero-grid">
+          <div class="hero-main">
+            <RoofLine tone="paper" class="roof-anim hero-roof" weight={1.5} draw={false} />
+            <h1>
+              <span class="hero-kicker t-label hero-fade" style="animation-delay:200ms">{copy.kicker}</span>
+              <span class="sr-only">{copy.h1.join(' ')}</span>
+              <span class="hero-title block" aria-hidden="true">
+                {lines.map((words) => (
+                  <span class="block">
+                    {words.map((w, i) => {
+                      const delay = 260 + wordIndex++ * 70;
+                      const dot = w.endsWith('.');
+                      return (
+                        <Fragment>
+                          <span class="w"><span style={`animation-delay:${delay}ms`}>{dot ? w.slice(0, -1) : w}{dot && <span class="dot">.</span>}</span></span>{i < words.length - 1 ? ' ' : ''}
+                        </Fragment>
+                      );
+                    })}
+                  </span>
+                ))}
+              </span>
+            </h1>
+            <div class="hero-sig hero-fade" style="animation-delay:640ms" aria-hidden="true">
+              <span class="sig-line"></span>
+              <span class="t-label sig-place">{lang === 'de' ? 'Bozen · Bolzano' : 'Bolzano · Bozen'}</span>
+            </div>
+            <nav class="hero-svc hero-fade" style="animation-delay:720ms" aria-label={copy.svcNav}>
+              <ol>
+                {copy.svc.map(([label, href], i) => (
+                  <li>
+                    <a href={href}>
+                      <span class="t-label t-num svc-n">{String(i + 1).padStart(2, '0')}</span>
+                      <span class="svc-l">{label}</span>
+                      <Icon name="arrow" size={16} class="svc-a" />
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          </div>
+
+          <div class="hero-side hero-fade" style="animation-delay:760ms">
+            <p class="hero-lead max-sm:hidden">{copy.lead}</p>
+            <div class="mt-6 flex flex-col gap-3 sm:flex-row lg:flex-col max-sm:mt-0">
+              <a href={site.dekra.bookingUrl} class="btn btn-primary" target="_blank" rel="noopener">
+                {t.cta.book}<span class="sr-only"> ({t.externalBooking})</span>
+                <Icon name="arrow-up-right" size={18} class="btn-arrow" />
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fascia dati stile scheda tecnica -->
+    <div class="wrap">
+      <dl class="strip t-num">
+        <div>
+          <dt class="t-label">{copy.strip.hours}</dt>
+          <dd class="strip-val">{site.hours.map((h) => `${h.open.replace(/^0/, '')}–${h.close}`).join(' · ')}</dd>
+        </div>
+        <div>
+          <dt class="t-label">{copy.strip.google}</dt>
+          <dd class="strip-val">{formatNumber(site.google.rating, lang, 1)} / 5</dd>
+          <dd class="strip-note">{site.google.reviewCountLabel} {copy.strip.reviews}</dd>
+        </div>
+        <div>
+          <dt class="t-label">{copy.strip.fee}</dt>
+          <dd class="strip-val">{formatPrice(site.revisionFee.total, lang, 2)}</dd>
+          <dd class="strip-note">{copy.strip.feeNote}</dd>
+        </div>
+        <div>
+          <dt class="t-label">{copy.strip.where}</dt>
+          <dd class="strip-val">{copy.strip.whereVal}</dd>
+          <dd class="strip-note">{copy.strip.whereNote}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <Marquee lang={lang} />
+
+  <!-- SERVIZI -->
+  <section class="section-y" aria-labelledby="services-title">
+    <div class="wrap">
+      <SectionHead num="01" label={copy.servicesLabel} />
+      <h2 id="services-title" class="t-h2 mt-8 max-w-[22ch] lg:mt-12" data-reveal>{copy.servicesTitle}</h2>
+
+      <ol class="services mt-10 lg:mt-16" data-services>
+        {copy.services.map((s, i) => (
+          <li data-reveal>
+            <a href={s.href} class="service-row group" data-img={s.foto}>
+              <span class="t-label t-num text-orange-ink pt-1">{String(i + 1).padStart(2, '0')}</span>
+              <span class="service-main">
+                <span class="service-title">{s.title}</span>
+                <span class="mt-3 block max-w-[52ch] text-muted">{s.text}</span>
+                <span class="mt-4 flex flex-wrap gap-x-4 gap-y-1 t-label text-ink">
+                  {s.facts.map((f) => <span class="fact">{f}</span>)}
+                </span>
+              </span>
+              <span class="service-thumb lg:hidden">
+                <Photo foto={s.foto as FotoKey} alt="" sizes="96px" ratio={[1, 1]} widths={[160, 240]} />
+              </span>
+              <span class="service-arrow" aria-hidden="true"><Icon name="arrow" size={26} /></span>
+            </a>
+          </li>
+        ))}
+      </ol>
+
+      <!-- Anteprima immagine che segue il cursore (solo desktop con mouse) -->
+      <div class="cursor-preview" aria-hidden="true" data-cursor-preview>
+        {copy.services.map((s, i) => (
+          <img
+            src={previews[i]}
+            alt=""
+            width="560"
+            height="420"
+            loading="lazy"
+            data-preview={s.foto}
+          />
+        ))}
+      </div>
+
+      <!-- Il vantaggio della sede unica -->
+      <div class="flow mt-20 grid-12 gap-y-10 lg:mt-32">
+        <div class="col-span-4 lg:col-span-4">
+          <h3 class="t-h2 max-w-[16ch] !text-[clamp(1.6rem,3vw,2.4rem)]" data-reveal>{copy.flowTitle}</h3>
+          <p class="mt-5 max-w-[40ch] text-muted" data-reveal>{copy.flowText}</p>
+        </div>
+        <ol class="flow-steps col-span-4 lg:col-span-8" data-stagger="110">
+          {copy.flow.map((f, i) => (
+            <li data-reveal>
+              <span class="flow-dot" aria-hidden="true"></span>
+              <span class="t-label t-num text-orange-ink">{String(i + 1).padStart(2, '0')}</span>
+              <span class="mt-2 block t-h3">{f.t}</span>
+              <span class="mt-2 block text-[0.9375rem] text-muted">{f.d}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- LA REVISIONE PASSO PER PASSO (banco di collaudo) -->
+  <InspectionTour lang={lang} num="02" headingId="tour" variant="compact" />
+
+  <!-- FIDUCIA -->
+  <section class="trust section-y bg-paper-2" aria-labelledby="trust-title">
+    <div class="wrap">
+      <SectionHead num="03" label={copy.trustLabel} />
+      <div class="grid-12 mt-10 gap-y-14 lg:mt-16">
+        <div class="col-span-4 lg:col-span-6">
+          <p class="trust-src" aria-hidden="true">
+            <GoogleLogo size={44} />
+            <span class="t-label text-muted">Google</span>
+          </p>
+          <p class="rating mt-6" aria-hidden="true">
+            <span class="rating-num t-num" data-count={site.google.rating} data-decimals="1">{formatNumber(site.google.rating, lang, 1)}</span>
+            <span class="rating-of t-label text-muted">{copy.trustOf}</span>
+          </p>
+          <div class="stars mt-4" aria-hidden="true">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <span class="star" style={`--fill:${Math.max(0, Math.min(1, site.google.rating - i)) * 100}%`}>
+                <Icon name="star" size={22} />
+              </span>
+            ))}
+          </div>
+          <h2 id="trust-title" class="t-h2 mt-8 max-w-[18ch]">
+            <span class="sr-only">{formatNumber(site.google.rating, lang, 1)} {copy.trustOf}. </span>
+            <span class="t-num text-orange-ink">{site.google.reviewCountLabel}</span> {copy.trustTitle}
+          </h2>
+        </div>
+        <ol class="col-span-4 lg:col-span-6" data-stagger="90">
+          {copy.reasons.map((r, i) => (
+            <li class="reason" data-reveal>
+              <span class="t-label t-num text-orange-ink">{String(i + 1).padStart(2, '0')}</span>
+              <div>
+                <h3 class="t-h3">{r.t}</h3>
+                <p class="mt-2 text-muted">{r.d}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <div class="mt-16 lg:mt-24">
+        <GoogleReviews lang={lang} dark={false} />
+      </div>
+    </div>
+  </section>
+
+  <!-- CALCOLATORE -->
+  <section class="on-dark section-y bg-night text-paper" aria-labelledby="calc-title" id="scadenza">
+    <div class="wrap">
+      <SectionHead num="04" label={copy.calcLabel} dark />
+      <div class="mt-8 grid-12 gap-y-4 lg:mt-12">
+        <h2 id="calc-title" class="t-h2 col-span-4 max-w-[16ch] lg:col-span-6" data-reveal>{copy.calcTitle}</h2>
+        <p class="col-span-4 max-w-[48ch] text-steel lg:col-span-5 lg:col-start-8 lg:self-end" data-reveal>{copy.calcText}</p>
+      </div>
+      <div class="mt-10 lg:mt-14">
+        <RevisionCalculator lang={lang} id="home-calc" />
+      </div>
+    </div>
+  </section>
+
+  <!-- DOVE SIAMO -->
+  <section class="section-y" aria-labelledby="where-title">
+    <div class="wrap">
+      <SectionHead num="05" label={copy.whereLabel} />
+      <div class="mt-8 grid-12 gap-y-10 lg:mt-12">
+        <div class="col-span-4 lg:col-span-5">
+          <h2 id="where-title" class="t-h2 max-w-[14ch]" data-reveal>{copy.whereTitle}</h2>
+          <p class="mt-5 max-w-[42ch] text-muted">{copy.whereText}</p>
+          <address class="mt-8 not-italic">
+            <span class="block text-lg font-semibold">{site.address.street[lang]}</span>
+            <span class="block text-muted">{site.address.postalCode} {site.address.city[lang]} ({site.address.region})</span>
+          </address>
+          <div class="mt-8">
+            <div class="flex items-center justify-between gap-4">
+              <h3 class="t-label">{t.hours.title}</h3>
+              <OpenStatus lang={lang} />
+            </div>
+            <HoursTable lang={lang} class="mt-2" />
+          </div>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a href={site.phone.href} class="btn btn-ink t-num"><Icon name="phone" size={18} /> {site.phone.display}</a>
+            <a href={site.whatsapp.href()} class="btn btn-ghost" target="_blank" rel="noopener"><Icon name="whatsapp" size={19} /> WhatsApp</a>
+          </div>
+        </div>
+        <div class="col-span-4 lg:col-span-7">
+          <MapBlock lang={lang} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOMANDE FREQUENTI -->
+  <section class="section-y pt-0" aria-labelledby="faq-title">
+    <div class="wrap grid-12 gap-y-10">
+      <div class="col-span-4 lg:col-span-4">
+        <SectionHead num="06" label={copy.faqLabel} />
+        <h2 id="faq-title" class="sr-only">{copy.faqLabel}</h2>
+        <a href={routes.promemoria[lang]} class="reminder-link mt-8">
+          <Icon name="bell" size={20} class="text-orange-ink" />
+          <span>{({ it: 'Ti ricordiamo noi la revisione', de: 'Wir erinnern Sie an die Revision', en: 'We’ll remind you when it’s due' })[lang]}</span>
+          <Icon name="arrow" size={18} class="btn-arrow" />
+        </a>
+      </div>
+      <div class="col-span-4 lg:col-span-8">
+        <Faq items={copy.faq} />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+@layer components {
+  /* ---------- HERO ---------- */
+  .hero { position: relative; background: var(--color-night); color: var(--color-paper); margin-top: calc(var(--header-h) * -1); }
+  .hero-stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100svh - 4.25rem);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  @media (min-width: 64rem) { .hero-stage { min-height: max(40rem, calc(100svh - 7.5rem)); } }
+
+  .hero-media { position: absolute; inset: 0; z-index: -1; overflow: hidden; background: var(--color-night-2); }
+  /* :global: con la foto vera l'<img> la crea il componente Picture */
+  .hero-media :global(.hero-img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 55%;
+    filter: saturate(0.82) contrast(1.06) brightness(0.86);
+    transform: scale(1.06);
+    animation: hero-zoom 2.8s var(--ease-out-expo) both;
+  }
+  @keyframes hero-zoom { from { transform: scale(1.16); } }
+  /* Viraggio sul blu del marchio + velo per la leggibilità del testo */
+  .hero-tint { position: absolute; inset: 0; background: var(--color-ink); mix-blend-mode: multiply; opacity: 0.42; }
+  .hero-scrim {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to top, color-mix(in oklab, var(--color-night) 96%, transparent) 0%, color-mix(in oklab, var(--color-night) 72%, transparent) 38%, transparent 72%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--color-night) 55%, transparent) 0%, transparent 22%);
+  }
+  @media (min-width: 64rem) {
+    .hero-scrim {
+      background:
+        linear-gradient(to top, color-mix(in oklab, var(--color-night) 94%, transparent) 0%, color-mix(in oklab, var(--color-night) 55%, transparent) 34%, transparent 62%),
+        linear-gradient(to right, color-mix(in oklab, var(--color-night) 70%, transparent) 0%, transparent 58%),
+        linear-gradient(to bottom, color-mix(in oklab, var(--color-night) 50%, transparent) 0%, transparent 20%);
+    }
+  }
+
+  .hero-content { position: relative; flex: 1; display: flex; flex-direction: column; padding-top: calc(var(--header-h) + 1.25rem); padding-bottom: 2rem; }
+  @media (min-width: 64rem) { .hero-content { padding-top: calc(var(--header-h) + 2rem); padding-bottom: 3rem; } }
+  .hero-top { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .hero-top :global(.chip), .hero-top .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.25rem;
+    padding: 0.3rem 0.8rem;
+    border: 1px solid color-mix(in oklab, var(--color-paper) 28%, transparent);
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--color-night) 45%, transparent);
+    font-size: 0.8125rem;
+    font-weight: 540;
+    color: var(--color-paper);
+  }
+
+  .hero-grid { margin-top: auto; display: grid; gap: 2rem; padding-top: 3rem; }
+  @media (min-width: 64rem) { .hero-grid { grid-template-columns: minmax(0, 1fr) 22rem; column-gap: 4rem; align-items: end; } }
+  @media (min-width: 80rem) { .hero-grid { grid-template-columns: minmax(0, 1fr) 25rem; } }
+
+  :global(.hero-roof) { display: block; width: min(100%, 52rem); height: clamp(2.5rem, 7vw, 6rem); margin-bottom: clamp(0.75rem, 1.5vw, 1.25rem); }
+  :global(html.js .hero-roof) { animation-delay: 0.15s; animation-duration: 2.4s; }
+  .hero-title {
+    font-family: var(--font-wide);
+    font-stretch: 125%;
+    font-weight: 650;
+    font-size: clamp(2.75rem, 7.6vw, 7rem);
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    color: var(--color-paper);
+  }
+  .hero-title .dot { color: var(--color-orange); }
+  .hero-kicker { display: block; margin-bottom: clamp(0.75rem, 1.4vw, 1.1rem); color: var(--color-steel); }
+  .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.1em; margin-bottom: -0.1em; }
+  .w > span { display: inline-block; animation: word-up 1.1s var(--ease-out-expo) both; }
+  @keyframes word-up { from { transform: translateY(110%); } }
+
+  .hero-sig { display: flex; align-items: center; gap: 1rem; margin-top: clamp(1rem, 2vw, 1.5rem); width: min(100%, 52rem); }
+  .sig-line { flex: 1; height: 1px; background: var(--color-orange); transform-origin: left; animation: sig-grow 1.6s var(--ease-out-expo) 0.7s both; }
+  @keyframes sig-grow { from { transform: scaleX(0); } }
+  .sig-place { color: var(--color-steel); letter-spacing: 0.32em; }
+  /* Servizi come indice numerato sotto il titolo */
+  .hero-svc { margin-top: clamp(1.25rem, 2.4vw, 2rem); width: min(100%, 52rem); }
+  .hero-svc ol { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 1.25rem; }
+  @media (min-width: 48rem) { .hero-svc ol { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .hero-svc a {
+    position: relative;
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    min-height: 2.75rem;
+    padding-top: 0.75rem;
+    text-decoration: none;
+    color: var(--color-paper);
+  }
+  .hero-svc a::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 1px;
+    background: color-mix(in oklab, var(--color-paper) 28%, transparent);
+  }
+  .hero-svc a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 1px;
+    background: var(--color-orange);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s var(--ease-out-expo);
+  }
+  .hero-svc a:hover::after, .hero-svc a:focus-visible::after { transform: scaleX(1); }
+  .svc-n { color: var(--color-orange); }
+  .svc-l { font-family: var(--font-wide); font-stretch: 118%; font-weight: 600; font-size: clamp(0.9375rem, 1.2vw, 1.0625rem); letter-spacing: -0.01em; white-space: nowrap; }
+  .hero-svc :global(.svc-a) { margin-left: auto; align-self: center; opacity: 0; transform: translateX(-6px); transition: opacity 0.3s, transform 0.4s var(--ease-out-expo); }
+  .hero-svc a:hover :global(.svc-a) { opacity: 1; transform: none; }
+  .hero-lead { font-size: clamp(1.0625rem, 1.3vw, 1.2rem); line-height: 1.55; color: color-mix(in oklab, var(--color-paper) 88%, transparent); }
+  .hero-side { padding-bottom: 0.25rem; }
+  @media (min-width: 64rem) { .hero-side { padding-left: 1.75rem; border-left: 1px solid var(--line-dark); } }
+
+  .hero-fade { animation: fade-up 1s var(--ease-out-expo) both; }
+  @keyframes fade-up { from { opacity: 0; transform: translateY(16px); } }
+  /* Il blocco con i bottoni scivola senza dissolvenza: contrasto sempre pieno */
+  .hero-side.hero-fade { animation-name: slide-up; }
+  @keyframes slide-up { from { transform: translateY(16px); } }
+
+  /* Fascia dati */
+  .strip { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line-dark); }
+  .strip > div { display: grid; gap: 0.3rem; align-content: start; padding: 1.15rem 0.9rem 1.3rem 0; border-bottom: 1px solid var(--line-dark); }
+  .strip > div:nth-child(odd) { border-right: 1px solid var(--line-dark); }
+  .strip > div:nth-child(even) { padding-left: 0.9rem; }
+  .strip > div:nth-last-child(-n + 2) { border-bottom: 0; }
+  .strip dt { color: var(--color-steel-2); }
+  .strip-val { font-stretch: 115%; font-weight: 620; font-size: clamp(1rem, 1.5vw, 1.2rem); letter-spacing: -0.01em; color: var(--color-paper); }
+  .strip-note { font-size: 0.875rem; color: var(--color-steel-2); }
+  @media (min-width: 64rem) {
+    .strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .strip > div { padding: 1.5rem 1.5rem 1.7rem; border-bottom: 0; border-right: 1px solid var(--line-dark); }
+    .strip > div:first-child { padding-left: 0; }
+    .strip > div:last-child { border-right: 0; }
+    .strip > div:nth-child(even) { padding-left: 1.5rem; }
+  }
+
+  /* Indice servizi */
+  .services { border-top: 1px solid var(--line-strong); }
+  .services li { border-bottom: 1px solid var(--line); }
+  .service-row {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+    gap: 0.75rem;
+    padding-block: 1.5rem;
+    text-decoration: none;
+    align-items: start;
+  }
+  .service-title {
+    display: block;
+    font-stretch: 125%;
+    font-weight: 640;
+    font-size: clamp(1.6rem, 4.6vw, 3.4rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    overflow-wrap: break-word;
+    transition: transform 0.6s var(--ease-out-expo), color 0.3s;
+  }
+  .fact { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .fact::before { content: ''; width: 5px; height: 5px; background: var(--color-orange); }
+  .service-thumb { width: 4.5rem; }
+  .service-arrow { display: none; }
+  @media (min-width: 64rem) {
+    .service-row { grid-template-columns: 4rem 1fr 4rem; padding-block: 2.25rem; align-items: center; }
+    .service-main { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); column-gap: 3rem; align-items: center; }
+    .service-main > span:nth-child(2) { margin-top: 0; }
+    .service-main > span:nth-child(3) { grid-column: 2; }
+    .service-arrow { display: grid; place-items: center; justify-self: end; width: 3.25rem; height: 3.25rem; border: 1px solid var(--line-strong); border-radius: 999px; transition: background-color 0.3s, border-color 0.3s, transform 0.5s var(--ease-out-expo); }
+    .service-row:hover .service-title { transform: translateX(0.6rem); }
+    .service-row:hover .service-arrow { background: var(--color-orange); border-color: var(--color-orange); transform: rotate(-45deg); }
+  }
+
+  .cursor-preview {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 30;
+    width: 20rem;
+    aspect-ratio: 4 / 3;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) scale(0.92);
+    transition: opacity 0.35s var(--ease-out-quart);
+    overflow: hidden;
+    display: none;
+  }
+  @media (pointer: fine) and (min-width: 64rem) { .cursor-preview { display: block; } }
+  .cursor-preview.is-on { opacity: 1; }
+  .cursor-preview img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.35s; }
+  .cursor-preview img.is-on { opacity: 1; }
+
+  /* Flusso sede unica */
+  .flow-steps { display: grid; gap: 0; position: relative; }
+  .flow-steps li { position: relative; padding: 0 0 2rem 2rem; border-left: 1px solid var(--line-strong); }
+  .flow-steps li:last-child { padding-bottom: 0; border-left-color: transparent; }
+  .flow-dot { position: absolute; left: -5px; top: 0.15rem; width: 9px; height: 9px; background: var(--color-paper); border: 1.5px solid var(--color-ink); border-radius: 999px; }
+  .flow-steps li:last-child .flow-dot { background: var(--color-orange); border-color: var(--color-orange); }
+  @media (min-width: 48rem) {
+    .flow-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 1.5rem; }
+    .flow-steps li { padding: 2rem 0 0 0; border-left: 0; border-top: 1px solid var(--line-strong); }
+    .flow-steps li:last-child { border-top-color: var(--color-orange); }
+    .flow-dot { left: 0; top: -5px; }
+  }
+
+  /* Fiducia */
+  .trust-src { display: flex; align-items: center; gap: 0.75rem; }
+  .rating { display: flex; align-items: flex-end; gap: 0.9rem; }
+  .rating-num { font-stretch: 125%; font-weight: 600; font-size: clamp(6rem, 22vw, 12.5rem); line-height: 0.8; letter-spacing: -0.05em; }
+  .rating-of { padding-bottom: 0.6rem; }
+  .stars { display: flex; gap: 0.3rem; }
+  .star { position: relative; color: color-mix(in oklab, var(--color-ink) 16%, transparent); }
+  .star::after { content: ''; position: absolute; inset: 0; background: var(--color-orange); clip-path: inset(0 calc(100% - var(--fill)) 0 0); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m12 3.8 2.5 5.2 5.6.7-4.1 3.9 1 5.6L12 16.5l-5 2.7 1-5.6-4.1-3.9 5.6-.7L12 3.8Z'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m12 3.8 2.5 5.2 5.6.7-4.1 3.9 1 5.6L12 16.5l-5 2.7 1-5.6-4.1-3.9 5.6-.7L12 3.8Z'/%3E%3C/svg%3E") center / contain no-repeat; }
+  .reason { display: grid; grid-template-columns: 2.5rem 1fr; gap: 0.5rem; padding-block: 1.5rem; border-top: 1px solid var(--line-strong); }
+  .reason:last-child { border-bottom: 1px solid var(--line-strong); }
+
+  .reminder-link { display: inline-flex; align-items: center; gap: 0.75rem; min-height: 2.75rem; font-weight: 600; text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 0.25em; }
+  .reminder-link:hover { text-decoration-color: currentColor; }
+  .reminder-link:hover :global(.btn-arrow) { transform: translateX(4px); }
+
+}
+</style>
+
+<script>
+  // Anteprima foto che segue il cursore sull'indice servizi (desktop). Interpolazione morbida senza librerie.
+  const list = document.querySelector<HTMLElement>('[data-services]');
+  const preview = document.querySelector<HTMLElement>('[data-cursor-preview]');
+  const fine = window.matchMedia('(pointer: fine) and (min-width: 64rem)').matches;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (list && preview && fine) {
+    let x = 0, y = 0, cx = 0, cy = 0, raf = 0;
+    const loop = () => {
+      const k = reduce ? 1 : 0.16;
+      cx += (x - cx) * k;
+      cy += (y - cy) * k;
+      preview.style.transform = `translate3d(${cx + 28}px, ${cy - 120}px, 0)`;
+      raf = requestAnimationFrame(loop);
+    };
+    list.addEventListener('pointerenter', (e) => {
+      x = cx = e.clientX;
+      y = cy = e.clientY;
+      preview.classList.add('is-on');
+      raf = requestAnimationFrame(loop);
+    });
+    list.addEventListener('pointerleave', () => {
+      preview.classList.remove('is-on');
+      cancelAnimationFrame(raf);
+    });
+    list.addEventListener('pointermove', (e) => {
+      x = e.clientX;
+      y = e.clientY;
+    });
+    list.querySelectorAll<HTMLElement>('[data-img]').forEach((row) => {
+      row.addEventListener('pointerenter', () => {
+        preview.querySelectorAll('img').forEach((img) => img.classList.toggle('is-on', img.dataset.preview === row.dataset.img));
+      });
+    });
+  }
+</script>

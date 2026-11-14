@@ -1,0 +1,153 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import Icon from '../../components/Icon.astro';
+import { richiediLogin } from '../../lib/server/pagina';
+
+export const prerender = false;
+const no = richiediLogin(Astro);
+if (no) return no;
+---
+<AdminLayout title="Panoramica" current="home">
+  <div class="a-head">
+    <div>
+      <h1 class="a-h1">Panoramica</h1>
+      <p class="a-sub">Il gestionale DEKRA resta com’è. Questo aggiunge quello che DEKRA non ti dà: i tuoi clienti, che tornano da te.</p>
+    </div>
+    <a href="/admin/locandina/" class="btn btn-ghost btn-sm"><Icon name="qr" size={18} /> Locandina QR</a>
+  </div>
+
+  <dl class="kpis" data-kpis aria-busy="true">
+    {['Iscritti totali', 'Nuovi questo mese', 'Scadenze entro 30 giorni', 'Con consenso alle offerte', 'Recensioni ottenute', 'Promemoria questa settimana'].map((l) => (
+      <div><dt>{l}</dt><dd>–</dd></div>
+    ))}
+  </dl>
+
+  <div class="grid gap-x-10 lg:grid-cols-2">
+    <section class="a-sec" aria-labelledby="t-nuovi">
+      <div class="a-sec-head">
+        <h2 id="t-nuovi" class="a-h2">Appena iscritti</h2>
+        <span class="t-label text-muted" data-live-note>Si aggiorna da solo</span>
+      </div>
+      <ul class="rows" data-nuovi></ul>
+    </section>
+
+    <section class="a-sec" aria-labelledby="t-scad">
+      <div class="a-sec-head">
+        <h2 id="t-scad" class="a-h2">Scadenze nei prossimi 30 giorni</h2>
+        <a href="/admin/clienti/?entro=30" class="link-u">Tutte</a>
+      </div>
+      <ul class="rows" data-scadenze></ul>
+    </section>
+  </div>
+
+  <section class="a-sec" aria-labelledby="t-inv">
+    <div class="a-sec-head">
+      <h2 id="t-inv" class="a-h2">Promemoria in partenza questa settimana</h2>
+      <a href="/admin/promemoria/" class="link-u">Regole e calendario</a>
+    </div>
+    <ul class="rows" data-invii></ul>
+  </section>
+
+  <section class="a-sec" id="demo" aria-labelledby="t-demo">
+    <div class="a-sec-head"><h2 id="t-demo" class="a-h2">Demo</h2></div>
+    <p class="mt-2 max-w-[60ch] text-sm text-muted">Cancella da Supabase i clienti veri iscritti per prova e i loro eventi, poi ricarica i 45 clienti di esempio. Da fare dopo ogni incontro.</p>
+    <div class="mt-3 flex flex-wrap gap-3">
+      <button type="button" class="btn btn-ghost" data-reset><Icon name="trash" size={18} /> <span data-reset-label>Ripristina demo</span></button>
+      <button type="button" class="btn btn-ghost" data-reset-cancel hidden>Annulla</button>
+    </div>
+  </section>
+</AdminLayout>
+
+<script>
+  import { carica, aggiornaOgni, regole, isVero, ripristina, type Dati } from '../../admin/store';
+  import { esc, rigaCliente, scheletro, vuoto, dataBreve, data, occupato, toast } from '../../admin/ui';
+  import { filtra, prossimiInvii } from '../../lib/crm/regole';
+  import { nomeCompleto } from '../../lib/crm/types';
+
+  const $ = (s: string) => document.querySelector<HTMLElement>(s)!;
+  const visti = new Set<string>();
+  let primo = true;
+  ['[data-nuovi]', '[data-scadenze]', '[data-invii]'].forEach((s) => ($(s).innerHTML = scheletro(3)));
+
+  function render(d: Dati) {
+    const now = new Date();
+    const veri = d.clienti.filter((c) => !c.esempio);
+    const inizioMese = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const nuoviMese = d.clienti.filter((c) => c.creato_il >= inizioMese).length;
+    const entro30 = filtra(d.clienti, { scadenzaEntro: 30 });
+    const offerte = d.clienti.filter((c) => c.consenso_offerte).length;
+    const richieste = new Set(d.eventi.filter((e) => e.tipo === 'recensione_richiesta').map((e) => e.cliente_id)).size;
+    const ottenute = new Set(d.eventi.filter((e) => e.tipo === 'recensione_ottenuta').map((e) => e.cliente_id)).size;
+    const settimana = prossimiInvii(d.clienti, regole(), d.eventi, 7);
+    const kpi: [string, string][] = [
+      [String(d.clienti.length), veri.length ? `di cui ${veri.length} ${veri.length === 1 ? 'vero' : 'veri'}` : ''],
+      [String(nuoviMese), ''],
+      [String(entro30.length), ''],
+      [String(offerte), `${Math.round((offerte / Math.max(1, d.clienti.length)) * 100)}%`],
+      [String(ottenute), `su ${richieste} richieste`],
+      [String(settimana.length), ''],
+    ];
+    const dds = document.querySelectorAll<HTMLElement>('[data-kpis] dd');
+    // Un numero cambiato (anche il primo arrivo dei dati) sale al suo posto
+    kpi.forEach(([v, s], i) => {
+      const dd = dds[i];
+      const html = `${esc(v)}${s ? ` <small>${esc(s)}</small>` : ''}`;
+      if (dd.dataset.v === html) return;
+      dd.dataset.v = html;
+      dd.innerHTML = html;
+      dd.classList.remove('bump');
+      void dd.offsetWidth;
+      dd.classList.add('bump');
+    });
+    $('[data-kpis]').removeAttribute('aria-busy');
+
+    // Clienti veri in cima: quelli comparsi dall'ultimo aggiornamento lampeggiano
+    const appena = (veri.length ? veri : d.clienti.slice().sort((a, b) => b.creato_il.localeCompare(a.creato_il))).slice(0, 6);
+    $('[data-nuovi]').innerHTML = veri.length
+      ? appena.map((c) => rigaCliente(c, { flash: !primo && !visti.has(c.id), side: `<strong>${esc(data(c.creato_il))}</strong><span class="text-muted">${c.origine === 'qr' ? 'dal QR' : 'dal sito'}</span>` })).join('')
+      : `<li>${vuoto('Nessun cliente vero ancora.', ' Inquadra il QR della locandina con il telefono e iscriviti: comparirai qui entro 10 secondi.')}</li>` +
+        appena.slice(0, 4).map((c) => rigaCliente(c)).join('');
+    veri.forEach((c) => visti.add(c.id));
+
+    $('[data-scadenze]').innerHTML = entro30.length
+      ? entro30.sort((a, b) => a.scadenza.localeCompare(b.scadenza)).slice(0, 6).map((c) => rigaCliente(c)).join('')
+      : `<li>${vuoto('Nessuna scadenza nei prossimi 30 giorni.', '')}</li>`;
+
+    $('[data-invii]').innerHTML = settimana.length
+      ? settimana.slice(0, 8).map((i) => `<li><a class="row${isVero(i.cliente) || i.cliente.locale ? ' is-new' : ''}" href="/admin/cliente/?id=${encodeURIComponent(i.cliente.id)}">
+          <span><span class="row-name">${esc(nomeCompleto(i.cliente))}</span><span class="row-meta">${i.tipo === 'revisione' ? `Revisione · ${i.giorniPrima} giorni prima` : 'Tagliando · 12 mesi'} · ${i.cliente.canale === 'whatsapp' ? 'WhatsApp' : 'email'}</span></span>
+          <span class="row-side"><strong>${esc(dataBreve(i.data))}</strong></span></a></li>`).join('')
+      : `<li>${vuoto('Nessun promemoria in partenza questa settimana.', '')}</li>`;
+    primo = false;
+  }
+
+  // Ripristino in due passi, senza finestre modali
+  const reset = $('[data-reset]') as HTMLButtonElement;
+  const resetCancel = $('[data-reset-cancel]') as HTMLButtonElement;
+  let armato = false;
+  const disarma = () => {
+    armato = false;
+    resetCancel.hidden = true;
+    reset.classList.replace('btn-ink', 'btn-ghost');
+    reset.querySelector('[data-reset-label]')!.textContent = 'Ripristina demo';
+  };
+  resetCancel.addEventListener('click', disarma);
+  reset.addEventListener('click', async () => {
+    if (!armato) {
+      armato = true;
+      resetCancel.hidden = false;
+      reset.classList.replace('btn-ghost', 'btn-ink');
+      reset.querySelector('[data-reset-label]')!.textContent = 'Conferma: cancella i clienti veri';
+      return;
+    }
+    const r = await occupato(reset, 'Ripristino…', ripristina);
+    disarma();
+    toast(r, 6000);
+    visti.clear();
+    primo = true;
+    render(await carica());
+  });
+
+  carica().then(render);
+  aggiornaOgni(10, render);
+</script>

@@ -6,9 +6,9 @@ import Icon from './Icon.astro';
 interface Props { lang: Lang; whatsappText?: string }
 const { lang, whatsappText } = Astro.props;
 const t = ui[lang];
-const waText = whatsappText ?? (lang === 'it' ? 'Buongiorno, vorrei un\'informazione.' : 'Guten Tag, ich hätte eine Frage.');
+const waText = whatsappText ?? { it: 'Buongiorno, vorrei un\'informazione.', de: 'Guten Tag, ich hätte eine Frage.', en: 'Hello, I have a question.' }[lang];
 ---
-<nav class="cta-bar on-dark lg:hidden" aria-label={lang === 'it' ? 'Azioni rapide' : 'Schnellaktionen'}>
+<nav class="cta-bar on-dark lg:hidden" aria-label={({ it: 'Azioni rapide', de: 'Schnellaktionen', en: 'Quick actions' })[lang]}>
   <a href={site.phone.href} class="cta-item">
     <Icon name="phone" size={20} />
     <span>{t.cta.call}</span>
@@ -19,7 +19,7 @@ const waText = whatsappText ?? (lang === 'it' ? 'Buongiorno, vorrei un\'informaz
   </a>
   <a href={site.dekra.bookingUrl} class="cta-item cta-main" target="_blank" rel="noopener">
     <Icon name="calendar" size={20} />
-    <span>{t.cta.bookShort}<span class="sr-only"> {lang === 'it' ? 'la revisione' : 'Revision'} ({t.externalBooking})</span></span>
+    <span>{t.cta.bookShort}<span class="sr-only"> {({ it: 'la revisione', de: 'Revision', en: 'your inspection' })[lang]} ({t.externalBooking})</span></span>
   </a>
 </nav>
 

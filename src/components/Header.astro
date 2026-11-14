@@ -13,16 +13,16 @@ const { lang, alternates, current, overlay = false } = Astro.props;
 const t = ui[lang];
 ---
 <header class="site-header" data-header data-overlay={overlay ? '' : undefined}>
-  <div class="wrap flex h-[var(--header-h)] items-center justify-between gap-4">
+  <div class="hdr wrap h-[var(--header-h)]">
     <a href={routes.home[lang]} class="logo-link shrink-0" aria-label={`${site.brand}, ${t.nav.home}`}>
       <Logo class="logo-std h-9 w-auto xl:h-10" alt="" />
       {overlay && <Logo inverse lazy={false} class="logo-inv h-9 w-auto xl:h-10" alt="" />}
     </a>
 
-    <nav aria-label={lang === 'it' ? 'Navigazione principale' : 'Hauptnavigation'} class="hidden lg:block">
-      <ul class="flex items-center gap-1 xl:gap-2">
+    <nav aria-label={t.navLabel} class="hdr-nav hidden lg:block">
+      <ul class="flex items-center gap-1 xl:gap-3">
         {navOrder.map((key) => (
-          <li>
+          <li class={key === 'azienda' ? 'nav-extra' : undefined}>
             <a
               href={routes[key][lang]}
               class="nav-link"
@@ -35,7 +35,7 @@ const t = ui[lang];
       </ul>
     </nav>
 
-    <div class="flex items-center gap-2 sm:gap-3">
+    <div class="hdr-actions flex items-center gap-1 sm:gap-2">
       <LangSwitch lang={lang} alternates={alternates} />
       <a
         href={site.dekra.bookingUrl}
@@ -43,7 +43,8 @@ const t = ui[lang];
         target="_blank"
         rel="noopener"
       >
-        {t.cta.book}
+        <span class="book-short">{t.cta.bookShort}</span>
+        <span class="book-long">{t.cta.book}</span>
         <span class="sr-only">({t.externalBooking})</span>
         <Icon name="arrow-up-right" size={18} />
       </a>
@@ -66,14 +67,13 @@ const t = ui[lang];
   <div class="wrap flex h-[var(--header-h)] items-center justify-between">
     <Logo inverse class="h-9 w-auto" alt={site.brand} />
     <div class="flex items-center gap-2">
-      <LangSwitch lang={lang} alternates={alternates} tone="dark" />
       <button type="button" class="menu-btn menu-btn-dark" data-menu-close>
         <Icon name="x" size={22} />
         <span class="sr-only">{t.close}</span>
       </button>
     </div>
   </div>
-  <nav aria-label={lang === 'it' ? 'Navigazione principale' : 'Hauptnavigation'} class="wrap mt-6">
+  <nav aria-label={t.navLabel} class="wrap mt-6">
     <ol class="mobile-nav">
       {(['home', ...navOrder] as RouteKey[]).map((key, i) => (
         <li>
@@ -85,7 +85,10 @@ const t = ui[lang];
       ))}
     </ol>
   </nav>
-  <div class="wrap mt-10 grid gap-3 pb-10 text-steel">
+  <div class="wrap mt-8">
+    <LangSwitch lang={lang} alternates={alternates} variant="inline" />
+  </div>
+  <div class="wrap mt-8 grid gap-3 pb-10 text-steel">
     <OpenStatus lang={lang} class="text-paper" />
     <a href={site.phone.href} class="text-2xl font-semibold text-paper t-num" style="font-stretch:112%">{site.phone.display}</a>
     <p class="text-sm">{site.address.street[lang]}, {site.address.postalCode} {site.address.city[lang]}</p>
@@ -103,6 +106,24 @@ const t = ui[lang];
     transition: border-color 0.3s, transform 0.4s var(--ease-out-expo);
   }
   .site-header[data-scrolled='true'] { border-bottom-color: var(--line); }
+  /* Logo · menu · azioni: da desktop il menu sta al centro esatto della pagina */
+  .hdr { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  @media (min-width: 64rem) {
+    .hdr { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); column-gap: 1.5rem; }
+    .hdr-actions { justify-self: end; }
+  }
+  /* Sei voci di menu: il menu sta al centro dello spazio libero tra logo e azioni;
+     sotto i 1440 px "Azienda" resta nel menu mobile e nel footer e il pulsante usa l’etichetta corta */
+  .book-long { display: none; }
+  @media (min-width: 64rem) {
+    .hdr { grid-template-columns: auto minmax(0, 1fr) auto; }
+    .hdr-nav { justify-self: center; }
+  }
+  @media (min-width: 64rem) and (max-width: 89.99rem) { .nav-extra { display: none; } }
+  @media (min-width: 90rem) {
+    .book-short { display: none; }
+    .book-long { display: inline; }
+  }
 
   /* Modalità overlay (Home): trasparente sulla foto, con un velo in alto per la leggibilità */
   .site-header[data-overlay] { background: transparent; transition: background-color 0.4s var(--ease-out-quart), border-color 0.3s, transform 0.4s var(--ease-out-expo); }
@@ -123,26 +144,25 @@ const t = ui[lang];
   .site-header[data-overlay]:not([data-scrolled='true']) :global(.logo-inv) { display: block; }
   .site-header[data-overlay]:not([data-scrolled='true']) .nav-link { color: var(--color-paper); }
   .site-header[data-overlay]:not([data-scrolled='true']) .menu-btn { color: var(--color-paper); border-color: color-mix(in oklab, var(--color-paper) 40%, transparent); }
-  .site-header[data-overlay]:not([data-scrolled='true']) :global(.lang-switch ul) { border-color: color-mix(in oklab, var(--color-paper) 40%, transparent); }
-  .site-header[data-overlay]:not([data-scrolled='true']) :global(.lang-switch a) { color: var(--color-paper); }
-  .site-header[data-overlay]:not([data-scrolled='true']) :global(.lang-switch a[aria-current='true']) { background: var(--color-paper); color: var(--color-ink); }
+  .site-header[data-overlay]:not([data-scrolled='true']) :global(.lang-btn) { color: var(--color-paper); }
 
   .nav-link {
     position: relative;
     display: inline-flex;
     align-items: center;
     min-height: 2.75rem;
-    padding-inline: 0.7rem;
+    padding-inline: 0.75rem;
     font-size: 0.9375rem;
-    font-weight: 520;
+    font-weight: 540;
+    white-space: nowrap;
     text-decoration: none;
     color: var(--color-ink);
   }
   .nav-link::after {
     content: '';
     position: absolute;
-    left: 0.7rem;
-    right: 0.7rem;
+    left: 0.75rem;
+    right: 0.75rem;
     bottom: 0.45rem;
     height: 1px;
     background: currentColor;

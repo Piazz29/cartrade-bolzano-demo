@@ -2,7 +2,7 @@
 // tabelle, stili inline, larghezza 600 px, bottone "a prova di Outlook", niente SVG né web font.
 // Colori dal DESIGN.md: carta #F7F6F3, navy #0E2340, arancio #E8710A (bottone con testo navy, 5,1:1).
 import { site } from '../../data/site';
-import type { Contenuto } from '../crm/messaggi';
+import type { Contenuto } from '../contatti';
 
 const C = {
   paper: '#F7F6F3',
@@ -37,7 +37,7 @@ export interface RenderOpts {
   demo?: boolean;
 }
 
-export function renderEmail(c: Contenuto, { baseUrl, demo = true }: RenderOpts): string {
+export function renderEmail(c: Contenuto, { baseUrl, demo = false }: RenderOpts): string {
   const lang = c.lang;
   const city = site.address.city[lang];
   const street = site.address.street[lang];
@@ -63,7 +63,7 @@ export function renderEmail(c: Contenuto, { baseUrl, demo = true }: RenderOpts):
     : '';
   const demoNote = demo
     ? `<p style="margin:12px 0 0;font-family:${FONT};font-size:12px;line-height:18px;color:#93A0B4;">${
-        lang === 'de' ? 'Demo: Diese Nachricht stammt aus der Vorschau der neuen Website.' : 'Demo: messaggio inviato dall’anteprima del nuovo sito.'
+        { it: 'Demo: messaggio inviato dall’anteprima del nuovo sito.', de: 'Demo: Diese Nachricht stammt aus der Vorschau der neuen Website.', en: 'Demo: message sent from the new website preview.' }[lang]
       }</p>`
     : '';
 
@@ -91,7 +91,10 @@ export function renderEmail(c: Contenuto, { baseUrl, demo = true }: RenderOpts):
         <td height="3" width="22%" bgcolor="${C.orange}" style="font-size:0;line-height:0;background:${C.orange};">&nbsp;</td>
       </tr></table>
     </td></tr>
-    <tr><td style="padding:28px 32px 4px;">
+ ${c.etichetta ? `<tr><td style="padding:28px 32px 0;">
+      <p style="margin:0;display:inline-block;padding:6px 10px;border-left:3px solid ${C.orange};background:${C.paper2};font-family:${FONT};font-size:12px;line-height:16px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:${C.orangeInk};">${esc(c.etichetta)}</p>
+    </td></tr>` : ''}
+    <tr><td style="padding:${c.etichetta ? '16px' : '28px'} 32px 4px;">
       <h1 style="margin:0;font-family:${FONT};font-size:26px;line-height:31px;font-weight:bold;letter-spacing:-0.3px;color:${C.ink};">${esc(c.titolo)}</h1>
     </td></tr>
     <tr><td style="padding:12px 32px 4px;">
@@ -103,9 +106,9 @@ export function renderEmail(c: Contenuto, { baseUrl, demo = true }: RenderOpts):
     <tr><td style="padding:28px 32px 28px;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${C.night}" style="background:${C.night};">
         <tr><td style="padding:20px 22px;">
-          <p style="margin:0;font-family:${FONT};font-size:14px;line-height:21px;color:${C.white};font-weight:bold;">${esc(site.name)} · ${lang === 'de' ? 'DEKRA-Partner für die Fahrzeugrevision' : 'Centro revisioni affiliato DEKRA'}</p>
+          <p style="margin:0;font-family:${FONT};font-size:14px;line-height:21px;color:${C.white};font-weight:bold;">${esc(site.name)} · ${{ it: 'Centro revisioni affiliato DEKRA', de: 'DEKRA-Partner für die Fahrzeugrevision', en: 'DEKRA-affiliated inspection centre' }[lang]}</p>
           <p style="margin:6px 0 0;font-family:${FONT};font-size:14px;line-height:21px;color:#C9D2DF;">${esc(street)} · ${esc(site.address.postalCode)} ${esc(city)}<br>
-          <a href="${esc(site.phone.href)}" style="color:#C9D2DF;text-decoration:underline;">${esc(site.phone.display)}</a> · ${lang === 'de' ? 'Mo–Fr 8:30–12:30, 14:00–18:00' : 'Lun–Ven 8:30–12:30, 14:00–18:00'}</p>
+          <a href="${esc(site.phone.href)}" style="color:#C9D2DF;text-decoration:underline;">${esc(site.phone.display)}</a> · ${{ it: 'Lun–Ven 8:30–12:30, 14:00–18:00', de: 'Mo–Fr 8:30–12:30, 14:00–18:00', en: 'Mon–Fri 8:30–12:30, 14:00–18:00' }[lang]}</p>
         </td></tr>
       </table>
       <p style="margin:16px 0 0;font-family:${FONT};font-size:12px;line-height:18px;color:${C.muted};">${esc(c.motivo)}</p>
@@ -120,7 +123,7 @@ export function renderEmail(c: Contenuto, { baseUrl, demo = true }: RenderOpts):
 
 /** Versione testo (client che non mostrano l'HTML, filtri antispam) */
 export function renderText(c: Contenuto): string {
-  const lines = [c.titolo, '', ...c.paragrafi.flatMap((p) => [p, ''])];
+  const lines = [...(c.etichetta ? [c.etichetta.toUpperCase(), ''] : []), c.titolo, '', ...c.paragrafi.flatMap((p) => [p, ''])];
   if (c.dati?.length) lines.push(...c.dati.map(([k, v]) => `${k}: ${v}`), '');
   if (c.cta) lines.push(`${c.cta.label}: ${c.cta.href}`);
   if (c.cta2) lines.push(`${c.cta2.label}: ${c.cta2.href}`);

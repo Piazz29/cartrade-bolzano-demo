@@ -1,0 +1,66 @@
+---
+// Barra fissa in basso su mobile: le tre azioni che contano, sempre a un pollice di distanza.
+import { site, type Lang } from '../data/site';
+import { ui } from '../i18n/ui';
+import Icon from './Icon.astro';
+interface Props { lang: Lang; whatsappText?: string }
+const { lang, whatsappText } = Astro.props;
+const t = ui[lang];
+const waText = whatsappText ?? { it: 'Buongiorno, vorrei un\'informazione.', de: 'Guten Tag, ich hätte eine Frage.', en: 'Hello, I have a question.' }[lang];
+---
+<nav class="cta-bar on-dark lg:hidden" aria-label={({ it: 'Azioni rapide', de: 'Schnellaktionen', en: 'Quick actions' })[lang]}>
+  <a href={site.phone.href} class="cta-item">
+    <Icon name="phone" size={20} />
+    <span>{t.cta.call}</span>
+  </a>
+  <a href={site.whatsapp.href(waText)} class="cta-item" target="_blank" rel="noopener">
+    <Icon name="whatsapp" size={21} />
+    <span>{t.cta.whatsapp}</span>
+  </a>
+  <a href={site.dekra.bookingUrl} class="cta-item cta-main" target="_blank" rel="noopener">
+    <Icon name="calendar" size={20} />
+    <span>{t.cta.bookShort}<span class="sr-only"> {({ it: 'la revisione', de: 'Revision', en: 'your inspection' })[lang]} ({t.externalBooking})</span></span>
+  </a>
+</nav>
+
+<style>
+@layer components {
+  .cta-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.25fr;
+    gap: 1px;
+    padding: 0.5rem var(--gutter) calc(0.5rem + env(safe-area-inset-bottom));
+    background: var(--color-night);
+    border-top: 1px solid var(--line-dark);
+  }
+  .cta-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 3.25rem;
+    font-stretch: 112%;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    color: var(--color-paper);
+    text-decoration: none;
+    border-radius: 2px;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.2s;
+  }
+  .cta-item:active { background: color-mix(in oklab, var(--color-paper) 10%, transparent); }
+  .cta-main { background: var(--color-orange); color: var(--color-ink); margin-left: 0.4rem; }
+  .cta-main:active { background: var(--color-orange-hover); }
+  /* Schermi stretti (iPhone SE, 320px): icona sopra, etichetta sotto, come una tab bar iOS */
+  @media (max-width: 22.49rem) {
+    .cta-bar { grid-template-columns: 1fr 1fr 1.15fr; padding-inline: 0.5rem; }
+    .cta-item { flex-direction: column; gap: 0.2rem; min-height: 3.25rem; font-size: 0.75rem; letter-spacing: 0.01em; }
+    .cta-main { margin-left: 0.3rem; }
+  }
+}
+</style>

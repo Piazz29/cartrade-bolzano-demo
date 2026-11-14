@@ -58,7 +58,7 @@ const widths = [480, 640, image.width].filter((w, i, a) => w <= image.width && a
       <span class="scrim" aria-hidden="true"></span>
     </div>
 
-    <nav aria-label={lang === 'it' ? 'Percorso' : 'Brotkrumen'} class="crumbs wrap ph-in">
+    <nav aria-label={({ it: 'Percorso', de: 'Brotkrumen', en: 'Breadcrumb' })[lang]} class="crumbs wrap ph-in">
       <ol class="flex items-center gap-2 text-sm">
         <li><a href={routes.home[lang]} class="link-u">{ui[lang].nav.home}</a></li>
         <li aria-hidden="true">/</li>

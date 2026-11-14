@@ -11,7 +11,7 @@ interface Props { lang: Lang }
 const { lang } = Astro.props;
 const lat = `${site.geo.lat.toFixed(4).replace('.', ',')}° N`;
 const lng = `${site.geo.lng.toFixed(4).replace('.', ',')}° E`;
-const services = lang === 'it' ? 'Revisione · Officina · Carrozzeria · Auto' : 'Revision · Werkstatt · Karosserie · Fahrzeuge';
+const services = { it: 'Revisione · Officina · Carrozzeria', de: 'Revision · Werkstatt · Karosserie', en: 'Inspection · Workshop · Bodywork' }[lang];
 ---
 <div class="pl" data-preloader aria-hidden="true">
   <span class="pl-corner tl t-label">{site.name}</span>

@@ -5,21 +5,22 @@ register: brand
 # CAR TRADE SRL · Bolzano
 
 ## Product purpose
-Sito vetrina per un'attività locale con quattro mestieri sotto lo stesso tetto in zona industriale a Bolzano: centro revisioni affiliato DEKRA (abilitazione auto), officina meccanica, carrozzeria, vendita di auto usate e a km 0. Il sito deve trasformare una visita in una di queste azioni: prenotare la revisione (portale DEKRA), chiamare o scrivere su WhatsApp, chiedere un preventivo, chiedere informazioni su un'auto.
+Sito vetrina per un'attività locale con tre mestieri sotto lo stesso tetto in zona industriale a Bolzano: centro revisioni affiliato DEKRA (abilitazione auto), officina meccanica, carrozzeria. Il sito deve trasformare una visita in una di queste azioni: prenotare la revisione (portale DEKRA), chiamare o scrivere su WhatsApp, chiedere un preventivo.
+
+Per scelta del cliente il sito **non ha database né gestionale**: nessuna iscrizione, nessuna lista clienti. Si contatta l'officina solo dai canali della pagina Contatti (telefono, WhatsApp, prenotazione DEKRA, moduli che arrivano per email). La versione con lista clienti e admin è archiviata in `archivio/lista-clienti/`.
 
 Questa versione è una **demo** da mostrare al titolare per convincerlo a rifare il sito attuale (one-page generico, testi da template).
 
 ## Users
 - **Chi deve fare la revisione** (la maggioranza): privati di Bolzano e dintorni, 30-70 anni, sullo smartphone. Vogliono sapere quando scade, quanto costa, quando possono passare, e cosa succede se non passa.
 - **Chi ha un problema all'auto**: un guasto, un tagliando, un danno di carrozzeria. Vuole un preventivo senza perdere mezza giornata.
-- **Chi cerca un'auto**: confronta prezzi su AutoScout24/Subito; arriva sul sito per fidarsi del venditore prima di chiamare.
-- Bilingue: italiano e tedesco (Alto Adige). Il tedesco è tedesco standard con la terminologia locale (in Südtirol si dice "Revision", non "HU/TÜV").
+- Trilingue: italiano e tedesco (Alto Adige), più inglese per turisti, lavoratori stranieri e chi vive in zona senza parlare le due lingue locali. Il tedesco è tedesco standard con la terminologia locale (in Südtirol si dice "Revision", non "HU/TÜV"). In inglese si usa "inspection" (non "MOT", che è britannico) e inglese britannico per date e ortografia (tyres, centre).
 
 ## Brand personality
 L'officina di fiducia che lavora bene. Concreta, precisa, onesta sui prezzi, senza esibizionismo. Tre parole: **preciso, diretto, solido**.
 
 ## Tone of voice
-Frasi brevi, verbi concreti, numeri veri. In italiano si dà del tu, come nelle CTA del brief ("Prenota la revisione", "Vedi le auto"). In tedesco si usa "Sie", come si aspetta un cliente altoatesino da un'azienda.
+Frasi brevi, verbi concreti, numeri veri. In italiano si dà del tu, come nelle CTA del brief ("Prenota la revisione", "Vedi le auto"). In tedesco si usa "Sie", come si aspetta un cliente altoatesino da un'azienda. In inglese tono diretto e cordiale, "you".
 
 ## Anti-references
 - Concessionari di lusso (nero + oro, video a tutto schermo, "esperienza esclusiva").

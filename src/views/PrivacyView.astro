@@ -1,7 +1,7 @@
 ---
 // Informativa privacy e cookie: TESTO SEGNAPOSTO.
-// TODO: sostituire con il testo del consulente privacy del cliente (GDPR art. 13), in italiano e tedesco.
-// La struttura segue i punti che l'informativa dovrà coprire per la lista clienti (promemoria, offerte, moduli).
+// TODO: sostituire con il testo del consulente privacy del cliente (GDPR art. 13), in italiano, tedesco e inglese.
+// Il sito non ha database né iscrizioni: gli unici dati sono quelli dei moduli contatti e preventivo, inoltrati per email.
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
 import { site, type Lang } from '../data/site';
@@ -13,38 +13,59 @@ const { lang } = Astro.props;
 const copy = {
   it: {
     title: 'Informativa privacy e cookie · Car Trade Bolzano',
-    description: 'Come CAR TRADE SRL di Bolzano tratta i dati di chi si iscrive ai promemoria della revisione o chiede un preventivo.',
+    description: 'Come CAR TRADE SRL di Bolzano tratta i dati di chi la contatta o chiede un preventivo dal sito.',
     label: 'Privacy',
     h1: 'Informativa privacy.',
     lead: 'Testo provvisorio. La versione definitiva sarà redatta dal consulente privacy dell’azienda.',
     badge: 'Bozza da completare',
     sections: [
-      ['Titolare del trattamento', `${site.name}, ${site.address.street.it}, ${site.address.postalCode} ${site.address.city.it}. P. IVA ${site.vat}.`],
-      ['Quali dati raccogliamo', 'Nome, cognome, email, cellulare, targa e mese dell’ultima revisione o dell’immatricolazione, interessi, canale e lingua preferiti. Per le richieste di preventivo anche la descrizione e le foto del danno.'],
-      ['Perché li usiamo', 'Per mandarti i promemoria di scadenza di revisione e tagliando, se li hai chiesti. Per le offerte, solo con un consenso separato. Per rispondere alle richieste inviate dai moduli del sito.'],
-      ['Base giuridica', 'Il tuo consenso, che puoi revocare in qualsiasi momento rispondendo STOP a un messaggio o scrivendoci. Per le richieste di preventivo, le misure precontrattuali da te richieste.'],
-      ['Per quanto tempo', 'Fino alla revoca del consenso. Da definire con il consulente il periodo massimo di conservazione dopo l’ultimo contatto.'],
-      ['Chi li tratta per noi', 'Fornitori che ospitano il sito, il database e l’invio dei messaggi (responsabili del trattamento ex art. 28 GDPR). Elenco e sede dei fornitori da completare.'],
+      ['Titolare del trattamento', `${site.name}, ${site.address.street.it}, ${site.address.postalCode} ${site.address.city.it}. P. IVA ${site.vat}. Email ${site.email}.`],
+      ['Quali dati raccogliamo', 'Solo quelli che scrivi nei moduli contatti e preventivo: nome e cognome, telefono, email (facoltativa), auto e targa (facoltative), il messaggio e, se le alleghi, le foto del danno.'],
+      ['Perché li usiamo', 'Esclusivamente per rispondere alla tua richiesta, nel modo che hai indicato (telefono, WhatsApp o email). Niente newsletter, niente offerte, nessuna lista.'],
+      ['Base giuridica', 'Le misure precontrattuali da te richieste (art. 6, par. 1, lett. b GDPR): ci scrivi per avere una risposta o un preventivo.'],
+      ['Dove finiscono', 'Il sito non ha un database: la richiesta arriva solo per email alla casella dell’azienda, con le foto allegate. Sul sito non resta nulla.'],
+      ['Per quanto tempo', 'Il tempo necessario a gestire la richiesta. Il periodo massimo di conservazione delle email è da definire con il consulente.'],
+      ['Chi li tratta per noi', 'Il fornitore che ospita il sito e quello che inoltra le email (responsabili del trattamento ex art. 28 GDPR). Elenco e sede dei fornitori da completare.'],
       ['I tuoi diritti', 'Accesso, rettifica, cancellazione, limitazione, portabilità e opposizione, oltre al reclamo al Garante per la protezione dei dati personali.'],
       ['Cookie', 'Il sito usa solo memoria tecnica del browser per funzionare. La mappa Google, se attivata, imposta cookie di terze parti: in produzione verrà caricata solo dopo il consenso nel banner cookie.'],
     ],
   },
   de: {
     title: 'Datenschutz und Cookies · Car Trade Bozen',
-    description: 'Wie CAR TRADE SRL in Bozen die Daten von Personen verarbeitet, die sich für die Revisions-Erinnerung anmelden oder ein Angebot anfordern.',
+    description: 'Wie CAR TRADE SRL in Bozen die Daten von Personen verarbeitet, die über die Website Kontakt aufnehmen oder ein Angebot anfordern.',
     label: 'Datenschutz',
     h1: 'Datenschutzerklärung.',
     lead: 'Vorläufiger Text. Die endgültige Fassung erstellt der Datenschutzberater des Unternehmens.',
     badge: 'Entwurf',
     sections: [
-      ['Verantwortlicher', `${site.name}, ${site.address.street.de}, ${site.address.postalCode} ${site.address.city.de}. MwSt.-Nr. ${site.vat}.`],
-      ['Welche Daten wir erheben', 'Vor- und Nachname, E-Mail, Handynummer, Kennzeichen und Monat der letzten Revision oder der Erstzulassung, Interessen, bevorzugter Kanal und Sprache. Bei Angebotsanfragen auch Beschreibung und Fotos des Schadens.'],
-      ['Wofür wir sie verwenden', 'Für die Erinnerungen an Revision und Inspektion, wenn Sie diese wünschen. Für Angebote nur mit einer eigenen Einwilligung. Zur Beantwortung von Anfragen über die Formulare der Website.'],
-      ['Rechtsgrundlage', 'Ihre Einwilligung, die Sie jederzeit widerrufen können, indem Sie mit STOP antworten oder uns schreiben. Bei Angebotsanfragen vorvertragliche Maßnahmen auf Ihre Anfrage.'],
-      ['Speicherdauer', 'Bis zum Widerruf der Einwilligung. Die Höchstdauer nach dem letzten Kontakt legt der Berater fest.'],
-      ['Auftragsverarbeiter', 'Dienstleister für Hosting, Datenbank und Versand der Nachrichten (Auftragsverarbeiter nach Art. 28 DSGVO). Liste und Sitz der Dienstleister folgen.'],
+      ['Verantwortlicher', `${site.name}, ${site.address.street.de}, ${site.address.postalCode} ${site.address.city.de}. MwSt.-Nr. ${site.vat}. E-Mail ${site.email}.`],
+      ['Welche Daten wir erheben', 'Nur was Sie in die Kontakt- und Angebotsformulare schreiben: Vor- und Nachname, Telefon, E-Mail (optional), Fahrzeug und Kennzeichen (optional), Ihre Nachricht und gegebenenfalls Fotos vom Schaden.'],
+      ['Wofür wir sie verwenden', 'Ausschließlich zur Beantwortung Ihrer Anfrage, auf dem gewünschten Weg (Telefon, WhatsApp oder E-Mail). Kein Newsletter, keine Angebote, keine Liste.'],
+      ['Rechtsgrundlage', 'Vorvertragliche Maßnahmen auf Ihre Anfrage (Art. 6 Abs. 1 lit. b DSGVO): Sie schreiben uns, um eine Antwort oder ein Angebot zu erhalten.'],
+      ['Wohin die Daten gehen', 'Die Website hat keine Datenbank: Die Anfrage kommt nur per E-Mail an das Postfach des Unternehmens, mit den Fotos im Anhang. Auf der Website bleibt nichts gespeichert.'],
+      ['Speicherdauer', 'So lange, wie die Bearbeitung der Anfrage dauert. Die Höchstdauer für die Aufbewahrung der E-Mails legt der Berater fest.'],
+      ['Auftragsverarbeiter', 'Der Hosting-Anbieter der Website und der Dienst, der die E-Mails zustellt (Auftragsverarbeiter nach Art. 28 DSGVO). Liste und Sitz der Anbieter folgen.'],
       ['Ihre Rechte', 'Auskunft, Berichtigung, Löschung, Einschränkung, Datenübertragbarkeit und Widerspruch sowie Beschwerde bei der Datenschutzbehörde.'],
       ['Cookies', 'Die Website nutzt nur technisch notwendigen Speicher im Browser. Die Google-Karte setzt, falls aktiviert, Cookies von Dritten: Im Livebetrieb wird sie erst nach Zustimmung im Cookie-Banner geladen.'],
+    ],
+  },
+  en: {
+    title: 'Privacy and cookies · Car Trade Bolzano',
+    description: 'How CAR TRADE SRL in Bolzano processes the data of people who contact it or request a quote through the website.',
+    label: 'Privacy',
+    h1: 'Privacy notice.',
+    lead: 'Provisional text. The final version will be drafted by the company’s data protection consultant.',
+    badge: 'Draft',
+    sections: [
+      ['Data controller', `${site.name}, ${site.address.street.en}, ${site.address.postalCode} ${site.address.city.en}, Italy. VAT no. ${site.vat}. Email ${site.email}.`],
+      ['What data we collect', 'Only what you write in the contact and quote forms: full name, phone, email (optional), car and number plate (optional), your message and, if you attach them, photos of the damage.'],
+      ['What we use it for', 'Only to reply to your request, the way you chose (phone, WhatsApp or email). No newsletter, no offers, no mailing list.'],
+      ['Legal basis', 'Pre-contractual steps taken at your request (Art. 6(1)(b) GDPR): you write to us to get a reply or a quote.'],
+      ['Where it goes', 'The website has no database: your request only reaches the company’s mailbox by email, with any photos attached. Nothing is kept on the website.'],
+      ['How long we keep it', 'As long as needed to handle your request. The maximum retention period for emails will be set with the consultant.'],
+      ['Processors', 'The provider hosting the website and the service delivering the emails (processors under Art. 28 GDPR). List and location of providers to follow.'],
+      ['Your rights', 'Access, rectification, erasure, restriction, data portability and objection, and the right to lodge a complaint with the Italian Data Protection Authority.'],
+      ['Cookies', 'The website only uses technically necessary storage in your browser. The Google map, if enabled, sets third-party cookies: on the live site it will only load after consent in the cookie banner.'],
     ],
   },
 }[lang];

@@ -1,0 +1,329 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Photo from '../components/Photo.astro';
+import Icon from '../components/Icon.astro';
+import SectionHead from '../components/SectionHead.astro';
+import RequestForm from '../components/RequestForm.astro';
+import Faq from '../components/Faq.astro';
+import { site, type Lang } from '../data/site';
+import { alternatesFor } from '../i18n/routes';
+import { ui } from '../i18n/ui';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = ui[lang];
+
+const copy = {
+  it: {
+    title: 'Officina meccanica e carrozzeria a Bolzano',
+    description: 'Officina meccanica e carrozzeria in Via Werner von Siemens 4/F a Bolzano: tagliandi, freni, diagnosi, riparazione danni e verniciatura. Preventivo anche da foto.',
+    label: 'Officina e carrozzeria',
+    h1: 'Officina e carrozzeria a Bolzano, sotto lo stesso tetto.',
+    lead: 'Prima ti diciamo cosa serve e quanto costa. Poi lo facciamo, e ti spieghiamo cosa abbiamo fatto. Per i danni basta una foto per avere un preventivo.',
+    quote: t.cta.quote,
+    photoAlt: 'Meccanico al lavoro sul vano motore con guanti e lampada',
+    workshopId: 'officina',
+    bodyId: 'carrozzeria',
+    wLabel: 'Officina meccanica',
+    wTitle: 'Officina',
+    wIntro: 'Manutenzione e riparazioni per auto di tutte le marche, con diagnosi elettronica e ricambi originali o equivalenti, a tua scelta.',
+    workshop: [
+      { t: 'Tagliandi', d: 'Manutenzione programmata secondo le specifiche del costruttore, con libretto aggiornato.' },
+      { t: 'Freni', d: 'Dischi, pastiglie, liquido freni. Misuriamo l’usura e ti mostriamo i pezzi sostituiti.' },
+      { t: 'Distribuzione e frizione', d: 'Sostituzione a chilometraggio o al primo segnale, con preventivo prima di iniziare.' },
+      { t: 'Diagnosi elettronica', d: 'Spia accesa? Leggiamo le centraline e ti diciamo cosa significa davvero.' },
+      // TODO: confermare con il cliente i servizi climatizzazione e pneumatici
+      { t: 'Climatizzazione', d: 'Ricarica del gas e sanificazione dell’impianto.' },
+      { t: 'Pneumatici', d: 'Cambio stagionale: in Alto Adige le gomme invernali sono obbligatorie dal 15 novembre al 15 aprile.' },
+      { t: 'Controllo pre-revisione', d: 'Un giro di verifiche qualche giorno prima, per arrivare alla revisione senza sorprese.' },
+    ],
+    wPhotoAlt: 'Officina con diverse auto in lavorazione sui ponti sollevatori',
+    tyreAlt: 'Mani con guanti che montano una ruota',
+    bLabel: 'Carrozzeria',
+    bTitle: 'Carrozzeria',
+    bIntro: 'Dal graffio del parcheggio al danno strutturale. Lavoriamo per riportare l’auto com’era, non per farla sembrare a posto.',
+    body: [
+      { t: 'Ammaccature e graffi', d: 'Riparazione di portiere, paraurti, parafanghi. Ritocchi e lucidatura.' },
+      { t: 'Raddrizzatura scocca', d: 'Ripristino della geometria dopo un urto, con misurazione dei punti di riferimento.' },
+      // TODO: confermare dotazione (forno di verniciatura) e sistema tintometrico
+      { t: 'Verniciatura', d: 'Colore riprodotto sul codice originale dell’auto, per parti o per l’intera carrozzeria.' },
+      { t: 'Ripristino estetico', d: 'Fari opacizzati, plastiche, cerchi: i dettagli che fanno sembrare vecchia un’auto.' },
+      // TODO: confermare se gestite le pratiche con le assicurazioni
+      { t: 'Sinistri', d: 'Ti aiutiamo con la documentazione per la tua assicurazione.' },
+    ],
+    bPhotoAlt: 'Carrozziere con occhiali e mascherina che lucida la fiancata di un’auto grigia',
+    b2PhotoAlt: 'Carteggiatura del pannello posteriore prima della verniciatura',
+    qLabel: 'Preventivo',
+    qTitle: 'Mandaci una foto. Ti diciamo quanto costa.',
+    qText: 'Descrivi il problema o carica le foto del danno: ti ricontattiamo con una stima e, se serve, ti proponiamo un giorno per vedere l’auto.',
+    qSteps: ['Compila il modulo, anche dal telefono', 'Valutiamo foto e descrizione', 'Ti chiamiamo con una stima e una data'],
+    qOr: 'Preferisci parlarne?',
+    faqLabel: 'Domande frequenti',
+    // TODO: confermare con il cliente politica preventivi, tempi di risposta e gestione sinistri (vedi TODO sopra)
+    faq: [
+      { q: 'Quanto costa un tagliando a Bolzano?', a: 'Dipende dal modello e da cosa prevede il costruttore a quel chilometraggio. Ti diciamo il prezzo prima di iniziare: niente sorprese al ritiro.' },
+      { q: 'Usate ricambi originali?', a: 'Originali o equivalenti di pari qualità, a tua scelta. Te lo chiediamo prima, insieme al preventivo.' },
+      { q: 'Quando vanno montate le gomme invernali in provincia di Bolzano?', a: 'Dal 15 novembre al 15 aprile servono gomme invernali montate o catene a bordo. Conviene prenotare il cambio a fine ottobre, prima della coda.' },
+      { q: 'Come funziona il preventivo di carrozzeria con le foto?', a: 'Compili il modulo dal telefono e carichi fino a 6 foto del danno, da vicino e da lontano. Ti ricontattiamo entro un giorno lavorativo con una stima e, se serve, un giorno per vedere l’auto.' },
+      { q: 'Mi si è accesa una spia: posso venire senza appuntamento?', a: 'Chiamaci prima: se la spia è rossa ti diciamo subito se puoi guidare. Con la diagnosi elettronica leggiamo le centraline e ti spieghiamo cosa significa davvero.' },
+      { q: 'Mi aiutate con l’assicurazione dopo un incidente?', a: 'Sì, ti aiutiamo a preparare la documentazione per la tua assicurazione e ripariamo l’auto in carrozzeria.' },
+    ],
+  },
+  de: {
+    title: 'Kfz-Werkstatt und Karosserie in Bozen',
+    description: 'Kfz-Werkstatt und Karosserie in der Werner-von-Siemens-Straße 4/F in Bozen: Inspektion, Bremsen, Diagnose, Unfallreparatur und Lackierung. Angebot auch per Foto.',
+    label: 'Werkstatt & Karosserie',
+    h1: 'Werkstatt und Karosserie in Bozen, unter einem Dach.',
+    lead: 'Erst sagen wir Ihnen, was nötig ist und was es kostet. Dann machen wir es und erklären, was wir gemacht haben. Bei Schäden reicht ein Foto für ein Angebot.',
+    quote: t.cta.quote,
+    photoAlt: 'Mechaniker mit Handschuhen und Lampe arbeitet im Motorraum',
+    workshopId: 'werkstatt',
+    bodyId: 'karosserie',
+    wLabel: 'Kfz-Werkstatt',
+    wTitle: 'Werkstatt',
+    wIntro: 'Wartung und Reparatur für Autos aller Marken, mit elektronischer Diagnose und Original- oder gleichwertigen Ersatzteilen, ganz wie Sie möchten.',
+    workshop: [
+      { t: 'Inspektion', d: 'Wartung nach Herstellervorgaben, mit aktualisiertem Serviceheft.' },
+      { t: 'Bremsen', d: 'Scheiben, Beläge, Bremsflüssigkeit. Wir messen den Verschleiß und zeigen Ihnen die ausgebauten Teile.' },
+      { t: 'Zahnriemen und Kupplung', d: 'Wechsel nach Kilometerstand oder beim ersten Anzeichen, mit Angebot vor Arbeitsbeginn.' },
+      { t: 'Elektronische Diagnose', d: 'Warnleuchte an? Wir lesen die Steuergeräte aus und sagen Ihnen, was sie wirklich bedeutet.' },
+      { t: 'Klimaanlage', d: 'Kältemittel nachfüllen und Anlage desinfizieren.' },
+      { t: 'Reifen', d: 'Saisonwechsel: In Südtirol gilt die Winterausrüstungspflicht vom 15. November bis 15. April.' },
+      { t: 'Check vor der Revision', d: 'Eine Runde Kontrollen ein paar Tage vorher, damit die Revision ohne Überraschungen klappt.' },
+    ],
+    wPhotoAlt: 'Werkstatt mit mehreren Fahrzeugen auf Hebebühnen',
+    tyreAlt: 'Hände mit Handschuhen montieren ein Rad',
+    bLabel: 'Karosserie',
+    bTitle: 'Karosserie',
+    bIntro: 'Vom Parkrempler bis zum Strukturschaden. Wir bringen das Auto in den Originalzustand zurück, statt es nur gut aussehen zu lassen.',
+    body: [
+      { t: 'Dellen und Kratzer', d: 'Reparatur von Türen, Stoßfängern, Kotflügeln. Ausbessern und Polieren.' },
+      { t: 'Richtarbeiten', d: 'Wiederherstellung der Karosseriegeometrie nach einem Unfall, mit Vermessung der Bezugspunkte.' },
+      { t: 'Lackierung', d: 'Farbton nach dem Originalcode des Fahrzeugs, für Einzelteile oder die ganze Karosserie.' },
+      { t: 'Aufbereitung', d: 'Matte Scheinwerfer, Kunststoffteile, Felgen: die Details, die ein Auto alt aussehen lassen.' },
+      { t: 'Unfallschäden', d: 'Wir helfen Ihnen mit den Unterlagen für Ihre Versicherung.' },
+    ],
+    bPhotoAlt: 'Karosseriebauer mit Schutzbrille und Maske poliert die Seite eines grauen Autos',
+    b2PhotoAlt: 'Schleifen der hinteren Seitenwand vor dem Lackieren',
+    qLabel: 'Angebot',
+    qTitle: 'Schicken Sie uns ein Foto. Wir sagen Ihnen, was es kostet.',
+    qText: 'Beschreiben Sie das Problem oder laden Sie Fotos vom Schaden hoch: Wir melden uns mit einer Schätzung und schlagen bei Bedarf einen Termin vor.',
+    qSteps: ['Formular ausfüllen, auch am Handy', 'Wir prüfen Fotos und Beschreibung', 'Wir rufen mit Schätzung und Termin an'],
+    qOr: 'Lieber persönlich?',
+    faqLabel: 'Häufige Fragen',
+    faq: [
+      { q: 'Was kostet eine Inspektion in Bozen?', a: 'Das hängt vom Modell ab und davon, was der Hersteller bei diesem Kilometerstand vorsieht. Den Preis nennen wir Ihnen vor Arbeitsbeginn: keine Überraschung bei der Abholung.' },
+      { q: 'Verwenden Sie Originalteile?', a: 'Original- oder gleichwertige Ersatzteile, ganz wie Sie möchten. Wir fragen Sie vorher, zusammen mit dem Angebot.' },
+      { q: 'Ab wann gilt in Südtirol die Winterreifenpflicht?', a: 'Vom 15. November bis 15. April sind Winterreifen oder Schneeketten an Bord vorgeschrieben. Am besten Ende Oktober buchen, bevor der Andrang beginnt.' },
+      { q: 'Wie funktioniert das Karosserie-Angebot per Foto?', a: 'Formular am Handy ausfüllen und bis zu 6 Fotos vom Schaden hochladen, von nah und fern. Wir melden uns innerhalb eines Werktags mit einer Schätzung und bei Bedarf einem Termin.' },
+      { q: 'Eine Warnleuchte ist an: Kann ich ohne Termin kommen?', a: 'Rufen Sie vorher an: Bei einer roten Leuchte sagen wir Ihnen sofort, ob Sie weiterfahren dürfen. Mit der elektronischen Diagnose lesen wir die Steuergeräte aus und erklären, was sie wirklich bedeutet.' },
+      { q: 'Helfen Sie nach einem Unfall mit der Versicherung?', a: 'Ja, wir helfen bei den Unterlagen für Ihre Versicherung und reparieren das Auto in unserer Karosserie.' },
+    ],
+  },
+  en: {
+    title: 'Car workshop and body shop in Bolzano',
+    description: 'Mechanical workshop and body shop at Via Werner von Siemens 4/F, Bolzano: servicing, brakes, diagnostics, accident repairs and painting. Quotes from photos too.',
+    label: 'Workshop & bodywork',
+    h1: 'Workshop and bodywork in Bolzano, under one roof.',
+    lead: 'First we tell you what’s needed and what it costs. Then we do it and explain what we did. For body damage, a photo is enough for a quote.',
+    quote: t.cta.quote,
+    photoAlt: 'Mechanic with gloves and a lamp working in the engine bay',
+    workshopId: 'workshop',
+    bodyId: 'bodywork',
+    wLabel: 'Mechanical workshop',
+    wTitle: 'Workshop',
+    wIntro: 'Servicing and repairs for cars of every make, with electronic diagnostics and original or equivalent parts, as you prefer.',
+    workshop: [
+      { t: 'Servicing', d: 'Maintenance to manufacturer specifications, with your service book kept up to date.' },
+      { t: 'Brakes', d: 'Discs, pads, brake fluid. We measure the wear and show you the parts we take off.' },
+      { t: 'Timing belt and clutch', d: 'Replaced by mileage or at the first sign of trouble, with a quote before we start.' },
+      { t: 'Electronic diagnostics', d: 'Warning light on? We read the control units and tell you what it really means.' },
+      { t: 'Air conditioning', d: 'Refrigerant top-up and system sanitising.' },
+      { t: 'Tyres', d: 'Seasonal change: in South Tyrol winter tyres are required from 15 November to 15 April.' },
+      { t: 'Pre-inspection check', d: 'A round of checks a few days before, so the inspection goes through without surprises.' },
+    ],
+    wPhotoAlt: 'Workshop with several cars on lifts',
+    tyreAlt: 'Gloved hands fitting a wheel',
+    bLabel: 'Bodywork',
+    bTitle: 'Bodywork',
+    bIntro: 'From a parking scrape to structural damage. We bring the car back to how it left the factory, not just make it look good.',
+    body: [
+      { t: 'Dents and scratches', d: 'Repairs to doors, bumpers and wings. Touch-ups and polishing.' },
+      { t: 'Panel straightening', d: 'Restoring the body geometry after an accident, measuring the reference points.' },
+      { t: 'Painting', d: 'Colour matched to the car’s original paint code, for single panels or the whole body.' },
+      { t: 'Refinishing', d: 'Cloudy headlights, plastic trim, wheels: the details that make a car look old.' },
+      { t: 'Accident damage', d: 'We help you with the paperwork for your insurance.' },
+    ],
+    bPhotoAlt: 'Body shop technician with goggles and mask polishing the side of a grey car',
+    b2PhotoAlt: 'Sanding the rear quarter panel before painting',
+    qLabel: 'Quote',
+    qTitle: 'Send us a photo. We’ll tell you what it costs.',
+    qText: 'Describe the problem or upload photos of the damage: we’ll get back to you with an estimate and, if needed, suggest an appointment.',
+    qSteps: ['Fill in the form, even on your phone', 'We look at the photos and description', 'We call you with an estimate and a date'],
+    qOr: 'Rather talk to us?',
+    faqLabel: 'Frequently asked questions',
+    faq: [
+      { q: 'How much does a car service cost in Bolzano?', a: 'It depends on the model and on what the manufacturer specifies at that mileage. We give you the price before we start: no surprises when you pick the car up.' },
+      { q: 'Do you use original parts?', a: 'Original or equivalent parts, as you prefer. We ask you beforehand, together with the quote.' },
+      { q: 'When are winter tyres required in South Tyrol?', a: 'From 15 November to 15 April you need winter tyres or snow chains on board. It’s best to book at the end of October, before the rush.' },
+      { q: 'How does the bodywork quote from photos work?', a: 'Fill in the form on your phone and upload up to 6 photos of the damage, close up and from a distance. We’ll get back to you within one working day with an estimate and, if needed, a date.' },
+      { q: 'A warning light is on: can I come without an appointment?', a: 'Call us first: if it’s a red light we’ll tell you straight away whether you can keep driving. With electronic diagnostics we read the control units and explain what it really means.' },
+      { q: 'Do you help with the insurance after an accident?', a: 'Yes, we help with the paperwork for your insurance and repair the car in our body shop.' },
+    ],
+  },
+}[lang];
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: copy.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+---
+<Base lang={lang} title={copy.title} description={copy.description} alternates={alternatesFor('officina')} current="officina" jsonLd={[faqLd]}>
+  <PageHero lang={lang} label={copy.label} title={copy.h1} lead={copy.lead}>
+    <Fragment slot="actions">
+      <a href="#preventivo" class="btn btn-primary">{copy.quote} <Icon name="arrow" size={18} class="btn-arrow rotate-90" /></a>
+      <a href={site.phone.href} class="btn btn-ghost t-num"><Icon name="phone" size={18} /> {site.phone.display}</a>
+    </Fragment>
+    <div slot="aside" class="relative overflow-hidden">
+      <Photo foto="officina-motore" alt={copy.photoAlt} sizes="(min-width: 64rem) 36vw, 100vw" ratio={[4, 3]} widths={[480, 768, 1080]} priority />
+    </div>
+  </PageHero>
+
+  <!-- 01 Officina -->
+  <section class="section-y" id={copy.workshopId} aria-labelledby="w-title">
+    <div class="wrap">
+      <SectionHead num="01" label={copy.wLabel} />
+      <div class="grid-12 mt-8 gap-y-8 lg:mt-12">
+        <h2 id="w-title" class="chapter col-span-4 lg:col-span-8" data-reveal>{copy.wTitle}</h2>
+        <p class="col-span-4 max-w-[46ch] text-muted lg:col-span-4 lg:self-end" data-reveal>{copy.wIntro}</p>
+      </div>
+      <div class="grid-12 mt-12 gap-y-10 lg:mt-16">
+        <div class="col-span-4 lg:col-span-5">
+          <div class="grid gap-[var(--gutter)] lg:sticky lg:top-28">
+            <Photo foto="officina-ponti" alt={copy.wPhotoAlt} sizes="(min-width: 64rem) 36vw, 100vw" ratio={[4, 3]} widths={[480, 768, 1080]} />
+            <Photo foto="officina-gomme" alt={copy.tyreAlt} sizes="(min-width: 64rem) 36vw, 100vw" ratio={[16, 9]} widths={[480, 768, 1080]} class="hidden lg:block" />
+          </div>
+        </div>
+        <ol class="svc col-span-4 lg:col-span-7" data-stagger="70">
+          {copy.workshop.map((s, i) => (
+            <li data-reveal>
+              <span class="t-label t-num text-orange-ink">{String(i + 1).padStart(2, '0')}</span>
+              <h3 class="t-h3">{s.t}</h3>
+              <p class="text-muted">{s.d}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 Carrozzeria -->
+  <section class="section-y bg-paper-2" id={copy.bodyId} aria-labelledby="b-title">
+    <div class="wrap">
+      <SectionHead num="02" label={copy.bLabel} />
+      <div class="grid-12 mt-8 gap-y-8 lg:mt-12">
+        <h2 id="b-title" class="chapter col-span-4 lg:col-span-8" data-reveal>{copy.bTitle}</h2>
+        <p class="col-span-4 max-w-[46ch] text-muted lg:col-span-4 lg:self-end" data-reveal>{copy.bIntro}</p>
+      </div>
+      <div class="body-photos mt-12 lg:mt-16">
+        <div class="relative overflow-hidden">
+          <div data-parallax="8">
+            <Photo foto="carrozzeria" alt={copy.bPhotoAlt} sizes="(min-width: 64rem) 62vw, 100vw" widths={[480, 640, 960, 1440]} fluid class="aspect-[16/10] w-full scale-[1.08]" />
+          </div>
+        </div>
+        <div class="hidden lg:block">
+          <Photo foto="carrozzeria-dettaglio" alt={copy.b2PhotoAlt} sizes="30vw" ratio={[4, 5]} widths={[480, 768]} />
+        </div>
+      </div>
+      <ol class="svc svc-cols mt-12 lg:mt-16" data-stagger="70">
+        {copy.body.map((s, i) => (
+          <li data-reveal>
+            <span class="t-label t-num text-orange-ink">{String(i + 1).padStart(2, '0')}</span>
+            <h3 class="t-h3">{s.t}</h3>
+            <p class="text-muted">{s.d}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- 03 Preventivo -->
+  <section class="on-dark section-y bg-night text-paper" id="preventivo" aria-labelledby="q-title">
+    <div class="wrap">
+      <SectionHead num="03" label={copy.qLabel} dark />
+      <div class="grid-12 mt-8 gap-y-12 lg:mt-12">
+        <div class="col-span-4 lg:col-span-5">
+          <div class="lg:sticky lg:top-28">
+            <h2 id="q-title" class="t-h2 max-w-[16ch]">{copy.qTitle}</h2>
+            <p class="mt-5 max-w-[42ch] text-steel">{copy.qText}</p>
+            <ol class="q-steps mt-8">
+              {copy.qSteps.map((s, i) => (
+                <li><span class="t-label t-num text-orange">{String(i + 1).padStart(2, '0')}</span><span>{s}</span></li>
+              ))}
+            </ol>
+            <div class="mt-10 hidden lg:block">
+              <p class="t-label text-steel-2">{copy.qOr}</p>
+              <div class="mt-3 flex flex-wrap gap-3">
+                <a href={site.phone.href} class="btn btn-ghost t-num"><Icon name="phone" size={18} /> {site.phone.display}</a>
+                <a href={site.whatsapp.href({ it: 'Buongiorno, vorrei un preventivo.', de: 'Guten Tag, ich hätte gern ein Angebot.', en: 'Hello, I’d like a quote.' }[lang])} class="btn btn-ghost" target="_blank" rel="noopener"><Icon name="whatsapp" size={19} /> WhatsApp</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-span-4 lg:col-span-6 lg:col-start-7">
+          <RequestForm lang={lang} variant="quote" id="quote" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 Domande frequenti -->
+  <section class="section-y" aria-labelledby="faq-title">
+    <div class="wrap grid-12 gap-y-10">
+      <div class="col-span-4 lg:col-span-4">
+        <SectionHead num="04" label={copy.faqLabel} />
+        <h2 id="faq-title" class="sr-only">{copy.faqLabel}</h2>
+      </div>
+      <div class="col-span-4 lg:col-span-8">
+        <Faq items={copy.faq} />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+@layer components {
+  .chapter {
+    font-stretch: 125%;
+    font-weight: 650;
+    font-size: clamp(2.6rem, 7.4vw, 7.5rem);
+    line-height: 0.88;
+    letter-spacing: -0.045em;
+  }
+  .svc { border-top: 1px solid var(--line-strong); }
+  .svc li {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    column-gap: 0.75rem;
+    row-gap: 0.4rem;
+    padding-block: 1.35rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .svc li > :not(:first-child) { grid-column: 2; }
+  .svc li > :first-child { grid-row: span 2; padding-top: 0.3rem; }
+  @media (min-width: 64rem) {
+    .svc li { grid-template-columns: 3rem minmax(0, 0.9fr) minmax(0, 1.1fr); column-gap: 1.5rem; padding-block: 1.6rem; align-items: baseline; }
+    .svc li > :not(:first-child) { grid-column: auto; }
+    .svc li > :first-child { grid-row: auto; padding-top: 0; }
+    .svc-cols { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--gutter); border-top: 0; }
+    .svc-cols li { grid-template-columns: 3rem 1fr; border-top: 1px solid var(--line-strong); border-bottom: 0; }
+    .svc-cols li > :not(:first-child) { grid-column: 2; }
+    .svc-cols li > :first-child { grid-row: span 2; }
+  }
+  .body-photos { display: grid; gap: var(--gutter); }
+  @media (min-width: 64rem) { .body-photos { grid-template-columns: 2fr 1fr; align-items: end; } }
+  .q-steps { border-top: 1px solid var(--line-dark); }
+  .q-steps li { display: grid; grid-template-columns: 2.5rem 1fr; padding-block: 0.9rem; border-bottom: 1px solid var(--line-dark); }
+}
+</style>

@@ -1,5 +1,5 @@
 // Tracciati delle icone a tratto sottile disegnate per il sito (niente set generici).
-// Unica fonte: li usano Icon.astro (pagine) e l'admin (interfaccia disegnata nel browser).
+// Unica fonte: li usa Icon.astro.
 export const ICONS = {
   'phone': `<path d="M5 3.5h3.2l1.6 4.2-2.1 1.4a11 11 0 0 0 7.2 7.2l1.4-2.1 4.2 1.6V19a1.5 1.5 0 0 1-1.6 1.5A16.5 16.5 0 0 1 3.5 5.1 1.5 1.5 0 0 1 5 3.5Z" />`,
   'whatsapp': `<path d="M4.2 19.8l1.1-3.9A8.4 8.4 0 1 1 8.4 19l-4.2.8Z" /><path d="M9.2 8.4c.2-.5.5-.5.8-.5h.5c.2 0 .4.1.5.4l.7 1.6c.1.2 0 .4-.1.6l-.5.6c-.1.1-.1.3 0 .5a6 6 0 0 0 2.6 2.4c.2.1.3.1.5 0l.6-.7c.2-.2.4-.2.6-.1l1.6.8c.2.1.3.3.3.5 0 .9-.6 1.8-1.6 1.9-1 .1-2.6-.3-4.4-1.9-1.6-1.5-2.3-3-2.3-4 0-.9.5-1.5.7-1.7Z" fill="currentColor" stroke="none" />`,
@@ -16,6 +16,7 @@ export const ICONS = {
   'mail': `<path d="M3.5 6.5h17v11h-17v-11Zm0 0 8.5 6.5 8.5-6.5" />`,
   'filter': `<path d="M4 7h10m4 0h2M4 17h2m4 0h10M14 4.5v5M8 14.5v5" />`,
   'chevron': `<path d="m6 9.5 6 6 6-6" />`,
+  'globe': `<circle cx="12" cy="12" r="8.75" /><path d="M3.5 12h17M12 3.25c2.25 2.4 3.4 5.3 3.4 8.75s-1.15 6.35-3.4 8.75c-2.25-2.4-3.4-5.3-3.4-8.75S9.75 5.65 12 3.25Z" />`,
   'download': `<path d="M12 4v11.5m-4.5-4.5L12 15.5l4.5-4.5M4.5 20h15" />`,
   'star': `<path d="m12 3.8 2.5 5.2 5.6.7-4.1 3.9 1 5.6L12 16.5l-5 2.7 1-5.6-4.1-3.9 5.6-.7L12 3.8Z" fill="currentColor" stroke="none" />`,
   'search': `<path d="M10.5 18a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15Zm5.3-2.2L21 21"/>`,

@@ -6,9 +6,6 @@ import PhotoHero from '../components/PhotoHero.astro';
 import { fotoLocale } from '../lib/foto';
 // Foto reali in src/assets/foto/ (mappa in src/data/foto.ts)
 const sedeImg = fotoLocale('sede')!;
-const showroom1 = fotoLocale('showroom-1')!;
-const showroom2 = fotoLocale('showroom-2')!;
-const showroom3 = fotoLocale('showroom-3')!;
 const ritratti = (['team-1', 'team-2', 'team-3', 'team-4'] as const).map((k) => fotoLocale(k));
 import Icon from '../components/Icon.astro';
 import SectionHead from '../components/SectionHead.astro';
@@ -27,24 +24,24 @@ const t = ui[lang];
 // I testi qui sotto sono plausibili ma non contengono fatti verificati.
 const copy = {
   it: {
-    title: 'Chi siamo: revisione, officina e auto a Bolzano',
-    kicker: 'Revisione, officina, carrozzeria e auto a Bolzano',
-    description: 'CAR TRADE SRL: revisione, officina, carrozzeria e vendita auto in un’unica sede a Bolzano Sud. Chi siamo, come lavoriamo, dove trovarci.',
+    title: 'Chi siamo · Revisione, officina e carrozzeria a Bolzano',
+    kicker: 'Revisione, officina e carrozzeria a Bolzano',
+    description: 'CAR TRADE SRL: revisione, officina e carrozzeria in un’unica sede a Bolzano Sud. Chi siamo, come lavoriamo, dove trovarci.',
     label: 'Azienda',
-    h1: ['Quattro mestieri.', 'Una sola squadra.'],
-    lead: 'Revisione, officina, carrozzeria e vendita sotto lo stesso tetto in Via Werner von Siemens. Così l’auto non deve girare la città, e tu nemmeno.',
+    h1: ['Tre mestieri.', 'Una sola squadra.'],
+    lead: 'Revisione, officina e carrozzeria sotto lo stesso tetto in Via Werner von Siemens. Così l’auto non deve girare la città, e tu nemmeno.',
     photoAlt: 'La sede Car Trade: linea di revisione con l’insegna “Revisioni DEKRA Italia Überprüfung” e un’auto sul banco prova',
     caption: 'La sede · Via Werner von Siemens 4/F',
     storyLabel: 'La storia',
     storyTitle: 'Nata da un problema molto concreto.',
     story: [
       'Chi porta l’auto in revisione e scopre un difetto, di solito deve trovare un’officina, aspettare un appuntamento, tornare per la nuova verifica. Giorni persi per un fanale o un disco dei freni.',
-      'Noi abbiamo scelto di fare tutto nello stesso posto: il centro revisioni affiliato DEKRA, l’officina meccanica, la carrozzeria. Accanto all’officina ci sono le auto in vendita, scelte con lo stesso criterio con cui le ripariamo.',
+      'Noi abbiamo scelto di fare tutto nello stesso posto: il centro revisioni affiliato DEKRA, l’officina meccanica, la carrozzeria.',
     ],
     milestones: [
-      { k: 'Officina', d: 'Meccanica e carrozzeria interne, per auto di tutte le marche.' },
       { k: 'Revisioni', d: 'Centro revisioni affiliato DEKRA, abilitato per autovetture.' },
-      { k: 'Auto', d: 'Usato selezionato e km 0, controllati in officina prima della vendita.' },
+      { k: 'Officina', d: 'Tagliandi, meccanica e diagnosi, per auto di tutte le marche.' },
+      { k: 'Carrozzeria', d: 'Riparazione, raddrizzatura e verniciatura, nella stessa sede.' },
     ],
     yearTodo: 'Anno',
     valuesLabel: 'Come lavoriamo',
@@ -57,7 +54,7 @@ const copy = {
     teamTitle: 'Le persone che vedrai in officina.',
     teamText: 'Volti e nomi arriveranno con il servizio fotografico in sede.',
     team: [
-      { r: 'Titolare', a: 'Direzione e vendita auto' },
+      { r: 'Titolare', a: 'Direzione' },
       { r: 'Responsabile tecnico', a: 'Centro revisioni' },
       { r: 'Capo officina', a: 'Meccanica e diagnosi' },
       { r: 'Carrozziere', a: 'Riparazione e verniciatura' },
@@ -66,13 +63,6 @@ const copy = {
     nameTodo: 'Nome e cognome',
     placeLabel: 'La sede',
     placeTitle: 'Via Werner von Siemens 4/F, zona produttiva Bolzano Sud.',
-    showroom: 'Lo showroom',
-    showroomText: 'Le auto in vendita sono esposte al coperto, nella stessa sede dell’officina.',
-    showAlt: [
-      'Showroom: Mercedes Classe C Coupé bianca in primo piano, altre auto sullo sfondo',
-      'Showroom: Jeep Wrangler bianca con assetto fuoristrada',
-      'Showroom: Abarth 595 blu e Jeep Renegade rossa',
-    ],
     facts: [
       ['Ragione sociale', site.name],
       ['P. IVA', site.vat],
@@ -84,24 +74,24 @@ const copy = {
     contact: 'Vieni a trovarci',
   },
   de: {
-    title: 'Über uns: Revision, Werkstatt und Fahrzeuge in Bozen',
-    kicker: 'Revision, Werkstatt, Karosserie und Fahrzeuge in Bozen',
-    description: 'CAR TRADE SRL: Revision, Werkstatt, Karosserie und Fahrzeugverkauf an einem Standort in Bozen Süd. Wer wir sind, wie wir arbeiten, wo Sie uns finden.',
+    title: 'Über uns · Revision, Werkstatt und Karosserie in Bozen',
+    kicker: 'Revision, Werkstatt und Karosserie in Bozen',
+    description: 'CAR TRADE SRL: Revision, Werkstatt und Karosserie an einem Standort in Bozen Süd. Wer wir sind, wie wir arbeiten, wo Sie uns finden.',
     label: 'Unternehmen',
-    h1: ['Vier Bereiche.', 'Ein Team.'],
-    lead: 'Revision, Werkstatt, Karosserie und Verkauf unter einem Dach in der Werner-von-Siemens-Straße. Damit das Auto nicht quer durch die Stadt muss und Sie auch nicht.',
+    h1: ['Drei Bereiche.', 'Ein Team.'],
+    lead: 'Revision, Werkstatt und Karosserie unter einem Dach in der Werner-von-Siemens-Straße. Damit das Auto nicht quer durch die Stadt muss und Sie auch nicht.',
     photoAlt: 'Der Standort von Car Trade: Prüfstraße mit dem Schild „Revisioni DEKRA Italia Überprüfung“ und einem Auto auf dem Prüfstand',
     caption: 'Standort · Werner-von-Siemens-Straße 4/F',
     storyLabel: 'Geschichte',
     storyTitle: 'Entstanden aus einem ganz konkreten Problem.',
     story: [
       'Wer bei der Revision einen Mangel entdeckt, muss meist eine Werkstatt suchen, auf einen Termin warten und dann zur Nachprüfung zurück. Tage verloren wegen eines Scheinwerfers oder einer Bremsscheibe.',
-      'Wir haben uns entschieden, alles an einem Ort zu machen: die Prüfstelle als DEKRA-Partner, die Kfz-Werkstatt, die Karosserie. Neben der Werkstatt stehen die Fahrzeuge zum Verkauf, ausgewählt nach denselben Maßstäben, nach denen wir sie reparieren.',
+      'Wir haben uns entschieden, alles an einem Ort zu machen: die Prüfstelle als DEKRA-Partner, die Kfz-Werkstatt, die Karosserie.',
     ],
     milestones: [
-      { k: 'Werkstatt', d: 'Mechanik und Karosserie im Haus, für Autos aller Marken.' },
       { k: 'Revision', d: 'DEKRA-Partner für die Revision, zugelassen für Pkw.' },
-      { k: 'Fahrzeuge', d: 'Ausgewählte Gebrauchtwagen und Tageszulassungen, vor dem Verkauf geprüft.' },
+      { k: 'Werkstatt', d: 'Inspektion, Mechanik und Diagnose, für Autos aller Marken.' },
+      { k: 'Karosserie', d: 'Reparatur, Richtarbeiten und Lackierung, am selben Standort.' },
     ],
     yearTodo: 'Jahr',
     valuesLabel: 'Wie wir arbeiten',
@@ -114,7 +104,7 @@ const copy = {
     teamTitle: 'Die Menschen, die Sie in der Werkstatt treffen.',
     teamText: 'Gesichter und Namen folgen mit dem Fotoshooting vor Ort.',
     team: [
-      { r: 'Inhaber', a: 'Leitung und Fahrzeugverkauf' },
+      { r: 'Inhaber', a: 'Leitung' },
       { r: 'Technischer Leiter', a: 'Prüfstelle Revision' },
       { r: 'Werkstattleiter', a: 'Mechanik und Diagnose' },
       { r: 'Karosseriebauer', a: 'Reparatur und Lackierung' },
@@ -123,13 +113,6 @@ const copy = {
     nameTodo: 'Vor- und Nachname',
     placeLabel: 'Standort',
     placeTitle: 'Werner-von-Siemens-Straße 4/F, Gewerbegebiet Bozen Süd.',
-    showroom: 'Der Ausstellungsraum',
-    showroomText: 'Die Fahrzeuge stehen überdacht im selben Gebäude wie die Werkstatt.',
-    showAlt: [
-      'Ausstellungsraum: weißes Mercedes C-Klasse Coupé im Vordergrund, weitere Autos dahinter',
-      'Ausstellungsraum: weißer Jeep Wrangler mit Geländefahrwerk',
-      'Ausstellungsraum: blauer Abarth 595 und roter Jeep Renegade',
-    ],
     facts: [
       ['Firmenname', site.name],
       ['MwSt.-Nr.', site.vat],
@@ -138,6 +121,55 @@ const copy = {
     ],
     arrive: 'Von der Autobahn A22 Ausfahrt Bozen Süd, dann Richtung Gewerbegebiet.',
     contact: 'Besuchen Sie uns',
+  },
+  en: {
+    title: 'About us · Car inspection and repairs in Bolzano',
+    kicker: 'Inspection, workshop and bodywork in Bolzano',
+    description: 'CAR TRADE SRL: vehicle inspection, workshop and body shop at one address in Bolzano South. Who we are, how we work, where to find us.',
+    label: 'About us',
+    h1: ['Three trades.', 'One team.'],
+    lead: 'Inspection, workshop and bodywork under one roof on Via Werner von Siemens. So your car doesn’t have to cross town, and neither do you.',
+    photoAlt: 'The Car Trade site: inspection lane with the “Revisioni DEKRA Italia Überprüfung” sign and a car on the test bench',
+    caption: 'Our site · Via Werner von Siemens 4/F',
+    storyLabel: 'Our story',
+    storyTitle: 'Born from a very real problem.',
+    story: [
+      'When an inspection finds a fault, you usually have to find a garage, wait for an appointment and then come back for the re-inspection. Days lost over a headlight or a brake disc.',
+      'We decided to do it all in one place: the DEKRA-affiliated inspection centre, the mechanical workshop and the body shop.',
+    ],
+    milestones: [
+      { k: 'Inspection', d: 'DEKRA-affiliated inspection centre, approved for cars.' },
+      { k: 'Workshop', d: 'Servicing, mechanics and diagnostics, for cars of every make.' },
+      { k: 'Bodywork', d: 'Repairs, panel straightening and painting, at the same address.' },
+    ],
+    yearTodo: 'Year',
+    valuesLabel: 'How we work',
+    values: [
+      { t: 'The price is agreed first.', d: 'Before we touch the car, you know what we’ll do and what it costs. If something else comes up, we call you.' },
+      { t: 'One point of contact.', d: 'From inspection to repair, you talk to the same people, who know your car.' },
+      { t: 'Work you can check.', d: 'We explain what we did and, if you like, show you the parts we replaced.' },
+    ],
+    teamLabel: 'People',
+    teamTitle: 'The people you’ll meet in the workshop.',
+    teamText: 'Faces and names coming soon, with the on-site photo shoot.',
+    team: [
+      { r: 'Owner', a: 'Management' },
+      { r: 'Technical manager', a: 'Inspection centre' },
+      { r: 'Workshop manager', a: 'Mechanics and diagnostics' },
+      { r: 'Body shop technician', a: 'Repairs and painting' },
+    ],
+    photoSoon: 'Photo coming soon',
+    nameTodo: 'Full name',
+    placeLabel: 'Location',
+    placeTitle: 'Via Werner von Siemens 4/F, Bolzano South business park.',
+    facts: [
+      ['Company name', site.name],
+      ['VAT no.', site.vat],
+      ['Address', `${site.address.street.en}, ${site.address.postalCode} Bolzano`],
+      ['Inspection', 'DEKRA-affiliated, cars'],
+    ],
+    arrive: 'From the A22 motorway take the Bolzano Sud exit, then follow signs for the business park.',
+    contact: 'Come and see us',
   },
 }[lang];
 ---
@@ -227,32 +259,14 @@ const copy = {
       <SectionHead num="04" label={copy.placeLabel} />
       <h2 id="place-title" class="t-h2 mt-8 max-w-[22ch] lg:mt-12" data-reveal>{copy.placeTitle}</h2>
       <div class="grid-12 mt-10 gap-y-10 lg:mt-14">
-        <figure class="col-span-4 lg:col-span-7">
-          {/* Foto dello showroom reale (dalle recensioni Google).
-              TODO: verificare chi ne detiene i diritti: se sono state caricate da clienti, chiedere il permesso o sostituirle con foto proprie.
-              TODO: confermare che lo showroom sia nella stessa sede (didascalia). */}
-          <div class="mosaic" data-stagger="90">
-            <div class="tile tile-wide" data-reveal>
-              <Picture src={showroom2} alt={copy.showAlt[1]} formats={['avif', 'webp']} fallbackFormat="webp" widths={[480, showroom2.width]} sizes="(min-width: 64rem) 55vw, 100vw" class="tile-img" />
-            </div>
-            <div class="tile" data-reveal>
-              <Picture src={showroom1} alt={copy.showAlt[0]} formats={['avif', 'webp']} fallbackFormat="webp" widths={[showroom1.width]} sizes="(min-width: 64rem) 27vw, 50vw" class="tile-img" />
-            </div>
-            <div class="tile" data-reveal>
-              <Picture src={showroom3} alt={copy.showAlt[2]} formats={['avif', 'webp']} fallbackFormat="webp" widths={[showroom3.width]} sizes="(min-width: 64rem) 27vw, 50vw" class="tile-img" />
-            </div>
-          </div>
-          <figcaption class="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span class="t-label">{copy.showroom}</span>
-            <span class="text-sm text-muted">{copy.showroomText}</span>
-          </figcaption>
-        </figure>
-        <div class="col-span-4 lg:col-span-5">
+        <div class="col-span-4 lg:col-span-6">
           <dl class="spec border-t border-[var(--line-strong)]">
             {copy.facts.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
           </dl>
           <p class="mt-6 text-muted">{copy.arrive}</p>
-          <h3 class="t-label mt-8">{t.hours.title}</h3>
+        </div>
+        <div class="col-span-4 lg:col-span-5 lg:col-start-8">
+          <h3 class="t-label">{t.hours.title}</h3>
           <HoursTable lang={lang} class="mt-2" />
           <div class="mt-8 flex flex-wrap gap-3">
             <a href={routes.contatti[lang]} class="btn btn-ink">{copy.contact} <Icon name="arrow" size={18} class="btn-arrow" /></a>
@@ -282,11 +296,6 @@ const copy = {
 
   .team { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.5rem var(--gutter); }
   @media (min-width: 64rem) { .team { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-  .mosaic { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gutter); }
-  .tile { position: relative; overflow: hidden; aspect-ratio: 3 / 4; background: var(--color-paper-3); }
-  .tile-wide { grid-column: 1 / -1; aspect-ratio: 3 / 2; }
-  .tile :global(.tile-img) { width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s var(--ease-out-expo); }
-  .tile:hover :global(.tile-img) { transform: scale(1.04); }
   .portrait { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; aspect-ratio: 4 / 5; background: var(--color-night); }
 }
 </style>

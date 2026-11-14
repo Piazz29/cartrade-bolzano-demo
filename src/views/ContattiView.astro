@@ -17,16 +17,18 @@ const t = ui[lang];
 
 const copy = {
   it: {
-    title: 'Contatti e orari del centro revisioni e officina a Bolzano',
+    title: 'Contatti e orari · Revisione e officina a Bolzano',
     kicker: 'Centro revisioni e officina · Bolzano',
-    description: `Contatti CAR TRADE Bolzano: telefono ${site.phone.display}, WhatsApp, Via Werner von Siemens 4/F. Orari lun-ven 8:30-12:30 e 14:00-18:00.`,
+    description: `Contatti CAR TRADE Bolzano: cellulare e WhatsApp ${site.phone.display}, fisso ${site.landline.display}, email ${site.email}, Via Werner von Siemens 4/F. Orari lun-ven 8:30-12:30 e 14:00-18:00.`,
     label: 'Contatti',
     h1: 'Chiamaci, scrivici o passa a trovarci.',
     lead: 'Per la revisione la via più veloce è la prenotazione online. Per tutto il resto rispondiamo al telefono e su WhatsApp negli orari di apertura.',
     channelsLabel: 'Canali',
     channels: [
-      { k: 'phone', t: 'Telefono', v: site.phone.display, href: site.phone.href, note: 'Negli orari di apertura', ext: false },
+      { k: 'phone', t: 'Cellulare', v: site.phone.display, href: site.phone.href, note: 'Negli orari di apertura', ext: false },
+      { k: 'phone', t: 'Telefono fisso', v: site.landline.display, href: site.landline.href, note: 'Negli orari di apertura', ext: false },
       { k: 'whatsapp', t: 'WhatsApp', v: 'Scrivici un messaggio', href: site.whatsapp.href('Buongiorno, '), note: 'Anche foto e documenti', ext: true },
+      { k: 'mail', t: 'Email', v: site.email, href: `mailto:${site.email}`, note: 'Per richieste e documenti', ext: false },
       { k: 'calendar', t: 'Revisione', v: 'Prenota online', href: site.dekra.bookingUrl, note: 'Portale DEKRA, 24 ore su 24', ext: true },
     ],
     formLabel: 'Scrivici',
@@ -35,22 +37,44 @@ const copy = {
     whereLabel: 'Dove siamo',
   },
   de: {
-    title: 'Kontakt und Öffnungszeiten: Prüfstelle und Werkstatt in Bozen',
+    title: 'Kontakt und Öffnungszeiten · Werkstatt in Bozen',
     kicker: 'Prüfstelle und Werkstatt · Bozen',
-    description: `Kontakt CAR TRADE Bozen: Telefon ${site.phone.display}, WhatsApp, Werner-von-Siemens-Straße 4/F. Öffnungszeiten Mo–Fr 8:30–12:30 und 14:00–18:00.`,
+    description: `Kontakt CAR TRADE Bozen: Handy und WhatsApp ${site.phone.display}, Festnetz ${site.landline.display}, E-Mail ${site.email}, Werner-von-Siemens-Straße 4/F. Öffnungszeiten Mo–Fr 8:30–12:30 und 14:00–18:00.`,
     label: 'Kontakt',
     h1: 'Rufen Sie an, schreiben Sie oder kommen Sie vorbei.',
     lead: 'Für die Revision ist die Online-Buchung der schnellste Weg. Für alles andere sind wir während der Öffnungszeiten am Telefon und auf WhatsApp erreichbar.',
     channelsLabel: 'Kanäle',
     channels: [
-      { k: 'phone', t: 'Telefon', v: site.phone.display, href: site.phone.href, note: 'Während der Öffnungszeiten', ext: false },
+      { k: 'phone', t: 'Handy', v: site.phone.display, href: site.phone.href, note: 'Während der Öffnungszeiten', ext: false },
+      { k: 'phone', t: 'Festnetz', v: site.landline.display, href: site.landline.href, note: 'Während der Öffnungszeiten', ext: false },
       { k: 'whatsapp', t: 'WhatsApp', v: 'Nachricht schreiben', href: site.whatsapp.href('Guten Tag, '), note: 'Auch Fotos und Dokumente', ext: true },
+      { k: 'mail', t: 'E-Mail', v: site.email, href: `mailto:${site.email}`, note: 'Für Anfragen und Dokumente', ext: false },
       { k: 'calendar', t: 'Revision', v: 'Online buchen', href: site.dekra.bookingUrl, note: 'DEKRA-Portal, rund um die Uhr', ext: true },
     ],
     formLabel: 'Schreiben Sie uns',
     formTitle: 'Hinterlassen Sie uns eine Nachricht.',
     formText: 'Wir antworten innerhalb eines Werktags, auf dem gewünschten Weg.',
     whereLabel: 'Anfahrt',
+  },
+  en: {
+    title: 'Contact and opening hours · Garage in Bolzano',
+    kicker: 'Inspection centre and workshop · Bolzano',
+    description: `Contact CAR TRADE Bolzano: mobile and WhatsApp ${site.phone.display}, landline ${site.landline.display}, email ${site.email}, Via Werner von Siemens 4/F. Open Mon–Fri 8:30–12:30 and 14:00–18:00.`,
+    label: 'Contact',
+    h1: 'Call, message or drop by.',
+    lead: 'For the inspection, booking online is the quickest way. For everything else, we’re on the phone and on WhatsApp during opening hours.',
+    channelsLabel: 'Channels',
+    channels: [
+      { k: 'phone', t: 'Mobile', v: site.phone.display, href: site.phone.href, note: 'During opening hours', ext: false },
+      { k: 'phone', t: 'Landline', v: site.landline.display, href: site.landline.href, note: 'During opening hours', ext: false },
+      { k: 'whatsapp', t: 'WhatsApp', v: 'Send a message', href: site.whatsapp.href('Hello, '), note: 'Photos and documents too', ext: true },
+      { k: 'mail', t: 'Email', v: site.email, href: `mailto:${site.email}`, note: 'For requests and documents', ext: false },
+      { k: 'calendar', t: 'Inspection', v: 'Book online', href: site.dekra.bookingUrl, note: 'DEKRA portal, 24/7', ext: true },
+    ],
+    formLabel: 'Write to us',
+    formTitle: 'Leave us a message.',
+    formText: 'We’ll reply within one working day, the way you chose.',
+    whereLabel: 'Find us',
   },
 }[lang];
 ---
@@ -59,7 +83,11 @@ const copy = {
     <div slot="aside" class="aside">
       <OpenStatus lang={lang} />
       <a href={site.phone.href} class="big-phone t-num mt-4 block">{site.phone.display}</a>
-      <p class="mt-3 text-muted">{site.address.street[lang]}, {site.address.postalCode} {site.address.city[lang]}</p>
+      <ul class="aside-more" role="list">
+        <li><Icon name="phone" size={17} /><a href={site.landline.href} class="link-u t-num">{site.landline.display}</a></li>
+        <li><Icon name="mail" size={17} /><a href={`mailto:${site.email}`} class="link-u">{site.email}</a></li>
+      </ul>
+      <p class="mt-4 text-muted">{site.address.street[lang]}, {site.address.postalCode} {site.address.city[lang]}</p>
     </div>
   </PageHero>
 
@@ -73,14 +101,13 @@ const copy = {
             <a href={c.href} target={c.ext ? '_blank' : undefined} rel={c.ext ? 'noopener' : undefined} class="channel group">
               <span class="ch-icon"><Icon name={c.k as 'phone'} size={22} /></span>
               <span class="t-label text-muted">{c.t}</span>
-              <span class="ch-v t-num">{c.v}</span>
+              <span class:list={['ch-v t-num', c.k === 'mail' && 'ch-v-mail']}>{c.v}</span>
               <span class="text-sm text-muted">{c.note}</span>
               <Icon name={c.ext ? 'arrow-up-right' : 'arrow'} size={22} class="ch-arrow" />
             </a>
           </li>
         ))}
       </ul>
-      {/* TODO: aggiungere l'email quando il cliente la conferma (site.email in src/data/site.ts) */}
     </div>
   </section>
 
@@ -126,6 +153,9 @@ const copy = {
   .big-phone:hover { color: var(--color-orange-ink); }
   .channels { display: grid; }
   @media (min-width: 64rem) { .channels { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .aside-more { display: grid; gap: 0.4rem; margin-top: 1rem; font-weight: 560; }
+  .aside-more li { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
+  .aside-more a { min-width: 0; overflow-wrap: anywhere; }
   .channel {
     position: relative;
     display: grid;
@@ -135,12 +165,15 @@ const copy = {
     text-decoration: none;
   }
   @media (min-width: 64rem) {
-    .channels li + li .channel { padding-left: 1.75rem; border-left: 1px solid var(--line); }
-    .channel { border-bottom: 0; padding-block: 2.25rem; }
+    .channels li:not(:nth-child(3n + 1)) .channel { padding-left: 1.75rem; border-left: 1px solid var(--line); }
+    .channel { padding-block: 2.25rem; }
+    .channels li:nth-last-child(-n + 2):nth-child(n + 4) .channel { border-bottom: 0; }
   }
   .ch-icon { display: grid; place-items: center; width: 3rem; height: 3rem; margin-bottom: 0.75rem; border: 1px solid var(--line-strong); border-radius: 999px; transition: background-color 0.3s, border-color 0.3s; }
   .channel:hover .ch-icon { background: var(--color-orange); border-color: var(--color-orange); }
-  .ch-v { font-stretch: 120%; font-weight: 630; font-size: clamp(1.4rem, 2.4vw, 1.9rem); letter-spacing: -0.02em; }
+  .ch-v { font-stretch: 120%; font-weight: 630; font-size: clamp(1.4rem, 2.4vw, 1.9rem); letter-spacing: -0.02em; min-width: 0; overflow-wrap: anywhere; }
+  /* l'indirizzo email è lungo: un passo più piccolo, così sta su una riga */
+  .ch-v-mail { font-size: clamp(1.15rem, 1.7vw, 1.45rem); }
   .channel :global(.ch-arrow) { position: absolute; right: 0.25rem; top: 2rem; transition: transform 0.4s var(--ease-out-expo); }
   .channel:hover :global(.ch-arrow) { transform: translate(3px, -3px); }
 }
