@@ -46,6 +46,23 @@ jobs:
           npm ci
           npm run build
 
+      - name: Trova la cartella del sito sul server
+        if: steps.secrets.outputs.ok == 'true'
+        id: dir
+        env:
+          FTP_USER: ${{ secrets.ARUBA_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          list=$(curl -s --ssl-reqd --list-only -u "$FTP_USER:$FTP_PASSWORD" ftp://ftplnx02.aruba.it/)
+          echo "Contenuto della radice FTP:"; echo "$list"
+          if echo "$list" | grep -qx 'www.cartradebz.com'; then
+            echo "path=./www.cartradebz.com/" >> "$GITHUB_OUTPUT"
+          elif echo "$list" | grep -qx 'cgi-bin'; then
+            echo "path=./" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::Cartella del sito non trovata sul server FTP"; exit 1
+          fi
+
       - name: Carica su Aruba (FTPS)
         if: steps.secrets.outputs.ok == 'true'
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -57,7 +74,7 @@ jobs:
           username: ${{ secrets.ARUBA_FTP_USER }}
           password: ${{ secrets.ARUBA_FTP_PASSWORD }}
           local-dir: ./dist/
-          server-dir: ./
+          server-dir: ${{ steps.dir.outputs.path }}
           # cancella sul server solo i file che il deploy stesso aveva caricato:
           # cgi-bin e _sito-vecchio-2026-11 non vengono toccati
           exclude: |
