@@ -1,0 +1,65 @@
+# Pubblica il sito su www.cartradebz.com (Aruba) a ogni push su main.
+# Carica via FTPS solo i file cambiati; tiene lo stato in .ftp-deploy-sync-state.json sul server.
+# Secret richiesti: ARUBA_FTP_USER, ARUBA_FTP_PASSWORD (le credenziali del pannello Aruba).
+name: Deploy Aruba
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-aruba
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Controlla i secret
+        id: secrets
+        env:
+          FTP_USER: ${{ secrets.ARUBA_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.ARUBA_FTP_PASSWORD }}
+        run: |
+          if [ -z "$FTP_USER" ] || [ -z "$FTP_PASSWORD" ]; then
+            echo "::warning::Secret ARUBA_FTP_USER / ARUBA_FTP_PASSWORD mancanti: deploy saltato."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.secrets.outputs.ok == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.secrets.outputs.ok == 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Build
+        if: steps.secrets.outputs.ok == 'true'
+        env:
+          PUBLIC_GOOGLE_MAPS_API_KEY: ${{ vars.PUBLIC_GOOGLE_MAPS_API_KEY }}
+        run: |
+          npm ci
+          npm run build
+
+      - name: Carica su Aruba (FTPS)
+        if: steps.secrets.outputs.ok == 'true'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          # stesso server di ftp.cartradebz.com, ma con certificato TLS valido
+          server: ftplnx02.aruba.it
+          protocol: ftps
+          port: 21
+          username: ${{ secrets.ARUBA_FTP_USER }}
+          password: ${{ secrets.ARUBA_FTP_PASSWORD }}
+          local-dir: ./dist/
+          server-dir: ./
+          # cancella sul server solo i file che il deploy stesso aveva caricato:
+          # cgi-bin e _sito-vecchio-2026-11 non vengono toccati
+          exclude: |
+            **/.git*
+            **/.git*/**

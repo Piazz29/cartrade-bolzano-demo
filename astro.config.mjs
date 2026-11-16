@@ -2,9 +2,9 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 
-// TODO: confermare il dominio definitivo prima della messa online
+// Dominio definitivo (hosting Aruba)
 export default defineConfig({
-  site: 'https://cartradebolzano.it',
+  site: 'https://www.cartradebz.com',
   trailingSlash: 'ignore',
   i18n: {
     locales: ['it', 'de'],

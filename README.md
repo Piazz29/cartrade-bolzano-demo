@@ -31,6 +31,8 @@ Perché le recensioni si caricano nel browser e non in build: le policy di Googl
 
 **Demo online su Vercel** (deploy da GitHub, a ogni push su `main`). `vercel.json` aggiunge l'header `X-Robots-Tag: noindex`: la demo non viene indicizzata dai motori di ricerca. **Al lancio sul dominio vero, togliere quell'header** da `vercel.json`.
 
+**Sito vero su Aruba: https://www.cartradebz.com.** A ogni push su `main`, il workflow `.github/workflows/deploy-aruba.yml` compila il sito e carica via FTPS (`ftplnx02.aruba.it`) solo i file cambiati. Servono i secret `ARUBA_FTP_USER` e `ARUBA_FTP_PASSWORD` (credenziali del pannello Aruba); senza secret il job si salta. Si può lanciare anche a mano da Actions › Deploy Aruba › Run workflow. Il vecchio sito PHP è sull'hosting in `/_sito-vecchio-2026-11`.
+
 `dist/` si pubblica su qualunque hosting statico (Netlify, Vercel, Cloudflare Pages, un server Apache/Nginx).
 Prima della messa online: confermare il dominio in `astro.config.mjs` (oggi `https://cartradebolzano.it`).
 
