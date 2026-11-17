@@ -3,7 +3,6 @@ import type { APIRoute } from 'astro';
 // Tutto il sito è aperto ai motori di ricerca e ai motori di risposta AI (GEO): vogliamo che citino
 // orari, indirizzo, tariffa della revisione e regole sulle gomme. Restano fuori solo le API (non sono pagine).
 // Gli assistenti AI sono elencati per nome: alcuni leggono solo le regole scritte per loro.
-// Nota: finché è una demo, vercel.json manda comunque "X-Robots-Tag: noindex" su tutto il sito.
 const AI_BOTS = [
   'Googlebot',
   'Bingbot',

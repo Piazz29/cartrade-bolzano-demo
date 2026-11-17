@@ -15,8 +15,8 @@ export const site = {
     region: 'BZ',
     country: 'IT',
   },
-  // Coordinate dalla scheda DEKRA
-  geo: { lat: 46.482868, lng: 11.332216 },
+  // Coordinate del segnaposto sulla scheda Google Business (allineate a Maps)
+  geo: { lat: 46.4836615, lng: 11.3347932 },
   // Zona servita (schema.org areaServed, testi "come raggiungerci", llms.txt): Bolzano e comuni vicini,
   // con i nomi ufficiali bilingui. In inglese si usa il nome italiano, come sui cartelli stradali.
   area: [
@@ -61,14 +61,14 @@ export const site = {
   },
   // Scheda Google Business "Centro Revisioni Dekra - Car Trade Srl" (Place ID ricavato e verificato dall'embed di Google Maps).
   // Voto e numero sono fissi (niente API): aggiornarli a mano qui quando cambiano sulla scheda.
-  // reviewCountLabel ("62+") è quello che si vede sul sito; reviewCount resta il numero puro.
+  // reviewCountLabel ("66") è quello che si vede sul sito; reviewCount resta il numero puro.
   google: {
     name: 'Centro Revisioni Dekra - Car Trade Srl',
     placeId: GOOGLE_PLACE_ID,
     cid: GOOGLE_CID,
-    rating: 4.5,
-    reviewCount: 62,
-    reviewCountLabel: '62+',
+    rating: 4.6,
+    reviewCount: 66,
+    reviewCountLabel: '66',
     url: `https://www.google.com/maps/place/?q=place_id:${GOOGLE_PLACE_ID}`,
     reviewsUrl: `https://www.google.com/maps/place/?q=place_id:${GOOGLE_PLACE_ID}`,
     // Link "scrivi una recensione" costruito dal Place ID (pulsante "Lascia una recensione")

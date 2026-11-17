@@ -50,10 +50,8 @@ export const ui = {
       tagline: 'Revisione auto, officina meccanica, carrozzeria e cambio gomme a Bolzano, Alto Adige.',
       legal: 'Privacy',
       cookies: 'Cookie',
-      demo: 'Demo di proposta grafica. Testi e immagini provvisori.',
     },
     google: { reviews: 'recensioni su Google', of: 'su' },
-    demoBadge: 'Demo',
   },
   de: {
     skip: 'Zum Inhalt springen',
@@ -102,10 +100,8 @@ export const ui = {
       tagline: 'Fahrzeugrevision, Kfz-Werkstatt, Karosserie und Reifenwechsel in Bozen, Südtirol.',
       legal: 'Datenschutz',
       cookies: 'Cookies',
-      demo: 'Gestaltungsentwurf. Texte und Bilder vorläufig.',
     },
     google: { reviews: 'Bewertungen auf Google', of: 'von' },
-    demoBadge: 'Demo',
   },
   en: {
     skip: 'Skip to content',
@@ -154,10 +150,8 @@ export const ui = {
       tagline: 'Car inspection, mechanical repairs, body shop and tyre change in Bolzano, South Tyrol.',
       legal: 'Privacy',
       cookies: 'Cookies',
-      demo: 'Design proposal demo. Texts and images are provisional.',
     },
     google: { reviews: 'reviews on Google', of: 'out of' },
-    demoBadge: 'Demo',
   },
 } as const;
 

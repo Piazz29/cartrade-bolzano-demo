@@ -33,13 +33,13 @@ npm run build          # build per Vercel in .vercel/output/ (pagine statiche + 
 npm run check          # controllo dei tipi (0 errori attesi)
 ```
 
-**Demo online su Vercel** (deploy da GitHub: produzione a ogni push su `main`, anteprima per ogni altro branch). `vercel.json` aggiunge l'header `X-Robots-Tag: noindex` a tutto il sito: la demo non viene indicizzata. **Al lancio sul dominio vero, togliere quell'header** da `vercel.json`. Prima della messa online: confermare il dominio in `astro.config.mjs` (oggi `https://cartradebolzano.it`).
+**Sito online su Vercel: https://www.cartradebz.com** (deploy da GitHub: produzione a ogni push su `main`, anteprima per ogni altro branch). Il dominio è registrato su Aruba (dove resta anche il vecchio sito, in `/_sito-vecchio-2026-11`); i record DNS del sito puntano a Vercel, la posta non cambia. `cartradebz.com` senza www rimanda a `www`. Il vecchio workflow FTP `.github/workflows/deploy-aruba.yml` è disattivato (solo avvio manuale).
 
 ### Google Maps e recensioni Google
 
 Il sito è collegato alla scheda Google reale **"Centro Revisioni Dekra - Car Trade Srl"** (Place ID e cid in `src/data/site.ts`).
 
-- **Voto e numero sono statici** (scelta voluta, niente API): 4,5 su 5 e "62+ recensioni", in `site.google` dentro `src/data/site.ts`. Quando cambiano sulla scheda si aggiornano lì a mano (`rating`, `reviewCount`, `reviewCountLabel`).
+- **Voto e numero sono statici** (scelta voluta, niente API): 4,6 su 5 e "66 recensioni" (aggiornati al 17/11/2026), in `site.google` dentro `src/data/site.ts`. Quando cambiano sulla scheda si aggiornano lì a mano (`rating`, `reviewCount`, `reviewCountLabel`).
 - La sezione recensioni mostra il logo Google, voto, numero e i pulsanti "Leggi tutte le recensioni" e "Lascia una recensione" (portano alla scheda vera).
 - La mappa Google è incorporata e mostra la scheda. Con `PUBLIC_GOOGLE_MAPS_API_KEY` (vedi `.env.example`) passa alla Maps Embed API ufficiale; non è necessaria.
 
@@ -158,5 +158,5 @@ Su richiesta del cliente, per ora il sito non ha database né gestionale. In [`a
 
 ## Note
 
-- I dati reali (ragione sociale, P. IVA, indirizzo, telefono, orari lun–ven, coordinate, link DEKRA, voto Google 4,5) vengono dal sito attuale, dalla scheda DEKRA e dal brief. Tutti i testi sono scritti da zero; nessuna recensione è inventata.
+- I dati reali (ragione sociale, P. IVA, indirizzo, telefono, orari lun–ven, coordinate, link DEKRA, voto Google 4,6) vengono dal sito attuale, dalla scheda DEKRA e dal brief. Tutti i testi sono scritti da zero; nessuna recensione è inventata.
 - Il tedesco è tedesco standard con la terminologia altoatesina: "Revision" (non "HU/TÜV"), "MwSt.-Nr." per la P. IVA. In tedesco si usa "Sie". L'inglese è britannico ("tyres", "centre"), con "inspection" per la revisione.

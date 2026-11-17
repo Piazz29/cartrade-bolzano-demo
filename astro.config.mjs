@@ -7,9 +7,9 @@ import vercel from '@astrojs/vercel';
 // Tutte facoltative: se mancano, il modulo conferma l'invio in modalità simulata. Documentate in .env.example.
 const secret = () => envField.string({ context: 'server', access: 'secret', optional: true });
 
-// TODO: confermare il dominio definitivo prima della messa online
+// Dominio definitivo (su Vercel; registrato su Aruba)
 export default defineConfig({
-  site: 'https://cartradebolzano.it',
+  site: 'https://www.cartradebz.com',
   trailingSlash: 'ignore',
   // Il sito resta prerenderizzato. Solo /api/richiesta è on-demand (export const prerender = false).
   adapter: vercel(),

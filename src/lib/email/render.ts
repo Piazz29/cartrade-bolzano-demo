@@ -31,7 +31,7 @@ function button(label: string, href: string, primary = true) {
 }
 
 export interface RenderOpts {
-  /** origine assoluta del sito (per logo e link), es. https://cartrade-demo.vercel.app */
+  /** origine assoluta del sito (per logo e link), es. https://www.cartradebz.com */
   baseUrl: string;
   /** mostra la riga "messaggio inviato dalla demo" */
   demo?: boolean;
