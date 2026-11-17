@@ -90,7 +90,7 @@ const business = {
   description: ABOUT[lang].description,
   url: `${siteUrl}${routes.home[lang]}`,
   image: `${siteUrl}/og/copertina-${lang}.jpg`,
-  logo: `${siteUrl}/brand/logo.svg`,
+  logo: `${siteUrl}/brand/logo-originale.png`,
   telephone: site.phone.e164,
   ...(site.email ? { email: site.email } : {}),
   contactPoint: [
@@ -122,10 +122,9 @@ const business = {
     ...(key === 'revisione' ? { price: site.revisionFee.total.toFixed(2), priceCurrency: 'EUR' } : {}),
     areaServed: { '@type': 'City', name: site.address.city[lang] },
   })),
-  // TODO: aggiungere il sabato se confermato
   openingHoursSpecification: site.hours.map((h) => ({
     '@type': 'OpeningHoursSpecification',
-    dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+    dayOfWeek: h.days.map((d) => ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d]),
     opens: h.open,
     closes: h.close,
   })),
@@ -139,7 +138,7 @@ const website = {
   '@id': `${siteUrl}/#website`,
   url: `${siteUrl}/`,
   name: site.brand,
-  alternateName: 'Car Trade Bozen',
+  alternateName: ['CarTrade Bolzano', 'Car Trade Bozen', 'CarTrade'],
   inLanguage: ['it', 'de', 'en'],
   publisher: { '@id': `${siteUrl}/#business` },
 };
@@ -177,8 +176,11 @@ const ld = [business, website, webpage, ...jsonLd];
     <link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt" />
 
     <meta name="theme-color" content="#F7F6F3" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-96.png" type="image/png" sizes="96x96" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Car Trade Bolzano" />

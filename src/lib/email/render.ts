@@ -108,7 +108,7 @@ export function renderEmail(c: Contenuto, { baseUrl, demo = false }: RenderOpts)
         <tr><td style="padding:20px 22px;">
           <p style="margin:0;font-family:${FONT};font-size:14px;line-height:21px;color:${C.white};font-weight:bold;">${esc(site.name)} · ${{ it: 'Centro revisioni affiliato DEKRA', de: 'DEKRA-Partner für die Fahrzeugrevision', en: 'DEKRA-affiliated inspection centre' }[lang]}</p>
           <p style="margin:6px 0 0;font-family:${FONT};font-size:14px;line-height:21px;color:#C9D2DF;">${esc(street)} · ${esc(site.address.postalCode)} ${esc(city)}<br>
-          <a href="${esc(site.phone.href)}" style="color:#C9D2DF;text-decoration:underline;">${esc(site.phone.display)}</a> · ${{ it: 'Lun–Ven 8:30–12:30, 14:00–18:00', de: 'Mo–Fr 8:30–12:30, 14:00–18:00', en: 'Mon–Fri 8:30–12:30, 14:00–18:00' }[lang]}</p>
+          <a href="${esc(site.phone.href)}" style="color:#C9D2DF;text-decoration:underline;">${esc(site.phone.display)}</a> · ${{ it: 'Lun–Ven 8:30–12:30, 14:00–18:00 · Sab 9:00–12:00', de: 'Mo–Fr 8:30–12:30, 14:00–18:00 · Sa 9:00–12:00', en: 'Mon–Fri 8:30–12:30, 14:00–18:00 · Sat 9:00–12:00' }[lang]}</p>
         </td></tr>
       </table>
       <p style="margin:16px 0 0;font-family:${FONT};font-size:12px;line-height:18px;color:${C.muted};">${esc(c.motivo)}</p>

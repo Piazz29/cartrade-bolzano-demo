@@ -46,7 +46,7 @@ export const site = {
     href: 'tel:+3904711923248',
     e164: '+3904711923248',
   },
-  // TODO: verificare che il numero sia attivo su WhatsApp (sul sito attuale non è indicato)
+  // Attivo su WhatsApp (confermato dal titolare, 17/11/2026)
   whatsapp: {
     number: '393246965239',
     href: (text?: string) =>
@@ -80,17 +80,15 @@ export const site = {
   },
   mapsUrl:
     'https://www.google.com/maps/dir/?api=1&destination=Centro+Revisioni+Dekra+-+Car+Trade+Srl%2C+Via+Werner+von+Siemens+4%2FF%2C+Bolzano&destination_place_id=ChIJ_xxnNNadgkcRzUuQfA86rBI',
-  // Orari: lun-ven 8:30-12:30 / 14:00-18:00.
-  // TODO: verificare il sabato mattina. La scheda DEKRA indica "sabato chiuso",
-  // altre fonti parlano di apertura il sabato mattina. Finché non è confermato, mostriamo chiuso.
+  // Orari (confermati dal titolare, 17/11/2026): lun-ven 8:30-12:30 / 14:00-18:00, sabato 9:00-12:00.
+  // days: 0 = domenica … 6 = sabato. Usati da tabella orari, stato "aperto ora" e schema.org.
   hours: [
     { days: [1, 2, 3, 4, 5], open: '08:30', close: '12:30' },
     { days: [1, 2, 3, 4, 5], open: '14:00', close: '18:00' },
+    { days: [6], open: '09:00', close: '12:00' },
   ],
-  saturdayVerified: false,
   // Tariffa nazionale revisione presso centri privati autorizzati (MIT).
-  // TODO: ricontrollare prima della pubblicazione. Un emendamento prevede l'aumento a 88,20 €,
-  // non ancora in vigore a ottobre 2026.
+  // Confermata dal titolare il 17/11/2026. Se entra in vigore l'aumento (emendamento a 88,20 €), aggiornare qui.
   revisionFee: {
     total: 79.02,
     parts: [

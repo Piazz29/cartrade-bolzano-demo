@@ -123,7 +123,7 @@ const copy = {
       { q: 'Posso avere un preventivo di carrozzeria senza venire in sede?', a: 'Sì. Dal modulo della pagina Carrozzeria carichi fino a 6 foto del danno dal telefono e ti ricontattiamo con una stima.' },
       { q: 'Fate il cambio gomme a Bolzano?', a: 'Sì, cambio gomme estive e invernali nella stessa sede di officina e revisione. In provincia di Bolzano le gomme invernali (o le catene a bordo) servono dal 15 novembre al 15 aprile: conviene prenotare a fine ottobre.' },
       { q: 'Come faccio a non dimenticare la scadenza?', a: 'Usa il calcolatore qui sopra: inserisci mese e anno dell’ultima revisione e con «Aggiungi al calendario» salvi la scadenza sul telefono, con un avviso un mese prima.' },
-      { q: 'Dove siete e quando siete aperti?', a: `In ${site.address.street.it}, zona produttiva di Bolzano Sud. Dal lunedì al venerdì, 8:30–12:30 e 14:00–18:00.` },
+      { q: 'Dove siete e quando siete aperti?', a: `In ${site.address.street.it}, zona produttiva di Bolzano Sud. Dal lunedì al venerdì 8:30–12:30 e 14:00–18:00, il sabato 9:00–12:00.` },
     ],
   },
   de: {
@@ -221,7 +221,7 @@ const copy = {
       { q: 'Bekomme ich ein Karosserie-Angebot, ohne vorbeizukommen?', a: 'Ja. Über das Formular auf der Seite Karosserie laden Sie bis zu 6 Fotos vom Schaden hoch, wir melden uns mit einer Schätzung.' },
       { q: 'Machen Sie Reifenwechsel in Bozen?', a: 'Ja, Sommer- und Winterreifen am selben Standort wie Werkstatt und Revision. In der Provinz Bozen sind Winterreifen (oder Ketten an Bord) vom 15. November bis 15. April Pflicht: am besten Ende Oktober buchen.' },
       { q: 'Wie vergesse ich den Termin nicht?', a: 'Mit dem Rechner oben: Monat und Jahr der letzten Revision eingeben und mit „In den Kalender eintragen“ den Termin im Handy speichern, mit Erinnerung einen Monat vorher.' },
-      { q: 'Wo sind Sie und wann haben Sie geöffnet?', a: `In der ${site.address.street.de}, Gewerbegebiet Bozen Süd. Montag bis Freitag, 8:30–12:30 und 14:00–18:00 Uhr.` },
+      { q: 'Wo sind Sie und wann haben Sie geöffnet?', a: `In der ${site.address.street.de}, Gewerbegebiet Bozen Süd. Montag bis Freitag 8:30–12:30 und 14:00–18:00 Uhr, Samstag 9:00–12:00 Uhr.` },
     ],
   },
   en: {
@@ -319,7 +319,7 @@ const copy = {
       { q: 'Can I get a bodywork quote without coming in?', a: 'Yes. Using the form on the Body shop page you can upload up to 6 photos of the damage from your phone, and we’ll get back to you with an estimate.' },
       { q: 'Do you change tyres in Bolzano?', a: 'Yes, summer and winter tyre changes at the same address as the workshop and inspection centre. In the province of Bolzano winter tyres (or chains on board) are required from 15 November to 15 April: book at the end of October.' },
       { q: 'How do I make sure I don’t forget the due date?', a: 'Use the calculator above: enter the month and year of your last inspection and tap “Add to calendar” to save the date on your phone, with an alert a month before.' },
-      { q: 'Where are you and when are you open?', a: `At ${site.address.street.en}, in the Bolzano South business park. Monday to Friday, 8:30–12:30 and 14:00–18:00.` },
+      { q: 'Where are you and when are you open?', a: `At ${site.address.street.en}, in the Bolzano South business park. Monday to Friday 8:30–12:30 and 14:00–18:00, Saturday 9:00–12:00.` },
     ],
   },
 }[lang];
@@ -447,7 +447,7 @@ const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 5
       <dl class="strip t-num">
         <div>
           <dt class="t-label">{copy.strip.hours}</dt>
-          <dd class="strip-val">{site.hours.map((h) => `${h.open.replace(/^0/, '')}–${h.close}`).join(' · ')}</dd>
+          <dd class="strip-val">{site.hours.filter((h) => h.days.includes(1)).map((h) => `${h.open.replace(/^0/, '')}–${h.close}`).join(' · ')}</dd>
         </div>
         <div>
           <dt class="t-label">{copy.strip.google}</dt>

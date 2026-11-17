@@ -4,7 +4,9 @@ import { ui } from '../i18n/ui';
 interface Props { lang: Lang; class?: string }
 const { lang, class: cls } = Astro.props;
 const t = ui[lang].hours;
-const slots = site.hours.map((h) => `${h.open} – ${h.close}`);
+const fmt = (h: { open: string; close: string }) => `${h.open} – ${h.close}`;
+const slots = site.hours.filter((h) => h.days.includes(1)).map(fmt);
+const sat = site.hours.filter((h) => h.days.includes(6)).map(fmt);
 ---
 <dl class:list={['spec', cls]}>
   <div>
@@ -13,8 +15,7 @@ const slots = site.hours.map((h) => `${h.open} – ${h.close}`);
   </div>
   <div>
     <dt>{t.saturday}</dt>
-    {/* TODO: verificare il sabato mattina (DEKRA indica chiuso, altre fonti no) */}
-    <dd>{t.closed}</dd>
+    <dd class="grid gap-0.5">{sat.length ? sat.map((s) => <span>{s}</span>) : t.closed}</dd>
   </div>
   <div>
     <dt>{t.sunday}</dt>
