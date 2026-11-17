@@ -43,6 +43,7 @@ const copy = {
     heroAlt: 'Officina luminosa con un’auto sul ponte sollevatore e un meccanico al lavoro sul motore',
     strip: {
       hours: 'Orari lun – ven',
+      sat: 'Sabato',
       google: 'Google',
       reviews: 'recensioni',
       fee: 'Revisione auto',
@@ -143,6 +144,7 @@ const copy = {
     heroAlt: 'Helle Werkstatt mit einem Auto auf der Hebebühne und einem Mechaniker am Motor',
     strip: {
       hours: 'Öffnungszeiten Mo – Fr',
+      sat: 'Samstag',
       google: 'Google',
       reviews: 'Bewertungen',
       fee: 'Revision Pkw',
@@ -241,6 +243,7 @@ const copy = {
     heroAlt: 'Bright workshop with a car on the lift and a mechanic working on the engine',
     strip: {
       hours: 'Hours Mon – Fri',
+      sat: 'Saturday',
       google: 'Google',
       reviews: 'reviews',
       fee: 'Car inspection',
@@ -448,6 +451,7 @@ const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 5
         <div>
           <dt class="t-label">{copy.strip.hours}</dt>
           <dd class="strip-val">{site.hours.filter((h) => h.days.includes(1)).map((h) => `${h.open.replace(/^0/, '')}–${h.close}`).join(' · ')}</dd>
+          <dd class="strip-note">{copy.strip.sat} {site.hours.filter((h) => h.days.includes(6)).map((h) => `${h.open.replace(/^0/, '')}–${h.close}`).join(' · ')}</dd>
         </div>
         <div>
           <dt class="t-label">{copy.strip.google}</dt>
