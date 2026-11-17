@@ -7,7 +7,7 @@ import { routes } from '../i18n/routes';
 
 export const GET: APIRoute = ({ site: base }) => {
   const u = (p: string) => new URL(p, base).href;
-  const fee = (l: 'it' | 'de' | 'en') => formatPrice(site.revisionFee.total, l, 2);
+  const fee = (l: 'it' | 'de' | 'en') => formatPrice(site.revisionFee.total, l);
   const area = (l: 'it' | 'de' | 'en') => site.area.map((a) => areaName(a, l)).join(', ');
   const updated = new Date().toISOString().slice(0, 10);
   const body = `# Car Trade Bolzano (${site.name})
@@ -23,7 +23,7 @@ Ultimo aggiornamento / Stand / Last updated: ${updated}
 - Cellulare e WhatsApp: ${site.phone.display} (${site.phone.e164})
 - Telefono fisso: ${site.landline.display} (${site.landline.e164})
 - Email: ${site.email}
-- Orari: lunedì–venerdì 8:30–12:30 e 14:00–18:00, sabato 9:00–12:00. Domenica chiuso.
+- Orari: lunedì–venerdì 8:00–12:00 e 14:00–18:00, sabato 9:00–12:00. Domenica chiuso.
 - Zona servita: ${area('it')}
 - Lingue: italiano e tedesco
 - Valutazione Google: ${site.google.rating} su 5 (${site.google.reviewCountLabel} recensioni)
@@ -79,7 +79,7 @@ Esito: regolare, ripetere (nuova revisione entro un mese) o sospeso. Esito e chi
 - Handy und WhatsApp: ${site.phone.display} (${site.phone.e164})
 - Festnetz: ${site.landline.display} (${site.landline.e164})
 - E-Mail: ${site.email}
-- Öffnungszeiten: Montag–Freitag 8:30–12:30 und 14:00–18:00 Uhr, Samstag 9:00–12:00 Uhr. Sonntag geschlossen.
+- Öffnungszeiten: Montag–Freitag 8:00–12:00 und 14:00–18:00 Uhr, Samstag 9:00–12:00 Uhr. Sonntag geschlossen.
 - Einzugsgebiet: ${area('de')}
 - Sprachen: Deutsch und Italienisch
 
@@ -118,7 +118,7 @@ Identifizierung, Bremsen (Rollenbremsprüfstand), Lenkung, Sicht, Beleuchtung (S
 - Mobile and WhatsApp: ${site.phone.display} (${site.phone.e164})
 - Landline: ${site.landline.display} (${site.landline.e164})
 - Email: ${site.email}
-- Opening hours: Monday–Friday 8:30–12:30 and 14:00–18:00, Saturday 9:00–12:00. Closed Sunday.
+- Opening hours: Monday–Friday 8:00–12:00 and 14:00–18:00, Saturday 9:00–12:00. Closed Sunday.
 - Area served: ${area('en')}
 - Languages: Italian, German and English
 

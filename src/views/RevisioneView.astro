@@ -19,15 +19,13 @@ const fee = site.revisionFee;
 const copy = {
   it: {
     title: 'Revisione auto a Bolzano · Centro affiliato DEKRA',
-    description: `Revisione auto a Bolzano in Via Werner von Siemens 4/F. Centro revisioni affiliato DEKRA, tariffa nazionale ${formatPrice(fee.total, 'it', 2)}, prenotazione online. Se non passa, l’officina è interna.`,
+    description: `Revisione auto a Bolzano in Via Werner von Siemens 4/F. Centro revisioni affiliato DEKRA, tariffa nazionale ${formatPrice(fee.total, 'it')}, prenotazione online. Se non passa, l’officina è interna.`,
     label: 'Revisione',
     h1: 'Revisione auto a Bolzano, senza giri a vuoto.',
     lead: 'Prenoti online il giorno che preferisci, aspetti in sede e riparti con l’esito. Se il controllo trova un difetto, l’officina è nello stesso posto.',
     calc: 'Calcola la scadenza',
     feeLabel: 'Tariffa nazionale',
     feeSub: 'Prezzo uguale in tutti i centri autorizzati d’Italia, fissato dal Ministero.',
-    feeParts: { base: 'Tariffa revisione', vat: 'IVA 22%', dtt: 'Diritti Motorizzazione', postal: 'Bollettino postale' },
-    feeTotal: 'Totale',
     photoAlt: 'Auto argento sul ponte sollevatore con il cofano aperto, pronta per il controllo',
     howLabel: 'Come funziona',
     howTitle: 'Quattro passaggi, una mattina.',
@@ -71,9 +69,9 @@ const copy = {
     calcTitle: 'Quando scade la tua?',
     faqLabel: 'Domande frequenti',
     faq: [
-      { q: 'Quanto costa la revisione auto?', a: `${formatPrice(fee.total, 'it', 2)}, tutto compreso. È la tariffa nazionale fissata dal Ministero: tariffa ${formatPrice(54.95, 'it', 2)}, IVA, diritti della Motorizzazione e bollettino.` },
+      { q: 'Quanto costa la revisione auto?', a: `${formatPrice(fee.total, 'it')}, tutto compreso. IVA, diritti della Motorizzazione e bollettino inclusi.` },
       { q: 'Ogni quanto si fa la revisione?', a: 'La prima entro 4 anni dalla prima immatricolazione, poi ogni 2 anni. La scadenza è sempre la fine del mese: se l’ultima revisione è del 10 marzo 2025, hai tempo fino al 31 marzo 2027.' },
-      { q: 'Dove fare la revisione auto a Bolzano?', a: `In ${site.address.street.it}, zona produttiva di Bolzano Sud: centro revisioni affiliato DEKRA, aperto dal lunedì al venerdì 8:30–12:30 e 14:00–18:00, il sabato 9:00–12:00. Si prenota online sul portale DEKRA scegliendo giorno e ora.` },
+      { q: 'Dove fare la revisione auto a Bolzano?', a: `In ${site.address.street.it}, zona produttiva di Bolzano Sud: centro revisioni affiliato DEKRA, aperto dal lunedì al venerdì 8:00–12:00 e 14:00–18:00, il sabato 9:00–12:00. Si prenota online sul portale DEKRA scegliendo giorno e ora.` },
       { q: 'Quali veicoli revisionate?', a: 'Il centro è abilitato per le autovetture. Per altri veicoli chiamaci e ti indichiamo come fare.' },
       { q: 'Posso portare l’auto di qualcun altro?', a: 'Sì. Non serve il proprietario né una delega: basta il documento originale dell’auto.' },
       { q: 'La revisione è scaduta: posso venire con l’auto?', a: 'Sì, il giorno della prenotazione puoi raggiungere il centro con l’auto. Prenota il prima possibile: circolare con la revisione scaduta comporta una sanzione.' },
@@ -83,15 +81,13 @@ const copy = {
   },
   de: {
     title: 'Fahrzeugrevision in Bozen · DEKRA-Partner',
-    description: `Revision für Pkw in Bozen, Werner-von-Siemens-Straße 4/F. DEKRA-Partner, staatlicher Tarif ${formatPrice(fee.total, 'de', 2)}, Online-Buchung. Nicht bestanden? Die Werkstatt ist im Haus.`,
+    description: `Revision für Pkw in Bozen, Werner-von-Siemens-Straße 4/F. DEKRA-Partner, staatlicher Tarif ${formatPrice(fee.total, 'de')}, Online-Buchung. Nicht bestanden? Die Werkstatt ist im Haus.`,
     label: 'Revision',
     h1: 'Revision in Bozen, ohne Umwege.',
     lead: 'Online den Wunschtermin buchen, vor Ort warten und mit dem Ergebnis wieder losfahren. Findet die Prüfung einen Mangel, ist die Werkstatt am selben Ort.',
     calc: 'Fälligkeit berechnen',
     feeLabel: 'Staatlicher Tarif',
     feeSub: 'In allen zugelassenen Prüfstellen Italiens gleich, vom Ministerium festgelegt.',
-    feeParts: { base: 'Prüfgebühr', vat: 'MwSt. 22 %', dtt: 'Gebühren Motorisierungsamt', postal: 'Posteinzahlung' },
-    feeTotal: 'Gesamt',
     photoAlt: 'Silbernes Auto mit geöffneter Motorhaube auf der Hebebühne, bereit für die Prüfung',
     howLabel: 'Ablauf',
     howTitle: 'Vier Schritte, ein Vormittag.',
@@ -132,9 +128,9 @@ const copy = {
     calcTitle: 'Wann ist Ihre fällig?',
     faqLabel: 'Häufige Fragen',
     faq: [
-      { q: 'Was kostet die Revision?', a: `${formatPrice(fee.total, 'de', 2)} inklusive allem. Das ist der staatliche Tarif: Prüfgebühr ${formatPrice(54.95, 'de', 2)}, MwSt., Gebühren des Motorisierungsamts und Posteinzahlung.` },
+      { q: 'Was kostet die Revision?', a: `${formatPrice(fee.total, 'de')} inklusive allem. MwSt., Gebühren des Motorisierungsamts und Posteinzahlung sind enthalten.` },
       { q: 'Wie oft muss das Auto zur Revision?', a: 'Die erste innerhalb von 4 Jahren ab Erstzulassung, danach alle 2 Jahre. Fällig ist sie immer zum Monatsende: War die letzte Revision am 10. März 2025, haben Sie bis 31. März 2027 Zeit.' },
-      { q: 'Wo kann ich in Bozen die Revision machen?', a: `In der ${site.address.street.de}, Gewerbegebiet Bozen Süd: DEKRA-Partner für die Revision, geöffnet Montag bis Freitag 8:30–12:30 und 14:00–18:00 Uhr, Samstag 9:00–12:00 Uhr. Gebucht wird online im DEKRA-Portal.` },
+      { q: 'Wo kann ich in Bozen die Revision machen?', a: `In der ${site.address.street.de}, Gewerbegebiet Bozen Süd: DEKRA-Partner für die Revision, geöffnet Montag bis Freitag 8:00–12:00 und 14:00–18:00 Uhr, Samstag 9:00–12:00 Uhr. Gebucht wird online im DEKRA-Portal.` },
       { q: 'Ist die Revision dasselbe wie TÜV oder Pickerl?', a: 'Ja, die Revision ist die italienische Pflichtprüfung, vergleichbar mit der Hauptuntersuchung (HU, „TÜV“) in Deutschland und dem „Pickerl“ in Österreich. Sie gilt für Fahrzeuge mit italienischem Kennzeichen; Autos mit ausländischem Kennzeichen werden im Zulassungsland geprüft.' },
       { q: 'Welche Fahrzeuge prüfen Sie?', a: 'Die Prüfstelle ist für Pkw zugelassen. Für andere Fahrzeuge rufen Sie uns an, wir sagen Ihnen, wie es geht.' },
       { q: 'Kann ich das Auto einer anderen Person bringen?', a: 'Ja. Weder der Halter noch eine Vollmacht sind nötig, nur das Originaldokument des Fahrzeugs.' },
@@ -145,15 +141,13 @@ const copy = {
   },
   en: {
     title: 'Car inspection in Bolzano · DEKRA-affiliated centre',
-    description: `Car inspection (revisione) in Bolzano, Via Werner von Siemens 4/F. DEKRA-affiliated centre, national fee ${formatPrice(fee.total, 'en', 2)}, online booking. If it fails, the workshop is on site.`,
+    description: `Car inspection (revisione) in Bolzano, Via Werner von Siemens 4/F. DEKRA-affiliated centre, national fee ${formatPrice(fee.total, 'en')}, online booking. If it fails, the workshop is on site.`,
     label: 'Inspection',
     h1: 'Car inspection in Bolzano, no running around.',
     lead: 'Book the day that suits you online, wait on site and leave with the result. If the check finds a fault, the workshop is in the same place.',
     calc: 'Work out the due date',
     feeLabel: 'National fee',
     feeSub: 'The same price at every authorised centre in Italy, set by the Ministry.',
-    feeParts: { base: 'Inspection fee', vat: 'VAT 22%', dtt: 'Motor registry fees', postal: 'Postal payment slip' },
-    feeTotal: 'Total',
     photoAlt: 'Silver car on the lift with the bonnet open, ready for the inspection',
     howLabel: 'How it works',
     howTitle: 'Four steps, one morning.',
@@ -194,9 +188,9 @@ const copy = {
     calcTitle: 'When is yours due?',
     faqLabel: 'Frequently asked questions',
     faq: [
-      { q: 'How much does a car inspection cost?', a: `${formatPrice(fee.total, 'en', 2)}, all inclusive. It’s the national fee set by the Ministry: inspection fee ${formatPrice(54.95, 'en', 2)}, VAT, motor registry fees and the postal payment slip.` },
+      { q: 'How much does a car inspection cost?', a: `${formatPrice(fee.total, 'en')}, all inclusive. VAT, motor registry fees and the postal payment slip are included.` },
       { q: 'How often does a car need an inspection?', a: 'The first within 4 years of first registration, then every 2 years. It’s always due by the end of the month: if your last inspection was on 10 March 2025, you have until 31 March 2027.' },
-      { q: 'Where can I get my car inspected in Bolzano?', a: `At ${site.address.street.en}, Bolzano South business park: a DEKRA-affiliated inspection centre, open Monday to Friday 8:30–12:30 and 14:00–18:00, Saturday 9:00–12:00. You book online on the DEKRA portal.` },
+      { q: 'Where can I get my car inspected in Bolzano?', a: `At ${site.address.street.en}, Bolzano South business park: a DEKRA-affiliated inspection centre, open Monday to Friday 8:00–12:00 and 14:00–18:00, Saturday 9:00–12:00. You book online on the DEKRA portal.` },
       { q: 'Is the Italian revisione the same as an MOT?', a: 'Yes: the revisione is Italy’s compulsory roadworthiness test, the equivalent of the UK MOT or the German TÜV. It applies to cars registered in Italy; foreign-registered cars are tested in their country of registration.' },
       { q: 'Which vehicles do you inspect?', a: 'The centre is approved for cars. For other vehicles, give us a call and we’ll tell you what to do.' },
       { q: 'Can I bring someone else’s car?', a: 'Yes. Neither the owner nor a letter of authorisation is needed, just the car’s original document.' },
@@ -247,20 +241,8 @@ const serviceLd = {
     </Fragment>
     <div slot="aside" class="fee">
       <p class="t-label text-muted">{copy.feeLabel}</p>
-      <p class="fee-total t-num mt-2">{formatPrice(fee.total, lang, 2)}</p>
+      <p class="fee-total t-num mt-2">{formatPrice(fee.total, lang)}</p>
       <p class="mt-2 max-w-[36ch] text-sm text-muted">{copy.feeSub}</p>
-      <dl class="spec mt-5 text-[0.9375rem]">
-        {fee.parts.map((p) => (
-          <div>
-            <dt>{copy.feeParts[p.key]}</dt>
-            <dd class="text-right">{formatPrice(p.value, lang, 2)}</dd>
-          </div>
-        ))}
-        <div class="!border-b-0">
-          <dt class="!text-ink font-semibold">{copy.feeTotal}</dt>
-          <dd class="text-right">{formatPrice(fee.total, lang, 2)}</dd>
-        </div>
-      </dl>
     </div>
   </PageHero>
 

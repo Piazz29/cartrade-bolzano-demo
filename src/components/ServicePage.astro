@@ -51,19 +51,19 @@ const pageUrl = `${siteUrl}${routes[page][lang]}`;
 // Collegamenti agli altri servizi della stessa sede
 const BLURB: Record<Lang, Record<(typeof serviceKeys)[number], string>> = {
   it: {
-    revisione: `Centro revisioni affiliato DEKRA. ${formatPrice(site.revisionFee.total, 'it', 2)} tutto compreso, prenotazione online.`,
+    revisione: `Centro revisioni affiliato DEKRA. ${formatPrice(site.revisionFee.total, 'it')} tutto compreso, prenotazione online.`,
     officina: 'Tagliandi, freni, distribuzione, diagnosi elettronica. Tutte le marche.',
     carrozzeria: 'Ammaccature, graffi, raddrizzatura e verniciatura. Preventivo da foto.',
     gomme: 'Cambio gomme estive e invernali. In Alto Adige l’obbligo va dal 15 novembre al 15 aprile.',
   },
   de: {
-    revisione: `DEKRA-Partner für die Revision. ${formatPrice(site.revisionFee.total, 'de', 2)} inklusive allem, online buchen.`,
+    revisione: `DEKRA-Partner für die Revision. ${formatPrice(site.revisionFee.total, 'de')} inklusive allem, online buchen.`,
     officina: 'Inspektion, Bremsen, Zahnriemen, elektronische Diagnose. Alle Marken.',
     carrozzeria: 'Dellen, Kratzer, Richtarbeiten und Lackierung. Angebot per Foto.',
     gomme: 'Sommer- und Winterreifen wechseln. In Südtirol gilt die Pflicht vom 15. November bis 15. April.',
   },
   en: {
-    revisione: `DEKRA-affiliated inspection centre. ${formatPrice(site.revisionFee.total, 'en', 2)} all inclusive, online booking.`,
+    revisione: `DEKRA-affiliated inspection centre. ${formatPrice(site.revisionFee.total, 'en')} all inclusive, online booking.`,
     officina: 'Servicing, brakes, timing belt, electronic diagnostics. All makes.',
     carrozzeria: 'Dents, scratches, panel straightening and painting. Quotes from photos.',
     gomme: 'Summer and winter tyre change. In South Tyrol winter tyres are required from 15 November to 15 April.',

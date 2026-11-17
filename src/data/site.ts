@@ -80,23 +80,17 @@ export const site = {
   },
   mapsUrl:
     'https://www.google.com/maps/dir/?api=1&destination=Centro+Revisioni+Dekra+-+Car+Trade+Srl%2C+Via+Werner+von+Siemens+4%2FF%2C+Bolzano&destination_place_id=ChIJ_xxnNNadgkcRzUuQfA86rBI',
-  // Orari (confermati dal titolare, 17/11/2026): lun-ven 8:30-12:30 / 14:00-18:00, sabato 9:00-12:00.
+  // Orari (confermati dal titolare, 17/11/2026): lun-ven 8:00-12:00 / 14:00-18:00, sabato 9:00-12:00.
   // days: 0 = domenica … 6 = sabato. Usati da tabella orari, stato "aperto ora" e schema.org.
   hours: [
-    { days: [1, 2, 3, 4, 5], open: '08:30', close: '12:30' },
+    { days: [1, 2, 3, 4, 5], open: '08:00', close: '12:00' },
     { days: [1, 2, 3, 4, 5], open: '14:00', close: '18:00' },
     { days: [6], open: '09:00', close: '12:00' },
   ],
   // Tariffa nazionale revisione presso centri privati autorizzati (MIT).
-  // Confermata dal titolare il 17/11/2026. Se entra in vigore l'aumento (emendamento a 88,20 €), aggiornare qui.
+  // Confermata dal titolare il 17/11/2026: 79 € tondi. Se entra in vigore l'aumento (emendamento a 88,20 €), aggiornare qui.
   revisionFee: {
-    total: 79.02,
-    parts: [
-      { key: 'base', value: 54.95 },
-      { key: 'vat', value: 12.09 },
-      { key: 'dtt', value: 10.2 },
-      { key: 'postal', value: 1.78 },
-    ],
+    total: 79,
   },
 } as const;
 

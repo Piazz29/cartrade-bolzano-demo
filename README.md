@@ -135,7 +135,7 @@ Consigli generali: luce naturale, officina in ordine, almeno **2400 px** di lato
 Cercali con `grep -rn TODO src astro.config.mjs`.
 
 **Dati da confermare**
-- `src/data/site.ts` · sabato; WhatsApp; tariffa revisione 79,02 €.
+- `src/data/site.ts` · sabato; WhatsApp; tariffa revisione 79 €.
 - `src/layouts/Base.astro`, `src/components/HoursTable.astro` · sabato; immagine social per l'inglese (`public/og/og-en.jpg`).
 - `astro.config.mjs` · dominio definitivo.
 - `src/views/RevisioneView.astro` · durata del controllo, metodi di pagamento, nuova revisione dopo "ripetere".

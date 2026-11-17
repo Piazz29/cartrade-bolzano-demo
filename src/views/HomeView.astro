@@ -28,7 +28,7 @@ const t = ui[lang];
 const copy = {
   it: {
     title: 'Revisione auto, officina, carrozzeria e gomme a Bolzano',
-    description: `Centro revisioni DEKRA a Bolzano Sud (${formatPrice(site.revisionFee.total, 'it', 2)}, prenotazione online), officina meccanica, carrozzeria e cambio gomme in un’unica sede: Via Werner von Siemens 4/F.`,
+    description: `Centro revisioni DEKRA a Bolzano Sud (${formatPrice(site.revisionFee.total, 'it')}, prenotazione online), officina meccanica, carrozzeria e cambio gomme in un’unica sede: Via Werner von Siemens 4/F.`,
     eyebrow: 'Bolzano Sud · Via Werner von Siemens 4/F',
     h1: ['Un solo indirizzo.', 'Tutto per la tua auto.'],
     kicker: 'Revisione, officina, carrozzeria e gomme a Bolzano',
@@ -58,7 +58,7 @@ const copy = {
         key: 'revisione',
         title: 'Revisione',
         text: 'Centro revisioni affiliato DEKRA per autovetture. Prenoti online, aspetti in sede, esci con l’esito sul libretto.',
-        facts: ['79,02 € tariffa nazionale', 'Prenotazione online'],
+        facts: ['79 € tariffa nazionale', 'Prenotazione online'],
         href: routes.revisione.it,
         foto: 'revisione-linea',
         alt: 'Berlina argento sul ponte sollevatore con il cofano aperto',
@@ -117,18 +117,18 @@ const copy = {
     whereText: 'Fuori dal traffico del centro, a pochi minuti dalla città. Prima di venire, una telefonata ti evita l’attesa.',
     faqLabel: 'Domande frequenti',
     faq: [
-      { q: 'Quanto costa la revisione a Bolzano e come si prenota?', a: `${formatPrice(site.revisionFee.total, 'it', 2)} tutto compreso: è la tariffa nazionale, uguale in tutti i centri autorizzati. Si prenota online sul portale DEKRA, scegliendo giorno e ora.` },
+      { q: 'Quanto costa la revisione a Bolzano e come si prenota?', a: `${formatPrice(site.revisionFee.total, 'it')} tutto compreso: è la tariffa nazionale, uguale in tutti i centri autorizzati. Si prenota online sul portale DEKRA, scegliendo giorno e ora.` },
       { q: 'Se l’auto non passa la revisione, dove la riparo?', a: 'Qui. Officina e carrozzeria sono nella stessa sede del centro revisioni: ti diciamo cosa serve e quanto costa, ripariamo e ripresenti l’auto a pochi metri di distanza.' },
       { q: 'Fate tagliandi e riparazioni su tutte le marche?', a: 'Sì. Tagliandi secondo le specifiche del costruttore, freni, distribuzione, diagnosi elettronica e carrozzeria per auto di ogni marca.' },
       { q: 'Posso avere un preventivo di carrozzeria senza venire in sede?', a: 'Sì. Dal modulo della pagina Carrozzeria carichi fino a 6 foto del danno dal telefono e ti ricontattiamo con una stima.' },
       { q: 'Fate il cambio gomme a Bolzano?', a: 'Sì, cambio gomme estive e invernali nella stessa sede di officina e revisione. In provincia di Bolzano le gomme invernali (o le catene a bordo) servono dal 15 novembre al 15 aprile: conviene prenotare a fine ottobre.' },
       { q: 'Come faccio a non dimenticare la scadenza?', a: 'Usa il calcolatore qui sopra: inserisci mese e anno dell’ultima revisione e con «Aggiungi al calendario» salvi la scadenza sul telefono, con un avviso un mese prima.' },
-      { q: 'Dove siete e quando siete aperti?', a: `In ${site.address.street.it}, zona produttiva di Bolzano Sud. Dal lunedì al venerdì 8:30–12:30 e 14:00–18:00, il sabato 9:00–12:00.` },
+      { q: 'Dove siete e quando siete aperti?', a: `In ${site.address.street.it}, zona produttiva di Bolzano Sud. Dal lunedì al venerdì 8:00–12:00 e 14:00–18:00, il sabato 9:00–12:00.` },
     ],
   },
   de: {
     title: 'Revision, Werkstatt, Karosserie und Reifen in Bozen',
-    description: `DEKRA-Prüfstelle für die Revision in Bozen Süd (${formatPrice(site.revisionFee.total, 'de', 2)}, Online-Buchung), Kfz-Werkstatt, Karosserie und Reifenwechsel an einem Standort: Werner-von-Siemens-Straße 4/F.`,
+    description: `DEKRA-Prüfstelle für die Revision in Bozen Süd (${formatPrice(site.revisionFee.total, 'de')}, Online-Buchung), Kfz-Werkstatt, Karosserie und Reifenwechsel an einem Standort: Werner-von-Siemens-Straße 4/F.`,
     eyebrow: 'Bozen Süd · Werner-von-Siemens-Straße 4/F',
     h1: ['Eine Adresse.', 'Alles für Ihr Auto.'],
     kicker: 'Revision, Werkstatt, Karosserie und Reifen in Bozen',
@@ -158,7 +158,7 @@ const copy = {
         key: 'revisione',
         title: 'Revision',
         text: 'DEKRA-Partner für die Revision von Pkw. Online buchen, vor Ort warten, mit dem Ergebnis im Fahrzeugschein wieder abfahren.',
-        facts: ['79,02 € staatlicher Tarif', 'Online-Buchung'],
+        facts: ['79 € staatlicher Tarif', 'Online-Buchung'],
         href: routes.revisione.de,
         foto: 'revisione-linea',
         alt: 'Silberne Limousine mit geöffneter Motorhaube auf der Hebebühne',
@@ -215,18 +215,18 @@ const copy = {
     whereText: 'Abseits vom Stadtverkehr, wenige Minuten vom Zentrum. Ein kurzer Anruf vorab erspart Ihnen Wartezeit.',
     faqLabel: 'Häufige Fragen',
     faq: [
-      { q: 'Was kostet die Revision in Bozen und wie bucht man?', a: `${formatPrice(site.revisionFee.total, 'de', 2)} inklusive allem: der staatliche Tarif, in allen zugelassenen Prüfstellen gleich. Gebucht wird online im DEKRA-Portal, mit Wunschtag und Uhrzeit.` },
+      { q: 'Was kostet die Revision in Bozen und wie bucht man?', a: `${formatPrice(site.revisionFee.total, 'de')} inklusive allem: der staatliche Tarif, in allen zugelassenen Prüfstellen gleich. Gebucht wird online im DEKRA-Portal, mit Wunschtag und Uhrzeit.` },
       { q: 'Das Auto hat die Revision nicht bestanden: Wo lasse ich es reparieren?', a: 'Gleich hier. Werkstatt und Karosserie sind am selben Standort wie die Prüfstelle: Wir sagen Ihnen, was nötig ist und was es kostet, reparieren und Sie stellen das Auto ein paar Meter weiter erneut vor.' },
       { q: 'Machen Sie Inspektion und Reparaturen für alle Marken?', a: 'Ja. Inspektion nach Herstellervorgaben, Bremsen, Zahnriemen, elektronische Diagnose und Karosserie für Fahrzeuge aller Marken.' },
       { q: 'Bekomme ich ein Karosserie-Angebot, ohne vorbeizukommen?', a: 'Ja. Über das Formular auf der Seite Karosserie laden Sie bis zu 6 Fotos vom Schaden hoch, wir melden uns mit einer Schätzung.' },
       { q: 'Machen Sie Reifenwechsel in Bozen?', a: 'Ja, Sommer- und Winterreifen am selben Standort wie Werkstatt und Revision. In der Provinz Bozen sind Winterreifen (oder Ketten an Bord) vom 15. November bis 15. April Pflicht: am besten Ende Oktober buchen.' },
       { q: 'Wie vergesse ich den Termin nicht?', a: 'Mit dem Rechner oben: Monat und Jahr der letzten Revision eingeben und mit „In den Kalender eintragen“ den Termin im Handy speichern, mit Erinnerung einen Monat vorher.' },
-      { q: 'Wo sind Sie und wann haben Sie geöffnet?', a: `In der ${site.address.street.de}, Gewerbegebiet Bozen Süd. Montag bis Freitag 8:30–12:30 und 14:00–18:00 Uhr, Samstag 9:00–12:00 Uhr.` },
+      { q: 'Wo sind Sie und wann haben Sie geöffnet?', a: `In der ${site.address.street.de}, Gewerbegebiet Bozen Süd. Montag bis Freitag 8:00–12:00 und 14:00–18:00 Uhr, Samstag 9:00–12:00 Uhr.` },
     ],
   },
   en: {
     title: 'Car inspection, repairs, body shop and tyres in Bolzano',
-    description: `DEKRA-affiliated car inspection centre in Bolzano South (${formatPrice(site.revisionFee.total, 'en', 2)}, book online), mechanic, body shop and tyre change at one address: Via Werner von Siemens 4/F.`,
+    description: `DEKRA-affiliated car inspection centre in Bolzano South (${formatPrice(site.revisionFee.total, 'en')}, book online), mechanic, body shop and tyre change at one address: Via Werner von Siemens 4/F.`,
     eyebrow: 'Bolzano South · Via Werner von Siemens 4/F',
     h1: ['One address.', 'Everything for your car.'],
     kicker: 'Car inspection, repairs, body shop and tyres in Bolzano',
@@ -256,7 +256,7 @@ const copy = {
         key: 'revisione',
         title: 'Inspection',
         text: 'DEKRA-affiliated inspection centre for cars. Book online, wait on site, leave with the result in your registration document.',
-        facts: ['€79.02 national fee', 'Online booking'],
+        facts: ['€79 national fee', 'Online booking'],
         href: routes.revisione.en,
         foto: 'revisione-linea',
         alt: 'Silver saloon on the lift with the bonnet open',
@@ -313,13 +313,13 @@ const copy = {
     whereText: 'Away from the city-centre traffic, a few minutes from town. A quick call before you come saves you waiting.',
     faqLabel: 'Frequently asked questions',
     faq: [
-      { q: 'How much does a car inspection cost in Bolzano and how do I book?', a: `${formatPrice(site.revisionFee.total, 'en', 2)} all inclusive: it’s the national fee, the same at every authorised centre. You book online on the DEKRA portal, choosing the day and time.` },
+      { q: 'How much does a car inspection cost in Bolzano and how do I book?', a: `${formatPrice(site.revisionFee.total, 'en')} all inclusive: it’s the national fee, the same at every authorised centre. You book online on the DEKRA portal, choosing the day and time.` },
       { q: 'If my car fails the inspection, where can I get it repaired?', a: 'Right here. The workshop and body shop are at the same address as the inspection centre: we tell you what’s needed and what it costs, fix it, and you present the car again a few metres away.' },
       { q: 'Do you service and repair all makes?', a: 'Yes. Servicing to manufacturer specifications, brakes, timing belts, electronic diagnostics and bodywork for cars of every make.' },
       { q: 'Can I get a bodywork quote without coming in?', a: 'Yes. Using the form on the Body shop page you can upload up to 6 photos of the damage from your phone, and we’ll get back to you with an estimate.' },
       { q: 'Do you change tyres in Bolzano?', a: 'Yes, summer and winter tyre changes at the same address as the workshop and inspection centre. In the province of Bolzano winter tyres (or chains on board) are required from 15 November to 15 April: book at the end of October.' },
       { q: 'How do I make sure I don’t forget the due date?', a: 'Use the calculator above: enter the month and year of your last inspection and tap “Add to calendar” to save the date on your phone, with an alert a month before.' },
-      { q: 'Where are you and when are you open?', a: `At ${site.address.street.en}, in the Bolzano South business park. Monday to Friday 8:30–12:30 and 14:00–18:00, Saturday 9:00–12:00.` },
+      { q: 'Where are you and when are you open?', a: `At ${site.address.street.en}, in the Bolzano South business park. Monday to Friday 8:00–12:00 and 14:00–18:00, Saturday 9:00–12:00.` },
     ],
   },
 }[lang];
@@ -456,7 +456,7 @@ const heroWide = unsplashSrcset(heroId, [1080, 1440, 1920, 2400], [16, 9], fp, 5
         </div>
         <div>
           <dt class="t-label">{copy.strip.fee}</dt>
-          <dd class="strip-val">{formatPrice(site.revisionFee.total, lang, 2)}</dd>
+          <dd class="strip-val">{formatPrice(site.revisionFee.total, lang)}</dd>
           <dd class="strip-note">{copy.strip.feeNote}</dd>
         </div>
         <div>
