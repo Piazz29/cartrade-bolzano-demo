@@ -3,13 +3,15 @@
 // del browser tra italiano, tedesco e inglese; per tutte le altre lingue l'inglese.
 // Senza JavaScript il meta refresh porta a /it/ (il pubblico principale è locale).
 const site = Astro.site!.toString().replace(/\/$/, '');
+const title = 'Car Trade Bolzano · Revisione, officina, carrozzeria';
+const description = 'Revisione DEKRA, officina meccanica, carrozzeria e cambio gomme in un’unica sede a Bolzano Sud, Via Werner von Siemens 4/F.';
 ---
 <!doctype html>
 <html lang="it">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Car Trade Bolzano · Revisione, officina, carrozzeria</title>
+    <title>{title}</title>
     <meta name="robots" content="noindex, follow" />
     <link rel="canonical" href={`${site}/it/`} />
     <link rel="alternate" hreflang="it" href={`${site}/it/`} />
@@ -17,6 +19,24 @@ const site = Astro.site!.toString().replace(/\/$/, '');
     <link rel="alternate" hreflang="en" href={`${site}/en/`} />
     <link rel="alternate" hreflang="x-default" href={`${site}/en/`} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <!-- Anteprima per chi condivide solo "cartradebz.com" (WhatsApp, Facebook, chat): non segue il redirect -->
+    <meta name="description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Car Trade Bolzano" />
+    <meta property="og:locale" content="it_IT" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={`${site}/`} />
+    <meta property="og:image" content={`${site}/og/copertina-it.jpg`} />
+    <meta property="og:image:secure_url" content={`${site}/og/copertina-it.jpg`} />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={title} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={`${site}/og/copertina-it.jpg`} />
     <script is:inline>
       (function () {
         var ok = { it: 1, de: 1, en: 1 };

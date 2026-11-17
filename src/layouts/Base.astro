@@ -23,9 +23,8 @@ const { lang, title, description, alternates, current, ogImage, jsonLd = [], wha
 const t = ui[lang];
 const siteUrl = Astro.site!.toString().replace(/\/$/, '');
 const canonical = `${siteUrl}${alternates[lang]}`;
-// TODO: immagine social dedicata all'inglese (public/og/og-en.jpg); intanto quella italiana
-const ogFile = lang === 'en' ? 'it' : lang;
-const og = ogImage ?? `${siteUrl}/og/og-${ogFile}.jpg`;
+// Copertina per WhatsApp e social (1200×630, una per lingua): public/og/copertina-{lang}.jpg
+const og = ogImage ?? `${siteUrl}/og/copertina-${lang}.jpg`;
 // Titolo breve (Google ne mostra circa 60 caratteri): se la città è già nel titolo, basta "Car Trade"
 const city = site.address.city[lang];
 const fullTitle = title.includes('Car Trade') ? title : title.includes(city) ? `${title} · Car Trade` : `${title} · Car Trade ${city}`;
@@ -90,7 +89,7 @@ const business = {
   alternateName: [site.brand, site.google.name],
   description: ABOUT[lang].description,
   url: `${siteUrl}${routes.home[lang]}`,
-  image: `${siteUrl}/og/og-${ogFile}.jpg`,
+  image: `${siteUrl}/og/copertina-${lang}.jpg`,
   logo: `${siteUrl}/brand/logo.svg`,
   telephone: site.phone.e164,
   ...(site.email ? { email: site.email } : {}),
@@ -189,6 +188,8 @@ const ld = [business, website, webpage, ...jsonLd];
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={og} />
+    <meta property="og:image:secure_url" content={og} />
+    <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content={fullTitle} />
