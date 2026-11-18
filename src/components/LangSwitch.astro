@@ -123,6 +123,7 @@ const t = ui[lang];
   document.querySelectorAll<HTMLAnchorElement>('[data-lang-link]').forEach((a) => {
     a.addEventListener('click', () => {
       try { localStorage.setItem('ct-lang', a.dataset.langLink ?? ''); } catch {}
+      document.cookie = `ct-lang=${a.dataset.langLink ?? ''}; path=/; max-age=31536000; samesite=lax`;
     });
   });
   const menus = Array.from(document.querySelectorAll<HTMLDetailsElement>('[data-lang-menu]'));

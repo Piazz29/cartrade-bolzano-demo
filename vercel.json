@@ -4,107 +4,104 @@
   "buildCommand": "npm run build",
   "redirects": [
     {
-      "source": "/index.php",
+      "source": "/",
+      "has": [
+        {
+          "type": "cookie",
+          "key": "ct-lang",
+          "value": "it"
+        }
+      ],
       "destination": "/it/",
-      "permanent": true
+      "permanent": false
     },
     {
-      "source": "/home.php",
-      "destination": "/it/",
-      "permanent": true
+      "source": "/",
+      "has": [
+        {
+          "type": "cookie",
+          "key": "ct-lang",
+          "value": "de"
+        }
+      ],
+      "destination": "/de/",
+      "permanent": false
     },
     {
-      "source": "/contatti.php",
-      "destination": "/it/contatti/",
-      "permanent": true
+      "source": "/",
+      "has": [
+        {
+          "type": "cookie",
+          "key": "ct-lang",
+          "value": "en"
+        }
+      ],
+      "destination": "/en/",
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "header",
+          "key": "accept-language",
+          "value": "^\\s*[iI][tT].*"
+        }
+      ],
+      "destination": "/it/",
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "header",
+          "key": "accept-language",
+          "value": "^\\s*[dD][eE].*"
+        }
+      ],
+      "destination": "/de/",
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "header",
+          "key": "accept-language",
+          "value": "^\\s*[a-zA-Z].*"
+        }
+      ],
+      "destination": "/en/",
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "destination": "/it/",
+      "permanent": false
     },
     {
       "source": "/contatti",
-      "destination": "/it/contatti/",
-      "permanent": true
-    },
-    {
-      "source": "/contatto.php",
-      "destination": "/it/contatti/",
+      "destination": "/it/",
       "permanent": true
     },
     {
       "source": "/contatto",
-      "destination": "/it/contatti/",
+      "destination": "/it/",
       "permanent": true
     },
     {
-      "source": "/dove-siamo.php",
-      "destination": "/it/contatti/",
+      "source": "/contacts",
+      "destination": "/it/",
       "permanent": true
     },
     {
       "source": "/dove-siamo",
-      "destination": "/it/contatti/",
-      "permanent": true
-    },
-    {
-      "source": "/revisione.php",
-      "destination": "/it/revisione/",
-      "permanent": true
-    },
-    {
-      "source": "/revisioni.php",
-      "destination": "/it/revisione/",
-      "permanent": true
-    },
-    {
-      "source": "/revisioni",
-      "destination": "/it/revisione/",
-      "permanent": true
-    },
-    {
-      "source": "/officina.php",
-      "destination": "/it/officina/",
-      "permanent": true
-    },
-    {
-      "source": "/carrozzeria.php",
-      "destination": "/it/carrozzeria/",
-      "permanent": true
-    },
-    {
-      "source": "/gomme.php",
-      "destination": "/it/cambio-gomme/",
-      "permanent": true
-    },
-    {
-      "source": "/gomme",
-      "destination": "/it/cambio-gomme/",
-      "permanent": true
-    },
-    {
-      "source": "/pneumatici.php",
-      "destination": "/it/cambio-gomme/",
-      "permanent": true
-    },
-    {
-      "source": "/pneumatici",
-      "destination": "/it/cambio-gomme/",
-      "permanent": true
-    },
-    {
-      "source": "/chi-siamo.php",
-      "destination": "/it/azienda/",
+      "destination": "/it/",
       "permanent": true
     },
     {
       "source": "/chi-siamo",
-      "destination": "/it/azienda/",
-      "permanent": true
-    },
-    {
-      "source": "/azienda.php",
-      "destination": "/it/azienda/",
-      "permanent": true
-    },
-    {
-      "source": "/servizi.php",
       "destination": "/it/",
       "permanent": true
     },
@@ -114,12 +111,52 @@
       "permanent": true
     },
     {
-      "source": "/privacy.php",
-      "destination": "/it/privacy/",
+      "source": "/home",
+      "destination": "/it/",
+      "permanent": true
+    },
+    {
+      "source": "/gomme",
+      "destination": "/it/",
+      "permanent": true
+    },
+    {
+      "source": "/pneumatici",
+      "destination": "/it/",
+      "permanent": true
+    },
+    {
+      "source": "/revisioni",
+      "destination": "/it/",
+      "permanent": true
+    },
+    {
+      "source": "/index.html",
+      "destination": "/it/",
+      "permanent": true
+    },
+    {
+      "source": "/index.htm",
+      "destination": "/it/",
+      "permanent": true
+    },
+    {
+      "source": "/default.html",
+      "destination": "/it/",
+      "permanent": true
+    },
+    {
+      "source": "/default.htm",
+      "destination": "/it/",
       "permanent": true
     },
     {
       "source": "/:path*.php",
+      "destination": "/it/",
+      "permanent": true
+    },
+    {
+      "source": "/:path*.php/:rest*",
       "destination": "/it/",
       "permanent": true
     },

@@ -86,7 +86,7 @@ const business = {
   '@type': ['AutoRepair', 'AutoBodyShop'],
   '@id': `${siteUrl}/#business`,
   name: site.name,
-  alternateName: [site.brand, site.google.name],
+  alternateName: [site.brand, site.google.name, 'CarTradeBZ', 'Car Trade Bozen'],
   description: ABOUT[lang].description,
   url: `${siteUrl}${routes.home[lang]}`,
   image: `${siteUrl}/og/copertina-${lang}.jpg`,
@@ -138,7 +138,7 @@ const website = {
   '@id': `${siteUrl}/#website`,
   url: `${siteUrl}/`,
   name: site.brand,
-  alternateName: ['CarTrade Bolzano', 'Car Trade Bozen', 'CarTrade'],
+  alternateName: ['CarTradeBZ', 'cartradebz', 'CarTrade Bolzano', 'Car Trade Bozen', 'CarTrade'],
   inLanguage: ['it', 'de', 'en'],
   publisher: { '@id': `${siteUrl}/#business` },
 };
@@ -283,7 +283,7 @@ const ld = [business, website, webpage, ...jsonLd];
         box.setAttribute('lang', want);
         var x = box.querySelector('[data-hint-x]');
         x.setAttribute('aria-label', tx.close);
-        go.addEventListener('click', function () { try { localStorage.setItem('ct-lang', want); } catch (e) {} });
+        go.addEventListener('click', function () { try { localStorage.setItem('ct-lang', want); } catch (e) {} document.cookie = 'ct-lang=' + want + '; path=/; max-age=31536000; samesite=lax'; });
         x.addEventListener('click', function () {
           box.hidden = true;
           try { sessionStorage.setItem('ct-hint-off', '1'); } catch (e) {}
