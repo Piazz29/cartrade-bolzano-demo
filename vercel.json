@@ -4,6 +4,126 @@
   "buildCommand": "npm run build",
   "redirects": [
     {
+      "source": "/index.php",
+      "destination": "/it/",
+      "permanent": true
+    },
+    {
+      "source": "/home.php",
+      "destination": "/it/",
+      "permanent": true
+    },
+    {
+      "source": "/contatti.php",
+      "destination": "/it/contatti/",
+      "permanent": true
+    },
+    {
+      "source": "/contatti",
+      "destination": "/it/contatti/",
+      "permanent": true
+    },
+    {
+      "source": "/contatto.php",
+      "destination": "/it/contatti/",
+      "permanent": true
+    },
+    {
+      "source": "/contatto",
+      "destination": "/it/contatti/",
+      "permanent": true
+    },
+    {
+      "source": "/dove-siamo.php",
+      "destination": "/it/contatti/",
+      "permanent": true
+    },
+    {
+      "source": "/dove-siamo",
+      "destination": "/it/contatti/",
+      "permanent": true
+    },
+    {
+      "source": "/revisione.php",
+      "destination": "/it/revisione/",
+      "permanent": true
+    },
+    {
+      "source": "/revisioni.php",
+      "destination": "/it/revisione/",
+      "permanent": true
+    },
+    {
+      "source": "/revisioni",
+      "destination": "/it/revisione/",
+      "permanent": true
+    },
+    {
+      "source": "/officina.php",
+      "destination": "/it/officina/",
+      "permanent": true
+    },
+    {
+      "source": "/carrozzeria.php",
+      "destination": "/it/carrozzeria/",
+      "permanent": true
+    },
+    {
+      "source": "/gomme.php",
+      "destination": "/it/cambio-gomme/",
+      "permanent": true
+    },
+    {
+      "source": "/gomme",
+      "destination": "/it/cambio-gomme/",
+      "permanent": true
+    },
+    {
+      "source": "/pneumatici.php",
+      "destination": "/it/cambio-gomme/",
+      "permanent": true
+    },
+    {
+      "source": "/pneumatici",
+      "destination": "/it/cambio-gomme/",
+      "permanent": true
+    },
+    {
+      "source": "/chi-siamo.php",
+      "destination": "/it/azienda/",
+      "permanent": true
+    },
+    {
+      "source": "/chi-siamo",
+      "destination": "/it/azienda/",
+      "permanent": true
+    },
+    {
+      "source": "/azienda.php",
+      "destination": "/it/azienda/",
+      "permanent": true
+    },
+    {
+      "source": "/servizi.php",
+      "destination": "/it/",
+      "permanent": true
+    },
+    {
+      "source": "/servizi",
+      "destination": "/it/",
+      "permanent": true
+    },
+    {
+      "source": "/privacy.php",
+      "destination": "/it/privacy/",
+      "permanent": true
+    },
+    {
+      "source": "/:path*.php",
+      "destination": "/it/",
+      "permanent": true
+    },
+    {
       "source": "/it/officina-carrozzeria",
       "destination": "/it/officina/",
       "permanent": true
