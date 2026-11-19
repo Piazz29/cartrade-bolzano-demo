@@ -75,9 +75,27 @@ const year = new Date().getFullYear();
           <li><a href={`${routes.privacy[lang]}#cookie`} class="link-u text-steel">{t.footer.cookies}</a></li>
         </ul>
       </nav>
-      <p class="text-sm text-steel-2 t-num">
-        © {year} {site.name} · {t.vat} {site.vat}
-      </p>
+      <div class="flex flex-col gap-4 lg:items-end">
+        <p class="text-sm text-steel-2 t-num">
+          © {year} {site.name} · {t.vat} {site.vat}
+        </p>
+        <a
+          href="https://www.auralpdigital.com/"
+          target="_blank"
+          rel="noopener"
+          class="group inline-flex items-center gap-3 text-sm text-steel-2 transition-colors hover:text-paper"
+        >
+          <span>Designed by</span>
+          <img
+            src="/brand/auralpdigital.svg"
+            alt="AuralpDigital"
+            width="556"
+            height="119"
+            loading="lazy"
+            class="h-5 w-auto opacity-80 transition-opacity group-hover:opacity-100"
+          />
+        </a>
+      </div>
     </div>
   </div>
 </footer>
